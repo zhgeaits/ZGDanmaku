@@ -48,11 +48,12 @@ public class ZGDanmaku {
     //初始化顶点坐标与着色数据的方法
     public void initVertexData() {
         //顶点坐标数据的初始化================begin============================
-        vCount = 3;
+        vCount = 4;
         final float UNIT_SIZE = 0.15f;
         float vertices[] = new float[]
                 {
-                        0 * UNIT_SIZE, 11 * UNIT_SIZE, 0,
+                        -11 * UNIT_SIZE, 11 * UNIT_SIZE, 0,
+                        11 * UNIT_SIZE, 11 * UNIT_SIZE, 0,
                         -11 * UNIT_SIZE, -11 * UNIT_SIZE, 0,
                         11 * UNIT_SIZE, -11 * UNIT_SIZE, 0,
                 };
@@ -71,7 +72,8 @@ public class ZGDanmaku {
         //顶点纹理坐标数据的初始化================begin============================
         float texCoor[] = new float[]//顶点颜色值数组，每个顶点4个色彩值RGBA
                 {
-                        0.5f, 0,
+                        0, 0,
+                        1f, 0,
                         0, 1,
                         1, 1
                 };
@@ -142,7 +144,7 @@ public class ZGDanmaku {
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
 
         //绘制纹理矩形
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vCount);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, vCount);
     }
 
     public void initTexture() {
