@@ -3,6 +3,8 @@ package org.zhgeaits.zgdanmaku;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
@@ -18,6 +20,9 @@ import java.util.List;
 public class ZGDanmakuView extends GLSurfaceView {
 
     private ZGDanmakuRenderer mRenderer;//场景渲染器
+    private Canvas mCanvas;
+    private Paint mPainter;
+
     private boolean isInited = false;
     private List<Bitmap> cached = new ArrayList<>();
 
@@ -40,6 +45,15 @@ public class ZGDanmakuView extends GLSurfaceView {
         setZOrderOnTop(true);
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);//设置渲染模式为主动渲染
 
+        mCanvas = new Canvas();
+        mPainter = new Paint(Paint.ANTI_ALIAS_FLAG);
+        final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
+        mPainter.setTextSize((int) (18 * fontScale + 0.5f));
+        mPainter.setColor(0xffffffff);
+        mPainter.setTextAlign(Paint.Align.LEFT);
+        mPainter.setShadowLayer(2, 3, 3, 0x5a000000);//0xff000000
+
+        //for test
         mRenderer.setListener(new ZGDanmakuRenderer.RenderListener() {
             @Override
             public void onInited() {
@@ -55,29 +69,6 @@ public class ZGDanmakuView extends GLSurfaceView {
             }
         });
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int offset = 0;
-                while (true) {
-                    if(offset > 1920) {
-                        offset = 0;
-                    }
-                    List<ZGDanmaku> danmakus = mRenderer.getAllDanmakus();
-                    if(danmakus != null) {
-                        for (int i = 0; i < danmakus.size(); i ++) {
-                            danmakus.get(i).setOffsetX(offset);
-                        }
-                    }
-                    try {
-                        offset += 20;
-                        Thread.sleep(20);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
     }
 
     public void showBitmap(Bitmap bitmap, float x) {
@@ -105,6 +96,16 @@ public class ZGDanmakuView extends GLSurfaceView {
             showBitmap(bitmapTmp, 0);
         } else {
             cached.add(bitmapTmp);
+        }
+
+        Bitmap textBitmap = Bitmap.createBitmap(300, 100, Bitmap.Config.ARGB_8888);
+        mCanvas.setBitmap(textBitmap);
+        mCanvas.drawText(text, 0, 90, mPainter);
+
+        if(isInited) {
+            showBitmap(textBitmap, 0);
+        } else {
+            cached.add(textBitmap);
         }
     }
 

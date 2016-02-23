@@ -44,14 +44,6 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
         mDanmakus.add(danmaku);
     }
 
-    /**
-     * 获取所有的弹幕
-     * @return
-     */
-    public List<ZGDanmaku> getAllDanmakus() {
-        return mDanmakus;
-    }
-
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
 
@@ -94,12 +86,18 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
         }
     }
 
+    float offset = 0;
+
     @Override
     public void onDrawFrame(GL10 gl10) {
 
+        if(offset > 1920) {
+            offset = 0;
+        }
+
         //设置屏幕背景色RGBA
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        
+
         //清除深度缓冲与颜色缓冲
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
 
@@ -108,7 +106,9 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
         //我只是为了测试
         List<ZGDanmaku> shouldRemoved = new ArrayList<>();
         for (int i = 0; i < mDanmakus.size(); i ++) {
+            mDanmakus.get(i).setOffsetX((int) offset);
             mDanmakus.get(i).drawDanmaku();
+            offset += 1;
             if (mDanmakus.get(i).isFinished()) {
                 shouldRemoved.add(mDanmakus.get(i));
             }
