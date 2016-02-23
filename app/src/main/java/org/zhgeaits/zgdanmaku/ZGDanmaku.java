@@ -1,6 +1,5 @@
 package org.zhgeaits.zgdanmaku;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
@@ -10,168 +9,211 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 /**
- * Created by Administrator on 2016/2/22 0022.
+ * Created by zhgeatis on 2016/2/22 0022.
+ * 弹幕
  */
 public class ZGDanmaku {
 
-    private Bitmap mBitmap;
-    private int textureId;
-    public float x;
+    private int mTextureId;//绑定的纹理id
+    private int mProgram;//自定义渲染管线程序id
+    private int muMVPMatrixHandle;//总变换矩阵引用id
+    private int maPositionHandle; //顶点位置属性引用id
+    private int maTexCoorHandle; //顶点纹理坐标属性引用id
 
-    int mProgram;//自定义渲染管线程序id
-    int muMVPMatrixHandle;//总变换矩阵引用id
-    int maPositionHandle; //顶点位置属性引用id
-    int maTexCoorHandle; //顶点纹理坐标属性引用id
-    String mVertexShader;//顶点着色器
-    String mFragmentShader;//片元着色器
+    private String mVertexShader;//顶点着色器
+    private String mFragmentShader;//片元着色器
 
-    FloatBuffer mVertexBuffer;//顶点坐标数据缓冲
-    FloatBuffer mTexCoorBuffer;//顶点纹理坐标数据缓冲
-    int vCount = 0;
-    float xAngle = 0;//绕x轴旋转的角度
-    float yAngle = 0;//绕y轴旋转的角度
-    float zAngle = 0;//绕z轴旋转的角度
+    private FloatBuffer mVertexBuffer;//顶点坐标数据缓冲
+    private FloatBuffer mTexCoorBuffer;//顶点纹理坐标数据缓冲
 
-    public ZGDanmaku(Bitmap bitmap, Context context) {
+    private Bitmap mBitmap;//弹幕纹理
+    public float offsetX;//偏移的x坐标
+    public float offsetY;//偏移的y坐标
+    private int mViewWidth;//窗口宽度
+    private int mViewHeight;//窗口高度
+    private int mVertexCount = 4;//纹理顶点个数，这个是矩形，四个顶点
+
+    public ZGDanmaku(Bitmap bitmap) {
         this.mBitmap = bitmap;
-        //初始化顶点坐标与着色数据
+    }
+
+    public void init() {
+        if (mBitmap == null) {
+            return;
+        }
+
+        //初始化顶点坐标与纹理着色数据
         initVertexData();
+
         //初始化着色器
-        initShader(context);
+        initShader();
+
+        //生成纹理
         initTexture();
     }
 
+    /**
+     * 设置着色器
+     *
+     * @param vertexShader   顶点着色器
+     * @param fragmentShader 片元着色器
+     */
+    public void setShader(String vertexShader, String fragmentShader) {
+        this.mVertexShader = vertexShader;
+        this.mFragmentShader = fragmentShader;
+    }
+
+    /**
+     * 设置view的宽高
+     * @param width
+     * @param height
+     */
+    public void setViewSize(int width, int height) {
+        this.mViewWidth = width;
+        this.mViewHeight = height;
+    }
+
+    /**
+     * 判断弹幕是否已经结束
+     *
+     * @return
+     */
     public boolean isFinished() {
         return false;
     }
 
-    //初始化顶点坐标与着色数据的方法
+    /**
+     * 初始化顶点坐标与着色数据
+     */
     public void initVertexData() {
-        //顶点坐标数据的初始化================begin============================
-        vCount = 4;
-        final float UNIT_SIZE = 0.15f;
+        //顶点坐标数据
+        //顶点坐标系：窗口取值范围是-1至1，所以，左上角坐标是(-1,1),终点坐标是(0,0)，右下角坐标是(1, -1)
+        //其实就是把坐标给归一化了，下面是计算弹幕的归一化宽和高
+        float danmakuHeight = (float) mBitmap.getHeight() / mViewHeight;
+        float danmakuWidth = (float) mBitmap.getWidth() / mViewWidth;
+
+        //弹幕四个角的顶点坐标，我默认把它绘制在屏幕的左上角了，这样方便处理
+        //为什么不是顺时针或者逆时针，实际上opengl只能绘制三角形，所以，
+        //这里其实是绘制了两个三角形的，前三个点和后三个点分别是三角形
         float vertices[] = new float[]
+//                {
+//                        -1, 1, 0,
+//                        1, 1, 0,
+//                        -1, -1, 0,
+//                        1, -1, 0
+//                };
                 {
-                        -11 * UNIT_SIZE, 11 * UNIT_SIZE, 0,
-                        11 * UNIT_SIZE, 11 * UNIT_SIZE, 0,
-                        -11 * UNIT_SIZE, -11 * UNIT_SIZE, 0,
-                        11 * UNIT_SIZE, -11 * UNIT_SIZE, 0,
+                        -1, 1, 0,                                   //左上角
+                        -(1 - danmakuWidth), 1, 0,                  //右上角
+                        -1, 1 - danmakuHeight, 0,                   //左下角
+                        -(1 - danmakuWidth), 1 - danmakuHeight, 0   //右下角
                 };
 
-        //创建顶点坐标数据缓冲
-        //vertices.length*4是因为一个整数四个字节
+        //一个float是4个字节，所以*4
+        //关于ByteBuffer，可以看nio相关知识：http://zhgeaits.me/java/2013/06/17/Java-nio.html
         ByteBuffer vbb = ByteBuffer.allocateDirect(vertices.length * 4);
-        vbb.order(ByteOrder.nativeOrder());//设置字节顺序
-        mVertexBuffer = vbb.asFloatBuffer();//转换为Float型缓冲
-        mVertexBuffer.put(vertices);//向缓冲区中放入顶点坐标数据
-        mVertexBuffer.position(0);//设置缓冲区起始位置
-        //特别提示：由于不同平台字节顺序不同数据单元不是字节的一定要经过ByteBuffer
-        //转换，关键是要通过ByteOrder设置nativeOrder()，否则有可能会出问题
-        //顶点坐标数据的初始化================end============================
+        vbb.order(ByteOrder.nativeOrder());
+        mVertexBuffer = vbb.asFloatBuffer();
+        mVertexBuffer.put(vertices);
+        mVertexBuffer.position(0);
 
-        //顶点纹理坐标数据的初始化================begin============================
+        //把纹理绘制到矩形中去，就需要制定读取纹理的坐标
+        //纹理坐标系：范围是0-1，左上角坐标是(0,0),右下角坐标是(1,1)
         float texCoor[] = new float[]//顶点颜色值数组，每个顶点4个色彩值RGBA
                 {
-                        0, 0,
-                        1f, 0,
-                        0, 1,
-                        1, 1
+                        0, 0,   //左上角
+                        1, 0,   //右上角
+                        0, 1,   //左下角
+                        1, 1    //右下角
                 };
-        //创建顶点纹理坐标数据缓冲
-        ByteBuffer cbb = ByteBuffer.allocateDirect(texCoor.length * 4);
-        cbb.order(ByteOrder.nativeOrder());//设置字节顺序
-        mTexCoorBuffer = cbb.asFloatBuffer();//转换为Float型缓冲
-        mTexCoorBuffer.put(texCoor);//向缓冲区中放入顶点着色数据
-        mTexCoorBuffer.position(0);//设置缓冲区起始位置
-        //特别提示：由于不同平台字节顺序不同数据单元不是字节的一定要经过ByteBuffer
-        //转换，关键是要通过ByteOrder设置nativeOrder()，否则有可能会出问题
-        //顶点纹理坐标数据的初始化================end============================
 
+        ByteBuffer cbb = ByteBuffer.allocateDirect(texCoor.length * 4);
+        cbb.order(ByteOrder.nativeOrder());
+        mTexCoorBuffer = cbb.asFloatBuffer();
+        mTexCoorBuffer.put(texCoor);
+        mTexCoorBuffer.position(0);
     }
 
-    //初始化着色器
-    public void initShader(Context context) {
-        //加载顶点着色器的脚本内容
-        mVertexShader = ShaderUtil.loadFromAssetsFile("vertex.sh", context.getResources());
-        //加载片元着色器的脚本内容
-        mFragmentShader = ShaderUtil.loadFromAssetsFile("frag.sh", context.getResources());
+    /**
+     * 初始化着色器
+     */
+    public void initShader() {
+
         //基于顶点着色器与片元着色器创建程序
-        mProgram = ShaderUtil.createProgram(mVertexShader, mFragmentShader);
-        //获取程序中顶点位置属性引用id
+        mProgram = ShaderUtils.createProgram(mVertexShader, mFragmentShader);
+
+        //获取顶点位置属性引用id
         maPositionHandle = GLES20.glGetAttribLocation(mProgram, "aPosition");
-        //获取程序中顶点纹理坐标属性引用id
+
+        //获取顶点纹理坐标属性引用id
         maTexCoorHandle = GLES20.glGetAttribLocation(mProgram, "aTexCoor");
-        //获取程序中总变换矩阵引用id
+
+        //获取总变换矩阵引用id
         muMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
     }
 
-    public void drawSelf() {
-        //制定使用某套shader程序
+    /**
+     * 初始化纹理
+     */
+    private void initTexture() {
+        //生成纹理ID
+        int[] textures = new int[1];
+        //第一个参数是生成纹理的数量
+        GLES20.glGenTextures(1, textures, 0);
+        mTextureId = textures[0];
+
+        //绑定纹理，并制定纹理的采样方式
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureId);
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+
+        //把bitmap加载到纹理
+        //纹理类型在OpenGL ES中必须为GL10.GL_TEXTURE_2D
+        //第二个参数是纹理的层次，0表示基本图像层，可以理解为直接贴图
+        //最后一个参数是纹理边框尺寸
+        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, mBitmap, 0);
+
+        mBitmap.recycle();
+    }
+
+    /**
+     * 绘制弹幕
+     */
+    public void drawDanmaku() {
+
+        //使用shader程序
         GLES20.glUseProgram(mProgram);
 
-        MatrixState.setInitStack();
+        //初始化矩阵
+        MatrixUtils.setInitStack();
 
-        MatrixState.transtate(x, 0, 0);
+        //平移
+        MatrixUtils.transtate(offsetX, offsetY, 0);
 
         //将最终变换矩阵传入shader程序
-        GLES20.glUniformMatrix4fv(muMVPMatrixHandle, 1, false, MatrixState.getFinalMatrix(), 0);
-        //为画笔指定顶点位置数据
-        GLES20.glVertexAttribPointer
-                (
-                        maPositionHandle,
-                        3,
-                        GLES20.GL_FLOAT,
-                        false,
-                        3 * 4,
-                        mVertexBuffer
-                );
-        //为画笔指定顶点纹理坐标数据
-        GLES20.glVertexAttribPointer
-                (
-                        maTexCoorHandle,
-                        2,
-                        GLES20.GL_FLOAT,
-                        false,
-                        2 * 4,
-                        mTexCoorBuffer
-                );
+        GLES20.glUniformMatrix4fv(muMVPMatrixHandle, 1, false, MatrixUtils.getFinalMatrix(), 0);
+
+        //传递顶点位置数据
+        //坐标是xyz三维，所以size是3，每个float是4个字节，所以stride是3 * 4
+        GLES20.glVertexAttribPointer(maPositionHandle, 3, GLES20.GL_FLOAT, false, 3 * 4, mVertexBuffer);
+
+        //传递纹理坐标数据
+        //坐标是xy二维的，所以size是2
+        GLES20.glVertexAttribPointer(maTexCoorHandle, 2, GLES20.GL_FLOAT, false, 2 * 4, mTexCoorBuffer);
+
         //允许顶点位置数据数组
         GLES20.glEnableVertexAttribArray(maPositionHandle);
         GLES20.glEnableVertexAttribArray(maTexCoorHandle);
 
         //绑定纹理
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureId);
 
         //绘制纹理矩形
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, vCount);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, mVertexCount);
     }
 
-    public void initTexture() {
-        //生成纹理ID
-        int[] textures = new int[1];
-        GLES20.glGenTextures
-                (
-                        1,          //产生的纹理id的数量
-                        textures,   //纹理id的数组
-                        0           //偏移量
-                );
-        textureId = textures[0];
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
 
-        //实际加载纹理
-        GLUtils.texImage2D
-                (
-                        GLES20.GL_TEXTURE_2D,   //纹理类型，在OpenGL ES中必须为GL10.GL_TEXTURE_2D
-                        0,                      //纹理的层次，0表示基本图像层，可以理解为直接贴图
-                        mBitmap,              //纹理图像
-                        0                      //纹理边框尺寸
-                );
-
-        mBitmap.recycle();
-    }
 }

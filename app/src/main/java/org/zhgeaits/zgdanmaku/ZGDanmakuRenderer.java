@@ -1,13 +1,9 @@
 package org.zhgeaits.zgdanmaku;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,74 +11,101 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * Created by Administrator on 2016/2/22 0022.
+ * Created by zhgeatis on 2016/2/22 0022.
+ * 弹幕渲染
  */
 public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
 
-    private List<ZGDanmaku> danmakus;
-    private Context context;
-    private RenderListener listener;
+    private List<ZGDanmaku> mDanmakus;
+    private Context mContext;
+    private RenderListener mListener;
+    private String mVertexShader;//顶点着色器
+    private String mFragmentShader;//片元着色器
+    private int mViewWidth;//窗口宽度
+    private int mViewHeight;//窗口高度
 
     public ZGDanmakuRenderer(Context context) {
-        danmakus = new ArrayList<>();
-        this.context = context;
+        mDanmakus = new ArrayList<>();
+        this.mContext = context;
     }
 
     public void setListener(RenderListener listener) {
-        this.listener = listener;
+        this.mListener = listener;
     }
 
+    /**
+     * 添加一个弹幕
+     * @param danmaku
+     */
     public void addDanmaku(ZGDanmaku danmaku) {
-        danmakus.add(danmaku);
-    }
-
-    public interface RenderListener {
-        void onInited();
+        danmaku.setShader(mVertexShader, mFragmentShader);
+        danmaku.setViewSize(mViewWidth, mViewHeight);
+        danmaku.init();
+        mDanmakus.add(danmaku);
     }
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-        //设置屏幕背景色RGBA
-        GLES20.glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
-        //打开深度检测
-//        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        //设置屏幕背景色RGBA
+        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         //关闭背面剪裁
         GLES20.glDisable(GLES20.GL_CULL_FACE);
 
-        if(listener != null) {
-            listener.onInited();
-        }
+        //加载顶点着色器的脚本内容
+        mVertexShader = ShaderUtils.loadFromAssetsFile("vertex.sh", mContext.getResources());
+
+        //加载片元着色器的脚本内容
+        mFragmentShader = ShaderUtils.loadFromAssetsFile("frag.sh", mContext.getResources());
+
     }
 
     @Override
     public void onSurfaceChanged(GL10 gl10, int width, int height) {
-        //设置视窗大小及位置
+
+        this.mViewWidth = width;
+        this.mViewHeight = height;
+
+        //设置视窗大小及位置为整个view范围
         GLES20.glViewport(0, 0, width, height);
-        //计算GLSurfaceView的宽高比
-        float ratio = (float) width / height;
-        //调用此方法计算产生透视投影矩阵
-        MatrixState.setProject(-ratio, ratio, -1, 1, 1, 10);
-        //调用此方法产生摄像机9参数位置矩阵
-        MatrixState.setCamera(0, 0, 3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+
+        //计算产生正交投影矩阵
+        //一般会设置前两个参数为-width / height，width / height，使得纹理不会变形，
+        //但是我这里不这样设置，为了控制位置，变形这个问题在顶点坐标那里处理即可
+        MatrixUtils.setProjectOrtho(-1, 1, -1, 1, 0, 1);
+
+        //产生摄像机9参数位置矩阵
+        MatrixUtils.setCamera(0, 0, 1, 0f, 0f, 0f, 0f, 1, 0);
+
+        if(mListener != null) {
+            mListener.onInited();
+        }
     }
 
     @Override
     public void onDrawFrame(GL10 gl10) {
+
         //清除深度缓冲与颜色缓冲
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
+
+        //绘制弹幕纹理
         List<ZGDanmaku> shouldRemoved = new ArrayList<>();
-        //绘制纹理矩形
-        for (int i = 0; i < danmakus.size(); i ++) {
-            danmakus.get(i).drawSelf();
-            if (danmakus.get(i).isFinished()) {
-                shouldRemoved.add(danmakus.get(i));
+        for (int i = 0; i < mDanmakus.size(); i ++) {
+            mDanmakus.get(i).drawDanmaku();
+            if (mDanmakus.get(i).isFinished()) {
+                shouldRemoved.add(mDanmakus.get(i));
             }
         }
+
+        //清除已经移出屏幕的弹幕
         for (int i = 0; i < shouldRemoved.size(); i ++) {
-            danmakus.remove(shouldRemoved.get(i));
+            mDanmakus.remove(shouldRemoved.get(i));
         }
+    }
+
+    public interface RenderListener {
+        void onInited();
     }
 
 }

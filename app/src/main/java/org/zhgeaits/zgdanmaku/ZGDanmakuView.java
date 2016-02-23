@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Administrator on 2016/2/22 0022.
+ * Created by zhgeatis on 2016/2/22 0022.
  */
 public class ZGDanmakuView extends GLSurfaceView {
 
@@ -31,7 +31,7 @@ public class ZGDanmakuView extends GLSurfaceView {
             public void onInited() {
                 isInited = true;
                 if(cached.size() > 0) {
-                    float x = 1;
+                    float x = 0;
                     for (Bitmap bitmap : cached) {
                         showBitmap(bitmap, x);
                         x++;
@@ -43,14 +43,14 @@ public class ZGDanmakuView extends GLSurfaceView {
     }
 
     public void showBitmap(Bitmap bitmap, float x) {
-        ZGDanmaku danmaku = new ZGDanmaku(bitmap, this.getContext());
-        danmaku.x = x;
+        ZGDanmaku danmaku = new ZGDanmaku(bitmap);
+        danmaku.offsetX = x;
         mRenderer.addDanmaku(danmaku);
     }
 
     public void shotDanmamku(String text) {
         //通过输入流加载图片===============begin===================
-        InputStream is = this.getResources().openRawResource(R.drawable.ic_launcher);
+        InputStream is = this.getResources().openRawResource(R.drawable.test);
         Bitmap bitmapTmp;
         try {
             bitmapTmp = BitmapFactory.decodeStream(is);
