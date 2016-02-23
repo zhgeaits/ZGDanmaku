@@ -27,8 +27,8 @@ public class ZGDanmaku {
     private FloatBuffer mTexCoorBuffer;//顶点纹理坐标数据缓冲
 
     private Bitmap mBitmap;//弹幕纹理
-    public float offsetX;//偏移的x坐标
-    public float offsetY;//偏移的y坐标
+    private int offsetX;//偏移的x坐标
+    private int offsetY;//偏移的y坐标
     private int mViewWidth;//窗口宽度
     private int mViewHeight;//窗口高度
     private int mVertexCount = 4;//纹理顶点个数，这个是矩形，四个顶点
@@ -74,6 +74,22 @@ public class ZGDanmaku {
     }
 
     /**
+     * 设置行偏移量
+     * @param offsety
+     */
+    public void setOffsetY(int offsety) {
+        this.offsetY = offsety;
+    }
+
+    /**
+     * 设置列偏移量
+     * @param offsetx
+     */
+    public void setOffsetX(int offsetx) {
+        this.offsetX = offsetx;
+    }
+
+    /**
      * 判断弹幕是否已经结束
      *
      * @return
@@ -89,19 +105,14 @@ public class ZGDanmaku {
         //顶点坐标数据
         //顶点坐标系：窗口取值范围是-1至1，所以，左上角坐标是(-1,1),终点坐标是(0,0)，右下角坐标是(1, -1)
         //其实就是把坐标给归一化了，下面是计算弹幕的归一化宽和高
-        float danmakuHeight = (float) mBitmap.getHeight() / mViewHeight;
-        float danmakuWidth = (float) mBitmap.getWidth() / mViewWidth;
+        //实际上顶点坐标是正负1的，所以要乘以2，放大两倍
+        float danmakuHeight = (float) mBitmap.getHeight() / mViewHeight * 2.0f;
+        float danmakuWidth = (float) mBitmap.getWidth() / mViewWidth * 2.0f;
 
         //弹幕四个角的顶点坐标，我默认把它绘制在屏幕的左上角了，这样方便处理
         //为什么不是顺时针或者逆时针，实际上opengl只能绘制三角形，所以，
         //这里其实是绘制了两个三角形的，前三个点和后三个点分别是三角形
         float vertices[] = new float[]
-//                {
-//                        -1, 1, 0,
-//                        1, 1, 0,
-//                        -1, -1, 0,
-//                        1, -1, 0
-//                };
                 {
                         -1, 1, 0,                                   //左上角
                         -(1 - danmakuWidth), 1, 0,                  //右上角
@@ -189,8 +200,13 @@ public class ZGDanmaku {
         //初始化矩阵
         MatrixUtils.setInitStack();
 
-        //平移
-        MatrixUtils.transtate(offsetX, offsetY, 0);
+        //首先把弹幕移动到右上角
+        MatrixUtils.transtate(2.0f, 0, 0);
+
+        //弹幕平移
+        float unitY = -(float)offsetY / mViewHeight * 2.0f;
+        float unitX = -(float)offsetX / mViewWidth * 2.0f;
+        MatrixUtils.transtate(unitX, unitY, 0);
 
         //将最终变换矩阵传入shader程序
         GLES20.glUniformMatrix4fv(muMVPMatrixHandle, 1, false, MatrixUtils.getFinalMatrix(), 0);

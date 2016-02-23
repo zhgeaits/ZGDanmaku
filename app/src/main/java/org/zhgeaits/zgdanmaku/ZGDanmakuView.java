@@ -30,7 +30,7 @@ public class ZGDanmakuView extends GLSurfaceView {
             @Override
             public void onInited() {
                 isInited = true;
-                if(cached.size() > 0) {
+                if (cached.size() > 0) {
                     float x = 0;
                     for (Bitmap bitmap : cached) {
                         showBitmap(bitmap, x);
@@ -40,11 +40,35 @@ public class ZGDanmakuView extends GLSurfaceView {
                 }
             }
         });
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int offset = 0;
+                while (true) {
+                    if(offset > 1920) {
+                        offset = 0;
+                    }
+                    List<ZGDanmaku> danmakus = mRenderer.getAllDanmakus();
+                    if(danmakus != null) {
+                        for (int i = 0; i < danmakus.size(); i ++) {
+                            danmakus.get(i).setOffsetX(offset);
+                        }
+                    }
+                    try {
+                        offset += 20;
+                        Thread.sleep(20);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
     }
 
     public void showBitmap(Bitmap bitmap, float x) {
         ZGDanmaku danmaku = new ZGDanmaku(bitmap);
-        danmaku.offsetX = x;
+        danmaku.setOffsetY((int) (x * bitmap.getHeight()));
         mRenderer.addDanmaku(danmaku);
     }
 

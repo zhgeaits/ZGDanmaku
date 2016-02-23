@@ -44,6 +44,14 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
         mDanmakus.add(danmaku);
     }
 
+    /**
+     * 获取所有的弹幕
+     * @return
+     */
+    public List<ZGDanmaku> getAllDanmakus() {
+        return mDanmakus;
+    }
+
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
 
@@ -90,6 +98,8 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
 
         //绘制弹幕纹理
+        //这样的写法是很不合理的，onDrawFrame回调是很频繁的，不应该new那么多list
+        //我只是为了测试
         List<ZGDanmaku> shouldRemoved = new ArrayList<>();
         for (int i = 0; i < mDanmakus.size(); i ++) {
             mDanmakus.get(i).drawDanmaku();
