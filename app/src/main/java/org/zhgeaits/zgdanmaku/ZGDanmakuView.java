@@ -3,7 +3,9 @@ package org.zhgeaits.zgdanmaku;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
+import android.util.AttributeSet;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,9 +23,21 @@ public class ZGDanmakuView extends GLSurfaceView {
 
     public ZGDanmakuView(Context context) {
         super(context);
+        init(context);
+    }
+
+    public ZGDanmakuView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init(context);
+    }
+
+    private void init(Context context) {
+        setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         this.setEGLContextClientVersion(2); //设置使用OPENGL ES2.0
         mRenderer = new ZGDanmakuRenderer(context);	//创建场景渲染器
         setRenderer(mRenderer);				//设置渲染器
+        getHolder().setFormat(PixelFormat.TRANSLUCENT);
+        setZOrderOnTop(true);
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);//设置渲染模式为主动渲染
 
         mRenderer.setListener(new ZGDanmakuRenderer.RenderListener() {

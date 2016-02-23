@@ -2,6 +2,7 @@ package org.zhgeaits.zgdanmaku;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
+import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.view.WindowManager;
 
@@ -19,10 +20,9 @@ public class MainActivity extends Activity {
         //设置为竖屏模式
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
-        danmakuView = new ZGDanmakuView(this);
+        setContentView(R.layout.activity_main);
 
-        setContentView(danmakuView);
-
+        danmakuView = (ZGDanmakuView) findViewById(R.id.danmaku);
         danmakuView.shotDanmamku("hello world!");
         danmakuView.shotDanmamku("hello world!");
         danmakuView.shotDanmamku("hello world!");

@@ -55,11 +55,14 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
 
-        //设置屏幕背景色RGBA
-        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-
         //关闭背面剪裁
         GLES20.glDisable(GLES20.GL_CULL_FACE);
+
+        //开启混色功能，这样是为了让png图片的透明能显示
+        GLES20.glEnable(GLES20.GL_BLEND);
+
+        //指定混色方案
+        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
         //加载顶点着色器的脚本内容
         mVertexShader = ShaderUtils.loadFromAssetsFile("vertex.sh", mContext.getResources());
@@ -94,6 +97,9 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 gl10) {
 
+        //设置屏幕背景色RGBA
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        
         //清除深度缓冲与颜色缓冲
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
 
