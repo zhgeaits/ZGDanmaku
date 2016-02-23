@@ -1,2 +1,2 @@
 # ZGDanmaku
-android danmaku implements by opengles
+android danmaku implemented by opengles

@@ -1,4 +1,4 @@
-package org.zhgeaits.zgdanmaku;
+package org.zhgeaits.app;
 
 import org.junit.Test;
 

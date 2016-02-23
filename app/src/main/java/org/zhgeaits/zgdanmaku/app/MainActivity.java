@@ -1,10 +1,11 @@
-package org.zhgeaits.zgdanmaku;
+package org.zhgeaits.zgdanmaku.app;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
-import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.view.WindowManager;
+
+import org.zhgeaits.zgdanmaku.ZGDanmakuView;
 
 public class MainActivity extends Activity {
 
