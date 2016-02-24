@@ -31,11 +31,13 @@ public class ZGDanmaku {
     private float offsetY;//偏移的y坐标，范围是0-mViewHeight
     private int mViewWidth;//窗口宽度
     private int mViewHeight;//窗口高度
+    private int mDanmakuWidth;//弹幕宽度
     private int mVertexCount = 4;//纹理顶点个数，这个是矩形，四个顶点
     private boolean isInited = false;
 
     public ZGDanmaku(Bitmap bitmap) {
         this.mBitmap = bitmap;
+        this.mDanmakuWidth = mBitmap.getWidth();
     }
 
     public void init() {
@@ -105,10 +107,19 @@ public class ZGDanmaku {
      * @return
      */
     public int getDanmakuWidth() {
-        if(mBitmap == null) {
-            return 0;
+        return mDanmakuWidth;
+    }
+
+    /**
+     * 判断是否已经结束了
+     * @return
+     */
+    public boolean isFinished() {
+        if(offsetX > mViewWidth + getDanmakuWidth()) {
+            uninit();
+            return true;
         }
-        return mBitmap.getWidth();
+        return false;
     }
 
     /**
@@ -186,6 +197,14 @@ public class ZGDanmaku {
         //第二个参数是纹理的层次，0表示基本图像层，可以理解为直接贴图
         //最后一个参数是纹理边框尺寸
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, mBitmap, 0);
+
+//        ByteBuffer byteBuffer = ByteBuffer.allocate(mBitmap.getByteCount());
+//        byteBuffer.order(ByteOrder.nativeOrder());
+//        mBitmap.copyPixelsFromBuffer(byteBuffer);
+//        byteBuffer.position(0);
+
+//        GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, mBitmap.getWidth(), mBitmap.getHeight(),
+//                0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, byteBuffer);
 
         mBitmap.recycle();
     }

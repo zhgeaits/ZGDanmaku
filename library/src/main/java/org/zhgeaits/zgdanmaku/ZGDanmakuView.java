@@ -6,11 +6,15 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by zhgeatis on 2016/2/22 0022.
@@ -23,10 +27,10 @@ public class ZGDanmakuView extends GLSurfaceView {
     private float mLineSpace;//行距
     private Canvas mCanvas;
     private Paint mPainter;
-    private boolean isInited = false;
     private boolean isPaused = false;
     private Queue<ZGDanmakuItem> mCachedDanmaku;
     private Map<Integer, ZGDanmaku> mLinesAvaliable;
+    protected final AtomicBoolean mWaiting = new AtomicBoolean(false);
 
     public ZGDanmakuView(Context context) {
         super(context);
@@ -65,34 +69,15 @@ public class ZGDanmakuView extends GLSurfaceView {
         mRenderer.setListener(new ZGDanmakuRenderer.RenderListener() {
             @Override
             public void onInited() {
-                isInited = true;
-                showCachedDanmaku();
+                start();
             }
         });
-
     }
 
     @Override
     public void onResume() {
         super.onResume();
         isPaused = false;
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    if (isPaused) {
-                        break;
-                    }
-                    try {
-                        Thread.sleep(300);
-                    } catch (InterruptedException e) {
-                        break;
-                    }
-                    showCachedDanmaku();
-                }
-            }
-        }).start();
     }
 
     @Override
@@ -101,32 +86,75 @@ public class ZGDanmakuView extends GLSurfaceView {
         isPaused = true;
     }
 
-    private synchronized void showCachedDanmaku() {
-        int size = mCachedDanmaku.size();
-        for (int i = 0; i < size; i++) {
-            ZGDanmakuItem item = mCachedDanmaku.poll();
-            if (!shotDanmakuItem(item)) {
-                mCachedDanmaku.offer(item);
+    private void start() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    if (isPaused) {
+                        break;
+                    }
+
+                    //读取临界区的弹幕
+                    List<ZGDanmaku> rendererList = mRenderer.getDanmakus();
+                    List<ZGDanmaku> swapList = new ArrayList<>();
+                    for (int i = 0; i < rendererList.size(); i ++) {
+                        if(!rendererList.get(i).isFinished()) {
+                            swapList.add(rendererList.get(i));
+                        }
+                    }
+
+                    //读取弹幕池的弹幕
+                    int cacheSize;
+                    synchronized (mCachedDanmaku) {
+                        cacheSize = mCachedDanmaku.size();
+                        for (int i = 0; i < cacheSize; i++) {
+                            ZGDanmakuItem item = mCachedDanmaku.poll();
+                            ZGDanmaku danmaku = getDanmaku(item);
+                            if (danmaku == null) {
+                                mCachedDanmaku.offer(item);
+                            } else {
+                                mRenderer.updateDanmakus(danmaku);
+                                swapList.add(danmaku);
+                            }
+                        }
+                    }
+
+                    //如果弹幕池和临界区都为空的时候就阻塞，不然弹幕池和临界区要不停刷新的
+                    if(swapList.size() == 0 && cacheSize == 0) {
+                        try {
+                            synchronized (mWaiting) {
+                                mWaiting.set(true);
+                                mWaiting.wait();
+                            }
+                        } catch (InterruptedException e) {
+                            break;
+                        }
+                    }
+
+                    //替换临界区的弹幕
+                    if(swapList.size() > 0) {
+                        mRenderer.setDanmakus(swapList);
+                    }
+                }
             }
-        }
+        }).start();
     }
 
-    private boolean shotDanmakuItem(ZGDanmakuItem danmakuItem) {
+    private ZGDanmaku getDanmaku(ZGDanmakuItem item) {
 
         int avaliableLine = getAvaliableLine();
         if (avaliableLine == -1) {
-            return false;
+            return null;
         }
 
-        ZGDanmaku danmaku = new ZGDanmaku(danmakuItem.getDanmakuBitmap());
+        ZGDanmaku danmaku = new ZGDanmaku(item.getDanmakuBitmap());
         mLinesAvaliable.put(avaliableLine, danmaku);
 
-        float offsetY = (danmakuItem.getDanmakuHeight() + mLineSpace) * avaliableLine;
+        float offsetY = (item.getDanmakuHeight() + mLineSpace) * avaliableLine;
         danmaku.setOffsetY(offsetY);
 
-        mRenderer.addDanmaku(danmaku);
-
-        return true;
+        return danmaku;
     }
 
     /**
@@ -182,14 +210,16 @@ public class ZGDanmakuView extends GLSurfaceView {
      */
     public void shotDanmamku(String text) {
         ZGDanmakuItem item = new ZGDanmakuItem(mCanvas, mPainter, text);
-
-        if (!isInited || !shotDanmakuItem(item)) {
-            cacheDanmaku(item);
+        synchronized (mCachedDanmaku) {
+            mCachedDanmaku.offer(item);
         }
-    }
 
-    public synchronized void cacheDanmaku(ZGDanmakuItem item) {
-        mCachedDanmaku.offer(item);
+        synchronized (mWaiting) {
+            if(mWaiting.get()) {
+                mWaiting.set(false);
+                mWaiting.notifyAll();
+            }
+        }
     }
 
 }

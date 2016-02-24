@@ -23,7 +23,7 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
 
-    private CopyOnWriteArrayList<ZGDanmaku> mDanmakus;
+    private List<ZGDanmaku> mDanmakus;
     private Context mContext;
     private RenderListener mListener;
     private String mVertexShader;//顶点着色器
@@ -32,24 +32,39 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
     private int mViewHeight;//窗口高度
     private long mLastTime;
     private float mSpeed;//速度，单位px/s
-    private List<ZGDanmaku> mShouldRemove;
 
     public ZGDanmakuRenderer(Context context) {
-        mDanmakus = new CopyOnWriteArrayList<>();
-        mShouldRemove = new ArrayList<>();
+        mDanmakus = new ArrayList<>();
         this.mContext = context;
     }
 
+    /**
+     * 设置初始化成功监听器
+     * @param listener
+     */
     public void setListener(RenderListener listener) {
         this.mListener = listener;
     }
 
     /**
      * 设置速度
-     * @param speed
+     * @param speed 单位px/s
      */
     public void setSpeed(float speed) {
         this.mSpeed = speed;
+    }
+
+    public synchronized List<ZGDanmaku> getDanmakus() {
+        return mDanmakus;
+    }
+
+    public synchronized void setDanmakus(List<ZGDanmaku> danmakus) {
+        this.mDanmakus = danmakus;
+    }
+
+    public void updateDanmakus(ZGDanmaku danmaku) {
+        danmaku.setShader(mVertexShader, mFragmentShader);
+        danmaku.setViewSize(mViewWidth, mViewHeight);
     }
 
     /**
@@ -121,25 +136,14 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
 
         //绘制弹幕纹理
-        int size = mDanmakus.size();
+        List<ZGDanmaku> danmakus = getDanmakus();
+        int size = danmakus.size();
         for (int i = 0; i < size; i ++) {
-            ZGDanmaku danmaku = mDanmakus.get(i);
-
+            ZGDanmaku danmaku = danmakus.get(i);
             float newOffset = detalOffset + danmaku.getCurrentOffsetX();
             danmaku.setOffsetX(newOffset);
-
-            if(newOffset <= mViewWidth + danmaku.getDanmakuWidth()) {
-                //mDanmakus.offer(danmaku);
-
-                danmaku.drawDanmaku();
-            } else {
-                mShouldRemove.add(danmaku);
-                danmaku.uninit();
-            }
+            danmaku.drawDanmaku();
         }
-
-        mDanmakus.removeAll(mShouldRemove);
-        mShouldRemove.clear();
 
         mLastTime = currentTime;
     }

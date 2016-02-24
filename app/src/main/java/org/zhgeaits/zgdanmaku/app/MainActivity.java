@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         danmakuView = (ZGDanmakuView) findViewById(R.id.danmaku);
-        danmakuView.setSpeed(150);
+        danmakuView.setSpeed(300);
         danmakuView.setLines(10);
         danmakuView.setLineSpace(2);
 
