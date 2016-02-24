@@ -2,29 +2,31 @@ package org.zhgeaits.zgdanmaku;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * Created by zhgeatis on 2016/2/22 0022.
  */
 public class ZGDanmakuView extends GLSurfaceView {
 
-    private ZGDanmakuRenderer mRenderer;//场景渲染器
+    private ZGDanmakuRenderer mRenderer;//渲染器
+    private Context mContext;
+    private int mLines = 4;//默认4行
+    private int mAvaliableLine;
+    private float mLineSpace;//行距
     private Canvas mCanvas;
     private Paint mPainter;
-
     private boolean isInited = false;
-    private List<Bitmap> cached = new ArrayList<>();
+    private Queue<ZGDanmakuItem> mCachedDanmaku;
 
     public ZGDanmakuView(Context context) {
         super(context);
@@ -37,77 +39,110 @@ public class ZGDanmakuView extends GLSurfaceView {
     }
 
     private void init(Context context) {
+        this.mContext = context;
+        mCachedDanmaku = new LinkedList<>();
+
         setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-        this.setEGLContextClientVersion(2); //设置使用OPENGL ES2.0
-        mRenderer = new ZGDanmakuRenderer(context);	//创建场景渲染器
-        setRenderer(mRenderer);				//设置渲染器
+        setEGLContextClientVersion(2); //设置使用OPENGL ES2.0
+        mRenderer = new ZGDanmakuRenderer(context);
+        setRenderer(mRenderer);
         getHolder().setFormat(PixelFormat.TRANSLUCENT);
         setZOrderOnTop(true);
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);//设置渲染模式为主动渲染
 
+        setSpeed(50);//默认50dp/s速度
+        setLineSpace(8);//默认8dp行距
+
         mCanvas = new Canvas();
         mPainter = new Paint(Paint.ANTI_ALIAS_FLAG);
-        final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
-        mPainter.setTextSize((int) (18 * fontScale + 0.5f));
+        mPainter.setTextSize(DimensUtils.dip2pixel(mContext, 18));
         mPainter.setColor(0xffffffff);
         mPainter.setTextAlign(Paint.Align.LEFT);
-        mPainter.setShadowLayer(2, 3, 3, 0x5a000000);//0xff000000
+        mPainter.setShadowLayer(2, 3, 3, 0x5a000000);
 
-        //for test
         mRenderer.setListener(new ZGDanmakuRenderer.RenderListener() {
             @Override
             public void onInited() {
                 isInited = true;
-                if (cached.size() > 0) {
-                    float x = 0;
-                    for (Bitmap bitmap : cached) {
-                        showBitmap(bitmap, x);
-                        x++;
-                    }
-                    cached.clear();
-                }
+                showCachedDanmaku();
             }
         });
-
     }
 
-    public void showBitmap(Bitmap bitmap, float x) {
-        ZGDanmaku danmaku = new ZGDanmaku(bitmap);
-        danmaku.setOffsetY((int) (x * bitmap.getHeight()));
-        mRenderer.addDanmaku(danmaku);
-    }
-
-    public void shotDanmamku(String text) {
-        //通过输入流加载图片===============begin===================
-        InputStream is = this.getResources().openRawResource(R.drawable.test);
-        Bitmap bitmapTmp;
-        try {
-            bitmapTmp = BitmapFactory.decodeStream(is);
-        } finally {
-            try {
-                is.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+    private void showCachedDanmaku() {
+        int size = mCachedDanmaku.size();
+        for (int i = 0; i < size; i ++) {
+            ZGDanmakuItem item = mCachedDanmaku.poll();
+            if(!shotDanmakuItem(item)) {
+                mCachedDanmaku.offer(item);
             }
         }
-        //通过输入流加载图片===============end=====================
-
-        if(isInited) {
-            showBitmap(bitmapTmp, 0);
-        } else {
-            cached.add(bitmapTmp);
-        }
-
-        Bitmap textBitmap = Bitmap.createBitmap(300, 100, Bitmap.Config.ARGB_8888);
-        mCanvas.setBitmap(textBitmap);
-        mCanvas.drawText(text, 0, 90, mPainter);
-
-        if(isInited) {
-            showBitmap(textBitmap, 0);
-        } else {
-            cached.add(textBitmap);
-        }
     }
 
+    private boolean shotDanmakuItem(ZGDanmakuItem danmakuItem) {
+        ZGDanmaku danmaku = new ZGDanmaku(danmakuItem.getDanmakuBitmap());
+
+        int avaliableLine = getAvaliableLine();
+        if (avaliableLine == -1) {
+            return false;
+        }
+
+        float offsetY = (danmakuItem.getDanmakuHeight() + mLineSpace) * avaliableLine;
+
+        danmaku.setOffsetY(offsetY);
+        mRenderer.addDanmaku(danmaku);
+
+        return true;
+    }
+
+    private int getAvaliableLine() {
+        int nowAvaliableLine = mAvaliableLine;
+        mAvaliableLine ++;
+        if(mAvaliableLine >= mLines) {
+            mAvaliableLine = 0;
+        }
+        return nowAvaliableLine;
+    }
+
+    /**
+     * 设置速度
+     *
+     * @param speed dp/s
+     */
+    public void setSpeed(float speed) {
+        float pxSpeed = DimensUtils.dip2pixel(mContext, speed);
+        this.mRenderer.setSpeed(pxSpeed);
+    }
+
+    /**
+     * 设置行数
+     *
+     * @param lines
+     */
+    public void setLines(int lines) {
+        this.mLines = lines;
+    }
+
+    /**
+     * 设置行距
+     *
+     * @param lineSpace
+     */
+    public void setLineSpace(int lineSpace) {
+        float pxLineSpace = DimensUtils.dip2pixel(mContext, lineSpace);
+        this.mLineSpace = pxLineSpace;
+    }
+
+    /**
+     * 发一条弹幕
+     * @param text
+     */
+    public void shotDanmamku(String text) {
+        ZGDanmakuItem item = new ZGDanmakuItem(mCanvas, mPainter, text);
+
+        if(!isInited || !shotDanmakuItem(item)) {
+            mCachedDanmaku.offer(item);
+        }
+    }
 
 }

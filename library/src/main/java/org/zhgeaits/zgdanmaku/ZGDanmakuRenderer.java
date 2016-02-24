@@ -5,7 +5,9 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -16,21 +18,27 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
 
-    private List<ZGDanmaku> mDanmakus;
+    private Queue<ZGDanmaku> mDanmakus;
     private Context mContext;
     private RenderListener mListener;
     private String mVertexShader;//顶点着色器
     private String mFragmentShader;//片元着色器
     private int mViewWidth;//窗口宽度
     private int mViewHeight;//窗口高度
+    private long mLastTime;
+    private float mSpeed;//速度，单位px/s
 
     public ZGDanmakuRenderer(Context context) {
-        mDanmakus = new ArrayList<>();
+        mDanmakus = new LinkedList<>();
         this.mContext = context;
     }
 
     public void setListener(RenderListener listener) {
         this.mListener = listener;
+    }
+
+    public void setSpeed(float speed) {
+        this.mSpeed = speed;
     }
 
     /**
@@ -84,16 +92,16 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
         if(mListener != null) {
             mListener.onInited();
         }
-    }
 
-    float offset = 0;
+        mLastTime = System.currentTimeMillis();
+    }
 
     @Override
     public void onDrawFrame(GL10 gl10) {
 
-        if(offset > 1920) {
-            offset = 0;
-        }
+        long currentTime = System.currentTimeMillis();
+        float intervalTime = (float)(currentTime - mLastTime) / 1000.0f;
+        float detalOffset = mSpeed * intervalTime;
 
         //设置屏幕背景色RGBA
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -102,22 +110,24 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
 
         //绘制弹幕纹理
-        //这样的写法是很不合理的，onDrawFrame回调是很频繁的，不应该new那么多list
-        //我只是为了测试
-        List<ZGDanmaku> shouldRemoved = new ArrayList<>();
-        for (int i = 0; i < mDanmakus.size(); i ++) {
-            mDanmakus.get(i).setOffsetX((int) offset);
-            mDanmakus.get(i).drawDanmaku();
-            offset += 1;
-            if (mDanmakus.get(i).isFinished()) {
-                shouldRemoved.add(mDanmakus.get(i));
+        int size = mDanmakus.size();
+        for (int i = 0; i < size; i ++) {
+            ZGDanmaku danmaku = mDanmakus.poll();
+            float newOffset = detalOffset + danmaku.getCurrentOffsetX();
+            danmaku.setOffsetX(newOffset);
+
+            if(newOffset <= mViewWidth + danmaku.getDanmakuWidth()) {
+                mDanmakus.offer(danmaku);
+            } else {
+                //for test
+                danmaku.setOffsetX(0);
+                mDanmakus.offer(danmaku);
             }
+
+            danmaku.drawDanmaku();
         }
 
-        //清除已经移出屏幕的弹幕
-        for (int i = 0; i < shouldRemoved.size(); i ++) {
-            mDanmakus.remove(shouldRemoved.get(i));
-        }
+        mLastTime = currentTime;
     }
 
     public interface RenderListener {

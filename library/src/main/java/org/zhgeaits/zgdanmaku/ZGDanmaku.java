@@ -27,8 +27,8 @@ public class ZGDanmaku {
     private FloatBuffer mTexCoorBuffer;//顶点纹理坐标数据缓冲
 
     private Bitmap mBitmap;//弹幕纹理
-    private int offsetX;//偏移的x坐标
-    private int offsetY;//偏移的y坐标
+    private float offsetX;//偏移的x坐标
+    private float offsetY;//偏移的y坐标
     private int mViewWidth;//窗口宽度
     private int mViewHeight;//窗口高度
     private int mVertexCount = 4;//纹理顶点个数，这个是矩形，四个顶点
@@ -77,7 +77,7 @@ public class ZGDanmaku {
      * 设置行偏移量
      * @param offsety
      */
-    public void setOffsetY(int offsety) {
+    public void setOffsetY(float offsety) {
         this.offsetY = offsety;
     }
 
@@ -85,17 +85,27 @@ public class ZGDanmaku {
      * 设置列偏移量
      * @param offsetx
      */
-    public void setOffsetX(int offsetx) {
+    public void setOffsetX(float offsetx) {
         this.offsetX = offsetx;
     }
 
     /**
-     * 判断弹幕是否已经结束
-     *
+     * 获取当前的行偏移量
      * @return
      */
-    public boolean isFinished() {
-        return false;
+    public float getCurrentOffsetX() {
+        return this.offsetX;
+    }
+
+    /**
+     * 获取弹幕宽度
+     * @return
+     */
+    public int getDanmakuWidth() {
+        if(mBitmap == null) {
+            return 0;
+        }
+        return mBitmap.getWidth();
     }
 
     /**
@@ -204,8 +214,8 @@ public class ZGDanmaku {
         MatrixUtils.transtate(2.0f, 0, 0);
 
         //弹幕平移
-        float unitY = -(float)offsetY / mViewHeight * 2.0f;
-        float unitX = -(float)offsetX / mViewWidth * 2.0f;
+        float unitY = -offsetY / mViewHeight * 2.0f;
+        float unitX = -offsetX / mViewWidth * 2.0f;
         MatrixUtils.transtate(unitX, unitY, 0);
 
         //将最终变换矩阵传入shader程序
