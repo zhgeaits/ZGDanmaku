@@ -3,6 +3,7 @@ package org.zhgeaits.zgdanmaku;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -48,15 +49,17 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
     public void addDanmaku(ZGDanmaku danmaku) {
         danmaku.setShader(mVertexShader, mFragmentShader);
         danmaku.setViewSize(mViewWidth, mViewHeight);
-        danmaku.init();
-        mDanmakus.add(danmaku);
+
+        synchronized (this) {
+            mDanmakus.offer(danmaku);
+        }
     }
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
 
         //关闭背面剪裁
-        GLES20.glDisable(GLES20.GL_CULL_FACE);
+        //GLES20.glDisable(GLES20.GL_CULL_FACE);
 
         //开启混色功能，这样是为了让png图片的透明能显示
         GLES20.glEnable(GLES20.GL_BLEND);
@@ -101,7 +104,7 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
 
         long currentTime = System.currentTimeMillis();
         float intervalTime = (float)(currentTime - mLastTime) / 1000.0f;
-        float detalOffset = mSpeed * intervalTime;
+        float detalOffset = 5;
 
         //设置屏幕背景色RGBA
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -109,23 +112,27 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
         //清除深度缓冲与颜色缓冲
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
 
-        //绘制弹幕纹理
-        int size = mDanmakus.size();
-        for (int i = 0; i < size; i ++) {
-            ZGDanmaku danmaku = mDanmakus.poll();
-            float newOffset = detalOffset + danmaku.getCurrentOffsetX();
-            danmaku.setOffsetX(newOffset);
+        synchronized (this) {
+            //绘制弹幕纹理
+            int size = mDanmakus.size();
+            for (int i = 0; i < size; i ++) {
+                ZGDanmaku danmaku = mDanmakus.poll();
 
-            if(newOffset <= mViewWidth + danmaku.getDanmakuWidth()) {
-                mDanmakus.offer(danmaku);
-            } else {
-                //for test
-                danmaku.setOffsetX(0);
-                mDanmakus.offer(danmaku);
+                if(!danmaku.isInited()) {
+                    danmaku.init();
+                }
+
+                float newOffset = detalOffset + danmaku.getCurrentOffsetX();
+                danmaku.setOffsetX(newOffset);
+
+                if(newOffset <= mViewWidth + danmaku.getDanmakuWidth()) {
+                    mDanmakus.offer(danmaku);
+                }
+
+                danmaku.drawDanmaku();
             }
-
-            danmaku.drawDanmaku();
         }
+
 
         mLastTime = currentTime;
     }

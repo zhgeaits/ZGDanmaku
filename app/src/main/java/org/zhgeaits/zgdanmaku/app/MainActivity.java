@@ -3,6 +3,7 @@ package org.zhgeaits.zgdanmaku.app;
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.WindowManager;
 
@@ -46,10 +47,18 @@ public class MainActivity extends Activity {
 //            }
 //        }).start();
 
-        for (int i = 0; i < 10; i ++) {
-            danmakuView.shotDanmamku("hello world!");
-        }
+        new Handler().postDelayed(test, 0);
     }
+
+    private Runnable test = new Runnable() {
+        @Override
+        public void run() {
+            for (int i = 0; i < 10; i ++) {
+                danmakuView.shotDanmamku("hello world!");
+            }
+            new Handler().postDelayed(test, 1000);
+        }
+    };
 
     @Override
     protected void onResume() {

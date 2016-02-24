@@ -32,6 +32,7 @@ public class ZGDanmaku {
     private int mViewWidth;//窗口宽度
     private int mViewHeight;//窗口高度
     private int mVertexCount = 4;//纹理顶点个数，这个是矩形，四个顶点
+    private boolean isInited = false;
 
     public ZGDanmaku(Bitmap bitmap) {
         this.mBitmap = bitmap;
@@ -48,8 +49,14 @@ public class ZGDanmaku {
         //初始化着色器
         initShader();
 
-        //生成纹理
+        //生成纹理，必须在opengl的现场绑定纹理才有用
         initTexture();
+
+        isInited = true;
+    }
+
+    public boolean isInited() {
+        return isInited;
     }
 
     /**

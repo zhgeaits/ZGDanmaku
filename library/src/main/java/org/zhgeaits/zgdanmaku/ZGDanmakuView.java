@@ -1,16 +1,14 @@
 package org.zhgeaits.zgdanmaku;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
 /**
@@ -44,6 +42,7 @@ public class ZGDanmakuView extends GLSurfaceView {
 
         setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         setEGLContextClientVersion(2); //设置使用OPENGL ES2.0
+
         mRenderer = new ZGDanmakuRenderer(context);
         setRenderer(mRenderer);
         getHolder().setFormat(PixelFormat.TRANSLUCENT);
@@ -69,11 +68,11 @@ public class ZGDanmakuView extends GLSurfaceView {
         });
     }
 
-    private void showCachedDanmaku() {
+    private synchronized void showCachedDanmaku() {
         int size = mCachedDanmaku.size();
-        for (int i = 0; i < size; i ++) {
+        for (int i = 0; i < size; i++) {
             ZGDanmakuItem item = mCachedDanmaku.poll();
-            if(!shotDanmakuItem(item)) {
+            if (!shotDanmakuItem(item)) {
                 mCachedDanmaku.offer(item);
             }
         }
@@ -95,12 +94,13 @@ public class ZGDanmakuView extends GLSurfaceView {
         return true;
     }
 
-    private int getAvaliableLine() {
+    private synchronized int getAvaliableLine() {
         int nowAvaliableLine = mAvaliableLine;
-        mAvaliableLine ++;
-        if(mAvaliableLine >= mLines) {
+        mAvaliableLine++;
+        if (mAvaliableLine >= mLines) {
             mAvaliableLine = 0;
         }
+
         return nowAvaliableLine;
     }
 
@@ -135,14 +135,19 @@ public class ZGDanmakuView extends GLSurfaceView {
 
     /**
      * 发一条弹幕
+     *
      * @param text
      */
     public void shotDanmamku(String text) {
         ZGDanmakuItem item = new ZGDanmakuItem(mCanvas, mPainter, text);
 
-        if(!isInited || !shotDanmakuItem(item)) {
-            mCachedDanmaku.offer(item);
+        if (!isInited || !shotDanmakuItem(item)) {
+            cacheDanmaku(item);
         }
+    }
+
+    public synchronized void cacheDanmaku(ZGDanmakuItem item) {
+        mCachedDanmaku.offer(item);
     }
 
 }
