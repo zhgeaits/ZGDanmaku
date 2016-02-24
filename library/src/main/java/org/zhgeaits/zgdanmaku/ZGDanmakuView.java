@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2016 Zhang Ge <zhgeaits@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.zhgeaits.zgdanmaku;
 
 import android.content.Context;
@@ -17,6 +32,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by zhgeatis on 2016/2/22 0022.
+ * 弹幕view
+ * 含有一个弹幕池，外面发送弹幕即往弹幕池添加一条弹幕。
+ * 包含一条弹幕线程，不断从GL线程的临界区获取弹幕，然后去掉已经跑完的弹幕；
+ * 不断从弹幕池获取弹幕，最后整合临界区的弹幕一起更新到临界区。
+ * 如果临界区和弹幕池都没有弹幕了，则阻塞，直到新来一条弹幕
  */
 public class ZGDanmakuView extends GLSurfaceView {
 

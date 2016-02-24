@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2016 Zhang Ge <zhgeaits@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.zhgeaits.zgdanmaku;
 
 import android.content.Context;
@@ -20,6 +35,9 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * Created by zhgeatis on 2016/2/22 0022.
  * 弹幕渲染器
+ * GL线程每帧都会回调onDrawFrame，初始化纹理，绑定纹理都必须在GL线程去做，不然画不出来东西
+ * 尽量不在onDrawFrame锁住临界区，这样GL线程和外面的线程互斥会有卡顿现象。
+ * 每次GL线程都完成渲染临界区的所有弹幕，走出屏幕的弹幕交给外面的线程处理。
  */
 public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
 
