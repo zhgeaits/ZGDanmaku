@@ -3,11 +3,13 @@ package org.zhgeaits.zgdanmaku;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.os.SystemClock;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -28,6 +30,7 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
     private int mViewHeight;//窗口高度
     private long mLastTime;
     private float mSpeed;//速度，单位px/s
+    private Map<Integer, Boolean> mLinesAvaliable;
 
     public ZGDanmakuRenderer(Context context) {
         mDanmakus = new LinkedList<>();
@@ -38,6 +41,14 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
         this.mListener = listener;
     }
 
+    public void setLinesAvaliable(Map<Integer, Boolean> linesAvaliable) {
+        this.mLinesAvaliable = linesAvaliable;
+    }
+
+    /**
+     * 设置速度
+     * @param speed
+     */
     public void setSpeed(float speed) {
         this.mSpeed = speed;
     }
@@ -96,13 +107,13 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
             mListener.onInited();
         }
 
-        mLastTime = System.currentTimeMillis();
+        mLastTime = SystemClock.elapsedRealtime();
     }
 
     @Override
     public void onDrawFrame(GL10 gl10) {
 
-        long currentTime = System.currentTimeMillis();
+        long currentTime = SystemClock.elapsedRealtime();
         float intervalTime = (float)(currentTime - mLastTime) / 1000.0f;
         float detalOffset = mSpeed * intervalTime;
 
@@ -118,23 +129,22 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
             for (int i = 0; i < size; i ++) {
                 ZGDanmaku danmaku = mDanmakus.poll();
 
-                if(!danmaku.isInited()) {
-                    danmaku.init();
-                }
-
                 float newOffset = detalOffset + danmaku.getCurrentOffsetX();
                 danmaku.setOffsetX(newOffset);
 
                 if(newOffset <= mViewWidth + danmaku.getDanmakuWidth()) {
                     mDanmakus.offer(danmaku);
+                    if(newOffset > danmaku.getDanmakuWidth()) {
+                        mLinesAvaliable.put(danmaku.getInLine(), true);
+                    }
+
+                    danmaku.drawDanmaku();
                 } else {
-                    TexturePool.offerTextureId(danmaku.getTextureId());
+                    danmaku.uninit();
                 }
 
-                danmaku.drawDanmaku();
             }
         }
-
 
         mLastTime = currentTime;
     }

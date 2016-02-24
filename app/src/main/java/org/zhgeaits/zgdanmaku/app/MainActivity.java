@@ -3,8 +3,6 @@ package org.zhgeaits.zgdanmaku.app;
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
 import android.view.WindowManager;
 
 import org.zhgeaits.zgdanmaku.ZGDanmakuView;
@@ -34,10 +32,9 @@ public class MainActivity extends Activity {
 //            @Override
 //            public void run() {
 //                while (true) {
-//                    for (int i = 0; i < 10; i ++) {
+//                    for (int i = 0; i < 100; i ++) {
 //                        danmakuView.shotDanmamku("hello world!");
 //                    }
-//                    Log.i("zhangge", "draw 10 danmakus");
 //                    try {
 //                        Thread.sleep(1000);
 //                    } catch (InterruptedException e) {
@@ -47,18 +44,10 @@ public class MainActivity extends Activity {
 //            }
 //        }).start();
 
-        new Handler().postDelayed(test, 0);
-    }
-
-    private Runnable test = new Runnable() {
-        @Override
-        public void run() {
-            for (int i = 0; i < 10; i ++) {
-                danmakuView.shotDanmamku("hello world!");
-            }
-            new Handler().postDelayed(test, 1000);
+        for (int i = 0; i < 100; i ++) {
+            danmakuView.shotDanmamku("hello world!");
         }
-    };
+    }
 
     @Override
     protected void onResume() {

@@ -6,9 +6,10 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
-import android.util.Log;
 
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 
 /**
@@ -16,15 +17,17 @@ import java.util.Queue;
  */
 public class ZGDanmakuView extends GLSurfaceView {
 
-    private ZGDanmakuRenderer mRenderer;//渲染器
     private Context mContext;
+    private ZGDanmakuRenderer mRenderer;//渲染器
     private int mLines = 4;//默认4行
     private int mAvaliableLine;
     private float mLineSpace;//行距
     private Canvas mCanvas;
     private Paint mPainter;
     private boolean isInited = false;
+    private boolean isPaused = false;
     private Queue<ZGDanmakuItem> mCachedDanmaku;
+    private Map<Integer, Boolean> mLinesAvaliable;
 
     public ZGDanmakuView(Context context) {
         super(context);
@@ -39,6 +42,7 @@ public class ZGDanmakuView extends GLSurfaceView {
     private void init(Context context) {
         this.mContext = context;
         mCachedDanmaku = new LinkedList<>();
+        mLinesAvaliable = new HashMap<>();
 
         setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         setEGLContextClientVersion(2); //设置使用OPENGL ES2.0
@@ -49,6 +53,7 @@ public class ZGDanmakuView extends GLSurfaceView {
         setZOrderOnTop(true);
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);//设置渲染模式为主动渲染
 
+        mRenderer.setLinesAvaliable(mLinesAvaliable);
         setSpeed(50);//默认50dp/s速度
         setLineSpace(8);//默认8dp行距
 
@@ -66,6 +71,36 @@ public class ZGDanmakuView extends GLSurfaceView {
                 showCachedDanmaku();
             }
         });
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        isPaused = false;
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    if (isPaused) {
+                        break;
+                    }
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                    showCachedDanmaku();
+                }
+            }
+        }).start();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        isPaused = true;
     }
 
     private synchronized void showCachedDanmaku() {
@@ -79,29 +114,35 @@ public class ZGDanmakuView extends GLSurfaceView {
     }
 
     private boolean shotDanmakuItem(ZGDanmakuItem danmakuItem) {
-        ZGDanmaku danmaku = new ZGDanmaku(danmakuItem.getDanmakuBitmap());
 
         int avaliableLine = getAvaliableLine();
         if (avaliableLine == -1) {
             return false;
         }
 
-        float offsetY = (danmakuItem.getDanmakuHeight() + mLineSpace) * avaliableLine;
+        ZGDanmaku danmaku = new ZGDanmaku(danmakuItem.getDanmakuBitmap());
+        danmaku.setInLine(avaliableLine);
+        mLinesAvaliable.put(avaliableLine, false);
 
+        float offsetY = (danmakuItem.getDanmakuHeight() + mLineSpace) * avaliableLine;
         danmaku.setOffsetY(offsetY);
+
         mRenderer.addDanmaku(danmaku);
 
         return true;
     }
 
+    /**
+     * 获取有效的弹道
+     * @return
+     */
     private synchronized int getAvaliableLine() {
-        int nowAvaliableLine = mAvaliableLine;
-        mAvaliableLine++;
-        if (mAvaliableLine >= mLines) {
-            mAvaliableLine = 0;
+        for (int i = 0; i < mLines; i ++) {
+            if(mLinesAvaliable.get(i) == null || mLinesAvaliable.get(i)) {
+                return i;
+            }
         }
-
-        return nowAvaliableLine;
+        return -1;
     }
 
     /**

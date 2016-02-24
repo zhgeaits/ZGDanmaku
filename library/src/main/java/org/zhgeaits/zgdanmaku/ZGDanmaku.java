@@ -33,6 +33,7 @@ public class ZGDanmaku {
     private int mViewHeight;//窗口高度
     private int mVertexCount = 4;//纹理顶点个数，这个是矩形，四个顶点
     private boolean isInited = false;
+    private int mInLine;//所在的行
 
     public ZGDanmaku(Bitmap bitmap) {
         this.mBitmap = bitmap;
@@ -53,10 +54,6 @@ public class ZGDanmaku {
         initTexture();
 
         isInited = true;
-    }
-
-    public boolean isInited() {
-        return isInited;
     }
 
     /**
@@ -88,6 +85,14 @@ public class ZGDanmaku {
         this.offsetY = offsety;
     }
 
+    public void setInLine(int inLine) {
+        this.mInLine = inLine;
+    }
+
+    public int getInLine() {
+        return mInLine;
+    }
+
     /**
      * 设置列偏移量
      * @param offsetx
@@ -113,14 +118,6 @@ public class ZGDanmaku {
             return 0;
         }
         return mBitmap.getWidth();
-    }
-
-    /**
-     * 获取纹理id
-     * @return
-     */
-    public int getTextureId() {
-        return mTextureId;
     }
 
     /**
@@ -174,18 +171,10 @@ public class ZGDanmaku {
      * 初始化着色器
      */
     public void initShader() {
-
-        //基于顶点着色器与片元着色器创建程序
-        mProgram = ShaderUtils.createProgram(mVertexShader, mFragmentShader);
-
-        //获取顶点位置属性引用id
-        maPositionHandle = GLES20.glGetAttribLocation(mProgram, "aPosition");
-
-        //获取顶点纹理坐标属性引用id
-        maTexCoorHandle = GLES20.glGetAttribLocation(mProgram, "aTexCoor");
-
-        //获取总变换矩阵引用id
-        muMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        mProgram = TexturePool.getProgram(mVertexShader, mFragmentShader);
+        maPositionHandle = TexturePool.getMaPositionHandle();
+        maTexCoorHandle = TexturePool.getMaTexCoorHandle();
+        muMVPMatrixHandle = TexturePool.getMuMVPMatrixHandle();
     }
 
     /**
@@ -210,10 +199,18 @@ public class ZGDanmaku {
         mBitmap.recycle();
     }
 
+    public void uninit() {
+        TexturePool.offerTextureId(mTextureId);
+    }
+
     /**
      * 绘制弹幕
      */
     public void drawDanmaku() {
+
+        if(!isInited) {
+            init();
+        }
 
         //使用shader程序
         GLES20.glUseProgram(mProgram);
@@ -251,6 +248,4 @@ public class ZGDanmaku {
         //绘制纹理矩形
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, mVertexCount);
     }
-
-
 }
