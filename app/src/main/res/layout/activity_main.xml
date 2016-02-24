@@ -4,8 +4,21 @@
     android:background="@color/colorPrimaryDark"
     android:layout_height="match_parent">
 
+    <Button
+        android:id="@+id/openOrClose"
+        android:layout_width="wrap_content"
+        android:text="openOrClose"
+        android:layout_height="wrap_content" />
+
     <org.zhgeaits.zgdanmaku.ZGDanmakuView
         android:id="@+id/danmaku"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <Button
+        android:id="@+id/pauseOrResume"
+        android:layout_width="wrap_content"
+        android:text="pauseOrResume"
+        android:layout_alignParentRight="true"
+        android:layout_height="wrap_content" />
 </RelativeLayout>

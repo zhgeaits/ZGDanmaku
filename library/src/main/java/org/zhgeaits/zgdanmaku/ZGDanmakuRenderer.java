@@ -19,19 +19,21 @@ import javax.microedition.khronos.opengles.GL10;
 
 /**
  * Created by zhgeatis on 2016/2/22 0022.
- * 弹幕渲染
+ * 弹幕渲染器
  */
 public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
 
-    private List<ZGDanmaku> mDanmakus;
     private Context mContext;
-    private RenderListener mListener;
-    private String mVertexShader;//顶点着色器
-    private String mFragmentShader;//片元着色器
-    private int mViewWidth;//窗口宽度
-    private int mViewHeight;//窗口高度
-    private long mLastTime;
-    private float mSpeed;//速度，单位px/s
+    private List<ZGDanmaku> mDanmakus;              //弹幕临界区
+    private RenderListener mListener;               //初始化成功监听器
+    private String mVertexShader;                   //顶点着色器
+    private String mFragmentShader;                 //片元着色器
+    private int mViewWidth;                         //窗口宽度
+    private int mViewHeight;                        //窗口高度
+    private float mSpeed;                           //速度，单位px/s
+    private long mLastTime;                         //绘制上一帧的时间
+    private boolean isOpen = true;                  //是否打开弹幕
+    private boolean isPaused = false;               //是否暂停弹幕
 
     public ZGDanmakuRenderer(Context context) {
         mDanmakus = new ArrayList<>();
@@ -54,28 +56,61 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
         this.mSpeed = speed;
     }
 
+    /**
+     * 获取临界区弹幕
+     * @return
+     */
     public synchronized List<ZGDanmaku> getDanmakus() {
         return mDanmakus;
     }
 
+    /**
+     * 设置临界区弹幕
+     * @param danmakus
+     */
     public synchronized void setDanmakus(List<ZGDanmaku> danmakus) {
         this.mDanmakus = danmakus;
     }
 
+    /**
+     * 设置弹幕的shader和view宽高
+     * @param danmaku
+     */
     public void updateDanmakus(ZGDanmaku danmaku) {
         danmaku.setShader(mVertexShader, mFragmentShader);
         danmaku.setViewSize(mViewWidth, mViewHeight);
     }
 
     /**
-     * 添加一个弹幕
-     * @param danmaku
+     * 设置弹幕是否打开
+     * @param isOpen
      */
-    public void addDanmaku(ZGDanmaku danmaku) {
-        danmaku.setShader(mVertexShader, mFragmentShader);
-        danmaku.setViewSize(mViewWidth, mViewHeight);
+    public void setOpen(boolean isOpen) {
+        this.isOpen = isOpen;
+    }
 
-        mDanmakus.add(danmaku);
+    /**
+     * 弹幕是否打开
+     * @return
+     */
+    public boolean isOpen() {
+        return isOpen;
+    }
+
+    /**
+     * 设置弹幕是否暂停
+     * @param isPaused
+     */
+    public void setPaused(boolean isPaused) {
+        this.isPaused = isPaused;
+    }
+
+    /**
+     * 弹幕是否暂停
+     * @return
+     */
+    public boolean isPaused() {
+        return isPaused;
     }
 
     @Override
@@ -140,9 +175,15 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
         int size = danmakus.size();
         for (int i = 0; i < size; i ++) {
             ZGDanmaku danmaku = danmakus.get(i);
-            float newOffset = detalOffset + danmaku.getCurrentOffsetX();
-            danmaku.setOffsetX(newOffset);
-            danmaku.drawDanmaku();
+
+            if(!isPaused) {
+                float newOffset = detalOffset + danmaku.getCurrentOffsetX();
+                danmaku.setOffsetX(newOffset);
+            }
+
+            if (isOpen) {
+                danmaku.drawDanmaku();
+            }
         }
 
         mLastTime = currentTime;

@@ -6,7 +6,6 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,7 +26,7 @@ public class ZGDanmakuView extends GLSurfaceView {
     private float mLineSpace;//行距
     private Canvas mCanvas;
     private Paint mPainter;
-    private boolean isPaused = false;
+    private boolean isResumed = false;
     private Queue<ZGDanmakuItem> mCachedDanmaku;
     private Map<Integer, ZGDanmaku> mLinesAvaliable;
     protected final AtomicBoolean mWaiting = new AtomicBoolean(false);
@@ -77,21 +76,24 @@ public class ZGDanmakuView extends GLSurfaceView {
     @Override
     public void onResume() {
         super.onResume();
-        isPaused = false;
+        isResumed = true;
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        isPaused = true;
+        isResumed = false;
     }
 
+    /**
+     * 启动弹幕线程
+     */
     private void start() {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 while (true) {
-                    if (isPaused) {
+                    if (!isResumed) {
                         break;
                     }
 
@@ -110,7 +112,7 @@ public class ZGDanmakuView extends GLSurfaceView {
                         cacheSize = mCachedDanmaku.size();
                         for (int i = 0; i < cacheSize; i++) {
                             ZGDanmakuItem item = mCachedDanmaku.poll();
-                            ZGDanmaku danmaku = getDanmaku(item);
+                            ZGDanmaku danmaku = generateDanmaku(item);
                             if (danmaku == null) {
                                 mCachedDanmaku.offer(item);
                             } else {
@@ -141,7 +143,12 @@ public class ZGDanmakuView extends GLSurfaceView {
         }).start();
     }
 
-    private ZGDanmaku getDanmaku(ZGDanmakuItem item) {
+    /**
+     * 生成一条弹幕，如果没有可用弹道就返回null
+     * @param item
+     * @return
+     */
+    private ZGDanmaku generateDanmaku(ZGDanmakuItem item) {
 
         int avaliableLine = getAvaliableLine();
         if (avaliableLine == -1) {
@@ -172,6 +179,38 @@ public class ZGDanmakuView extends GLSurfaceView {
             }
         }
         return -1;
+    }
+
+    /**
+     * 设置弹幕是否打开
+     * @param isOpen
+     */
+    public void setOpen(boolean isOpen) {
+        mRenderer.setOpen(isOpen);
+    }
+
+    /**
+     * 弹幕是否打开
+     * @return
+     */
+    public boolean isOpen() {
+        return mRenderer.isOpen();
+    }
+
+    /**
+     * 设置弹幕暂停
+     * @param isPaused
+     */
+    public void setPaused(boolean isPaused) {
+        mRenderer.setPaused(isPaused);
+    }
+
+    /**
+     * 弹幕是否暂停
+     * @return
+     */
+    public boolean isPaused() {
+        return mRenderer.isPaused();
     }
 
     /**
