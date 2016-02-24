@@ -11,6 +11,7 @@ import android.graphics.Paint;
 public class ZGDanmakuItem {
 
     private Bitmap mBitmap;
+    private String mText;
     private Canvas mCanvas;
     private Paint mPainter;
     private Context mContext;
@@ -18,20 +19,20 @@ public class ZGDanmakuItem {
     public ZGDanmakuItem(Canvas canvas, Paint paint, String text) {
         this.mCanvas = canvas;
         this.mPainter = paint;
-        setText(text);
-    }
-
-    public void setText(String text) {
-        mBitmap = Bitmap.createBitmap(300, 100, Bitmap.Config.ARGB_8888);
-        mCanvas.setBitmap(mBitmap);
-        mCanvas.drawText(text, 0, 90, mPainter);
+        this.mText = text;
     }
 
     public Bitmap getDanmakuBitmap() {
+        if(mBitmap == null) {
+            mBitmap = Bitmap.createBitmap(300, 100, Bitmap.Config.ARGB_8888);
+            mCanvas.setBitmap(mBitmap);
+            mCanvas.drawText(mText, 0, 90, mPainter);
+        }
         return mBitmap;
     }
 
     public int getDanmakuHeight() {
+        getDanmakuBitmap();
         if(mBitmap == null) {
             return 0;
         }

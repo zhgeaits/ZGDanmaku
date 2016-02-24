@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         danmakuView = (ZGDanmakuView) findViewById(R.id.danmaku);
-        danmakuView.setSpeed(40);
+        danmakuView.setSpeed(150);
         danmakuView.setLines(10);
         danmakuView.setLineSpace(2);
 
@@ -32,7 +32,7 @@ public class MainActivity extends Activity {
             @Override
             public void run() {
                 while (true) {
-                    for (int i = 0; i < 10; i ++) {
+                    for (int i = 0; i < 100; i ++) {
                         danmakuView.shotDanmamku("hello world!");
                     }
                     try {

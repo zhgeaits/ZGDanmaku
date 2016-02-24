@@ -11,6 +11,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -21,7 +23,7 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
 
-    private Queue<ZGDanmaku> mDanmakus;
+    private CopyOnWriteArrayList<ZGDanmaku> mDanmakus;
     private Context mContext;
     private RenderListener mListener;
     private String mVertexShader;//顶点着色器
@@ -30,9 +32,11 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
     private int mViewHeight;//窗口高度
     private long mLastTime;
     private float mSpeed;//速度，单位px/s
+    private List<ZGDanmaku> mShouldRemove;
 
     public ZGDanmakuRenderer(Context context) {
-        mDanmakus = new LinkedList<>();
+        mDanmakus = new CopyOnWriteArrayList<>();
+        mShouldRemove = new ArrayList<>();
         this.mContext = context;
     }
 
@@ -56,9 +60,7 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
         danmaku.setShader(mVertexShader, mFragmentShader);
         danmaku.setViewSize(mViewWidth, mViewHeight);
 
-        synchronized (this) {
-            mDanmakus.offer(danmaku);
-        }
+        mDanmakus.add(danmaku);
     }
 
     @Override
@@ -118,25 +120,26 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
         //清除深度缓冲与颜色缓冲
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
 
-        synchronized (this) {
-            //绘制弹幕纹理
-            int size = mDanmakus.size();
-            for (int i = 0; i < size; i ++) {
-                ZGDanmaku danmaku = mDanmakus.poll();
+        //绘制弹幕纹理
+        int size = mDanmakus.size();
+        for (int i = 0; i < size; i ++) {
+            ZGDanmaku danmaku = mDanmakus.get(i);
 
-                float newOffset = detalOffset + danmaku.getCurrentOffsetX();
-                danmaku.setOffsetX(newOffset);
+            float newOffset = detalOffset + danmaku.getCurrentOffsetX();
+            danmaku.setOffsetX(newOffset);
 
-                if(newOffset <= mViewWidth + danmaku.getDanmakuWidth()) {
-                    mDanmakus.offer(danmaku);
+            if(newOffset <= mViewWidth + danmaku.getDanmakuWidth()) {
+                //mDanmakus.offer(danmaku);
 
-                    danmaku.drawDanmaku();
-                } else {
-                    danmaku.uninit();
-                }
-
+                danmaku.drawDanmaku();
+            } else {
+                mShouldRemove.add(danmaku);
+                danmaku.uninit();
             }
         }
+
+        mDanmakus.removeAll(mShouldRemove);
+        mShouldRemove.clear();
 
         mLastTime = currentTime;
     }

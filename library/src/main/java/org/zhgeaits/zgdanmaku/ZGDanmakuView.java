@@ -6,7 +6,6 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -86,7 +85,7 @@ public class ZGDanmakuView extends GLSurfaceView {
                         break;
                     }
                     try {
-                        Thread.sleep(2000);
+                        Thread.sleep(300);
                     } catch (InterruptedException e) {
                         break;
                     }
@@ -141,7 +140,6 @@ public class ZGDanmakuView extends GLSurfaceView {
             }
             ZGDanmaku danmaku = mLinesAvaliable.get(i);
             if(danmaku.getCurrentOffsetX() > danmaku.getDanmakuWidth()) {
-                Log.i("zhangge", "width" + danmaku.getDanmakuWidth() + ",danmaku.getCurrentOffsetX()" + danmaku.getCurrentOffsetX());
                 return i;
             }
         }
