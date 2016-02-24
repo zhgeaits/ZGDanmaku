@@ -27,13 +27,12 @@ public class ZGDanmaku {
     private FloatBuffer mTexCoorBuffer;//顶点纹理坐标数据缓冲
 
     private Bitmap mBitmap;//弹幕纹理
-    private float offsetX;//偏移的x坐标
-    private float offsetY;//偏移的y坐标
+    private float offsetX;//偏移的x坐标，范围是0-mViewWidth
+    private float offsetY;//偏移的y坐标，范围是0-mViewHeight
     private int mViewWidth;//窗口宽度
     private int mViewHeight;//窗口高度
     private int mVertexCount = 4;//纹理顶点个数，这个是矩形，四个顶点
     private boolean isInited = false;
-    private int mInLine;//所在的行
 
     public ZGDanmaku(Bitmap bitmap) {
         this.mBitmap = bitmap;
@@ -85,14 +84,6 @@ public class ZGDanmaku {
         this.offsetY = offsety;
     }
 
-    public void setInLine(int inLine) {
-        this.mInLine = inLine;
-    }
-
-    public int getInLine() {
-        return mInLine;
-    }
-
     /**
      * 设置列偏移量
      * @param offsetx
@@ -127,7 +118,7 @@ public class ZGDanmaku {
         //顶点坐标数据
         //顶点坐标系：窗口取值范围是-1至1，所以，左上角坐标是(-1,1),终点坐标是(0,0)，右下角坐标是(1, -1)
         //其实就是把坐标给归一化了，下面是计算弹幕的归一化宽和高
-        //实际上顶点坐标是正负1的，所以要乘以2，放大两倍
+        //实际上顶点坐标是正负1的，所以弹幕在坐标系中要乘以2，放大两倍
         float danmakuHeight = (float) mBitmap.getHeight() / mViewHeight * 2.0f;
         float danmakuWidth = (float) mBitmap.getWidth() / mViewWidth * 2.0f;
 
@@ -221,7 +212,7 @@ public class ZGDanmaku {
         //首先把弹幕移动到右上角
         MatrixUtils.transtate(2.0f, 0, 0);
 
-        //弹幕平移
+        //弹幕平移，同理坐标放大两倍
         float unitY = -offsetY / mViewHeight * 2.0f;
         float unitX = -offsetX / mViewWidth * 2.0f;
         MatrixUtils.transtate(unitX, unitY, 0);

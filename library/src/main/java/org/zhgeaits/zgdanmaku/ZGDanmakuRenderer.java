@@ -30,7 +30,6 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
     private int mViewHeight;//窗口高度
     private long mLastTime;
     private float mSpeed;//速度，单位px/s
-    private Map<Integer, Boolean> mLinesAvaliable;
 
     public ZGDanmakuRenderer(Context context) {
         mDanmakus = new LinkedList<>();
@@ -39,10 +38,6 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
 
     public void setListener(RenderListener listener) {
         this.mListener = listener;
-    }
-
-    public void setLinesAvaliable(Map<Integer, Boolean> linesAvaliable) {
-        this.mLinesAvaliable = linesAvaliable;
     }
 
     /**
@@ -134,9 +129,6 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
 
                 if(newOffset <= mViewWidth + danmaku.getDanmakuWidth()) {
                     mDanmakus.offer(danmaku);
-                    if(newOffset > danmaku.getDanmakuWidth()) {
-                        mLinesAvaliable.put(danmaku.getInLine(), true);
-                    }
 
                     danmaku.drawDanmaku();
                 } else {

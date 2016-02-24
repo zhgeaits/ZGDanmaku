@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -20,14 +21,13 @@ public class ZGDanmakuView extends GLSurfaceView {
     private Context mContext;
     private ZGDanmakuRenderer mRenderer;//渲染器
     private int mLines = 4;//默认4行
-    private int mAvaliableLine;
     private float mLineSpace;//行距
     private Canvas mCanvas;
     private Paint mPainter;
     private boolean isInited = false;
     private boolean isPaused = false;
     private Queue<ZGDanmakuItem> mCachedDanmaku;
-    private Map<Integer, Boolean> mLinesAvaliable;
+    private Map<Integer, ZGDanmaku> mLinesAvaliable;
 
     public ZGDanmakuView(Context context) {
         super(context);
@@ -53,7 +53,6 @@ public class ZGDanmakuView extends GLSurfaceView {
         setZOrderOnTop(true);
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);//设置渲染模式为主动渲染
 
-        mRenderer.setLinesAvaliable(mLinesAvaliable);
         setSpeed(50);//默认50dp/s速度
         setLineSpace(8);//默认8dp行距
 
@@ -121,8 +120,7 @@ public class ZGDanmakuView extends GLSurfaceView {
         }
 
         ZGDanmaku danmaku = new ZGDanmaku(danmakuItem.getDanmakuBitmap());
-        danmaku.setInLine(avaliableLine);
-        mLinesAvaliable.put(avaliableLine, false);
+        mLinesAvaliable.put(avaliableLine, danmaku);
 
         float offsetY = (danmakuItem.getDanmakuHeight() + mLineSpace) * avaliableLine;
         danmaku.setOffsetY(offsetY);
@@ -138,7 +136,12 @@ public class ZGDanmakuView extends GLSurfaceView {
      */
     private synchronized int getAvaliableLine() {
         for (int i = 0; i < mLines; i ++) {
-            if(mLinesAvaliable.get(i) == null || mLinesAvaliable.get(i)) {
+            if(mLinesAvaliable.get(i) == null) {
+                return i;
+            }
+            ZGDanmaku danmaku = mLinesAvaliable.get(i);
+            if(danmaku.getCurrentOffsetX() > danmaku.getDanmakuWidth()) {
+                Log.i("zhangge", "width" + danmaku.getDanmakuWidth() + ",danmaku.getCurrentOffsetX()" + danmaku.getCurrentOffsetX());
                 return i;
             }
         }
