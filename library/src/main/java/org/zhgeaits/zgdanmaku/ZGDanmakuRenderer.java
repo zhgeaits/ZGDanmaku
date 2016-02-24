@@ -104,7 +104,7 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
 
         long currentTime = System.currentTimeMillis();
         float intervalTime = (float)(currentTime - mLastTime) / 1000.0f;
-        float detalOffset = 5;
+        float detalOffset = mSpeed * intervalTime;
 
         //设置屏幕背景色RGBA
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -127,6 +127,8 @@ public class ZGDanmakuRenderer implements GLSurfaceView.Renderer {
 
                 if(newOffset <= mViewWidth + danmaku.getDanmakuWidth()) {
                     mDanmakus.offer(danmaku);
+                } else {
+                    TexturePool.offerTextureId(danmaku.getTextureId());
                 }
 
                 danmaku.drawDanmaku();

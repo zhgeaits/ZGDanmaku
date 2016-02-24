@@ -116,6 +116,14 @@ public class ZGDanmaku {
     }
 
     /**
+     * 获取纹理id
+     * @return
+     */
+    public int getTextureId() {
+        return mTextureId;
+    }
+
+    /**
      * 初始化顶点坐标与着色数据
      */
     public void initVertexData() {
@@ -184,11 +192,7 @@ public class ZGDanmaku {
      * 初始化纹理
      */
     private void initTexture() {
-        //生成纹理ID
-        int[] textures = new int[1];
-        //第一个参数是生成纹理的数量
-        GLES20.glGenTextures(1, textures, 0);
-        mTextureId = textures[0];
+        mTextureId = TexturePool.pollTextureId();
 
         //绑定纹理，并制定纹理的采样方式
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureId);
