@@ -22,11 +22,12 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 
+import org.zhgeaits.zgdanmaku.ZGDanmakuTextureView;
 import org.zhgeaits.zgdanmaku.ZGDanmakuView;
 
 public class MainActivity extends Activity {
 
-    private ZGDanmakuView danmakuView;
+    private ZGDanmakuTextureView danmakuView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,26 +41,26 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.activity_main);
 
-        danmakuView = (ZGDanmakuView) findViewById(R.id.danmaku);
+        danmakuView = (ZGDanmakuTextureView) findViewById(R.id.danmaku);
         danmakuView.setSpeed(150);
         danmakuView.setLines(10);
         danmakuView.setLineSpace(2);
 
-        Button closeSwitcher = (Button) findViewById(R.id.openOrClose);
-        closeSwitcher.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                danmakuView.setOpen(!danmakuView.isOpen());
-            }
-        });
-
-        Button pauseSwitcher = (Button) findViewById(R.id.pauseOrResume);
-        pauseSwitcher.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                danmakuView.setPaused(!danmakuView.isPaused());
-            }
-        });
+//        Button closeSwitcher = (Button) findViewById(R.id.openOrClose);
+//        closeSwitcher.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                danmakuView.setOpen(!danmakuView.isOpen());
+//            }
+//        });
+//
+//        Button pauseSwitcher = (Button) findViewById(R.id.pauseOrResume);
+//        pauseSwitcher.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                danmakuView.setPaused(!danmakuView.isPaused());
+//            }
+//        });
 
         new Thread(new Runnable() {
             @Override

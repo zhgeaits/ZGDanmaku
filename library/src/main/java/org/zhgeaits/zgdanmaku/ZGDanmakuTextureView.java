@@ -19,8 +19,13 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
-import android.opengl.GLSurfaceView;
+import android.opengl.GLES20;
+import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.util.Log;
+
+import com.eaglesakura.view.GLTextureView;
+import com.eaglesakura.view.egl.SurfaceColorSpec;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,18 +35,16 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+
 /**
- * Created by zhgeatis on 2016/2/22 0022.
- * 弹幕view
- * 含有一个弹幕池，外面发送弹幕即往弹幕池添加一条弹幕。
- * 包含一条弹幕线程，不断从GL线程的临界区获取弹幕，然后去掉已经跑完的弹幕；
- * 不断从弹幕池获取弹幕，最后整合临界区的弹幕一起更新到临界区。
- * 如果临界区和弹幕池都没有弹幕了，则阻塞，直到新来一条弹幕
+ * Created by zhgeaits on 16/2/25.
  */
-public class ZGDanmakuView extends GLSurfaceView {
+public class ZGDanmakuTextureView extends GLTextureView {
 
     private Context mContext;
-    private ZGDanmakuRenderer mRenderer;//渲染器
+    private ZGDanmakuTextviewRenderer mRenderer;//渲染器
     private int mLines = 4;//默认4行
     private float mLineSpace;//行距
     private Canvas mCanvas;
@@ -51,13 +54,28 @@ public class ZGDanmakuView extends GLSurfaceView {
     private Map<Integer, ZGDanmaku> mLinesAvaliable;
     protected final AtomicBoolean mWaiting = new AtomicBoolean(false);
 
-    public ZGDanmakuView(Context context) {
+    private List<ZGDanmaku> mDanmakus;              //弹幕临界区
+    private String mVertexShader;                   //顶点着色器
+    private String mFragmentShader;                 //片元着色器
+    private int mViewWidth;                         //窗口宽度
+    private int mViewHeight;                        //窗口高度
+    private float mSpeed;                           //速度，单位px/s
+    private long mLastTime;                         //绘制上一帧的时间
+    private boolean isOpen = true;                  //是否打开弹幕
+    private boolean isPaused = false;               //是否暂停弹幕
+
+    public ZGDanmakuTextureView(Context context) {
         super(context);
         init(context);
     }
 
-    public ZGDanmakuView(Context context, AttributeSet attrs) {
+    public ZGDanmakuTextureView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        init(context);
+    }
+
+    public ZGDanmakuTextureView(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
         init(context);
     }
 
@@ -65,15 +83,19 @@ public class ZGDanmakuView extends GLSurfaceView {
         this.mContext = context;
         mCachedDanmaku = new LinkedList<>();
         mLinesAvaliable = new HashMap<>();
+        mDanmakus = new ArrayList<>();
 
-        setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-        setEGLContextClientVersion(2); //设置使用OPENGL ES2.0
+        setSurfaceSpec(SurfaceColorSpec.RGBA8, true, false);
+//        setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+        setVersion(GLESVersion.OpenGLES20);
 
-        mRenderer = new ZGDanmakuRenderer(context);
+        mRenderer = new ZGDanmakuTextviewRenderer();
         setRenderer(mRenderer);
-        getHolder().setFormat(PixelFormat.TRANSLUCENT);
-        setZOrderOnTop(true);
-        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);//设置渲染模式为主动渲染
+//        setAlpha(1);
+        setOpaque(false);
+//        getHolder().setFormat(PixelFormat.TRANSLUCENT);
+        //setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);//设置渲染模式为主动渲染
+//        setRenderingThreadType(RenderingThreadType.RequestThread);
 
         setSpeed(50);//默认50dp/s速度
         setLineSpace(8);//默认8dp行距
@@ -85,12 +107,6 @@ public class ZGDanmakuView extends GLSurfaceView {
         mPainter.setTextAlign(Paint.Align.LEFT);
         mPainter.setShadowLayer(2, 3, 3, 0x5a000000);
 
-        mRenderer.setListener(new ZGDanmakuRenderer.RenderListener() {
-            @Override
-            public void onInited() {
-                start();
-            }
-        });
     }
 
     @Override
@@ -105,9 +121,6 @@ public class ZGDanmakuView extends GLSurfaceView {
         isResumed = false;
     }
 
-    /**
-     * 启动弹幕线程
-     */
     private void start() {
         new Thread(new Runnable() {
             @Override
@@ -118,7 +131,7 @@ public class ZGDanmakuView extends GLSurfaceView {
                     }
 
                     //读取临界区的弹幕
-                    List<ZGDanmaku> rendererList = mRenderer.getDanmakus();
+                    List<ZGDanmaku> rendererList = getDanmakus();
                     List<ZGDanmaku> swapList = new ArrayList<>();
                     for (int i = 0; i < rendererList.size(); i++) {
                         if (!rendererList.get(i).isFinished()) {
@@ -136,13 +149,14 @@ public class ZGDanmakuView extends GLSurfaceView {
                             if (danmaku == null) {
                                 mCachedDanmaku.offer(item);
                             } else {
-                                mRenderer.updateDanmakus(danmaku);
+                                updateDanmakus(danmaku);
                                 swapList.add(danmaku);
                             }
                         }
                     }
 
                     //如果弹幕池和临界区都为空的时候就阻塞，不然弹幕池和临界区要不停刷新的
+                    Log.i("zhangge", "swapList.size()=" + swapList.size() + ",cacheSize=" + cacheSize);
                     if (swapList.size() == 0 && cacheSize == 0) {
                         try {
                             synchronized (mWaiting) {
@@ -156,7 +170,7 @@ public class ZGDanmakuView extends GLSurfaceView {
 
                     //替换临界区的弹幕
                     if (swapList.size() > 0) {
-                        mRenderer.setDanmakus(swapList);
+                        setDanmakus(swapList);
                     }
 
                     try {
@@ -210,39 +224,12 @@ public class ZGDanmakuView extends GLSurfaceView {
     }
 
     /**
-     * 设置弹幕是否打开
-     *
-     * @param isOpen
+     * 设置弹幕的shader和view宽高
+     * @param danmaku
      */
-    public void setOpen(boolean isOpen) {
-        mRenderer.setOpen(isOpen);
-    }
-
-    /**
-     * 弹幕是否打开
-     *
-     * @return
-     */
-    public boolean isOpen() {
-        return mRenderer.isOpen();
-    }
-
-    /**
-     * 设置弹幕暂停
-     *
-     * @param isPaused
-     */
-    public void setPaused(boolean isPaused) {
-        mRenderer.setPaused(isPaused);
-    }
-
-    /**
-     * 弹幕是否暂停
-     *
-     * @return
-     */
-    public boolean isPaused() {
-        return mRenderer.isPaused();
+    public void updateDanmakus(ZGDanmaku danmaku) {
+        danmaku.setShader(mVertexShader, mFragmentShader);
+        danmaku.setViewSize(mViewWidth, mViewHeight);
     }
 
     /**
@@ -252,7 +239,7 @@ public class ZGDanmakuView extends GLSurfaceView {
      */
     public void setSpeed(float speed) {
         float pxSpeed = DimensUtils.dip2pixel(mContext, speed);
-        this.mRenderer.setSpeed(pxSpeed);
+        this.mSpeed = pxSpeed;
     }
 
     /**
@@ -274,6 +261,18 @@ public class ZGDanmakuView extends GLSurfaceView {
         this.mLineSpace = pxLineSpace;
     }
 
+    public synchronized List<ZGDanmaku> getDanmakus() {
+        return mDanmakus;
+    }
+
+    /**
+     * 设置临界区弹幕
+     * @param danmakus
+     */
+    public synchronized void setDanmakus(List<ZGDanmaku> danmakus) {
+        this.mDanmakus = danmakus;
+    }
+
     /**
      * 发一条弹幕
      *
@@ -293,4 +292,77 @@ public class ZGDanmakuView extends GLSurfaceView {
         }
     }
 
+    private class ZGDanmakuTextviewRenderer implements Renderer {
+
+        @Override
+        public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+            GLES20.glEnable(GLES20.GL_BLEND);
+
+            //指定混色方案
+            GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+
+            //加载顶点着色器的脚本内容
+            mVertexShader = ShaderUtils.loadFromAssetsFile("vertex.sh", mContext.getResources());
+
+            //加载片元着色器的脚本内容
+            mFragmentShader = ShaderUtils.loadFromAssetsFile("frag.sh", mContext.getResources());
+        }
+
+        @Override
+        public void onSurfaceChanged(GL10 gl, int width, int height) {
+            mViewWidth = width;
+            mViewHeight = height;
+
+            //设置视窗大小及位置为整个view范围
+            GLES20.glViewport(0, 0, width, height);
+
+            //计算产生正交投影矩阵
+            //一般会设置前两个参数为-width / height，width / height，使得纹理不会变形，
+            //但是我这里不这样设置，为了控制位置，变形这个问题在顶点坐标那里处理即可
+            MatrixUtils.setProjectOrtho(-1, 1, -1, 1, 0, 1);
+
+            //产生摄像机9参数位置矩阵
+            MatrixUtils.setCamera(0, 0, 1, 0f, 0f, 0f, 0f, 1, 0);
+
+            start();
+
+            mLastTime = SystemClock.elapsedRealtime();
+        }
+
+        @Override
+        public void onDrawFrame(GL10 gl) {
+            long currentTime = SystemClock.elapsedRealtime();
+            float intervalTime = (float)(currentTime - mLastTime) / 1000.0f;
+            float detalOffset = mSpeed * intervalTime;
+
+            //设置屏幕背景色RGBA
+            GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+            //清除深度缓冲与颜色缓冲
+            GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
+
+            //绘制弹幕纹理
+            List<ZGDanmaku> danmakus = getDanmakus();
+            int size = danmakus.size();
+            for (int i = 0; i < size; i ++) {
+                ZGDanmaku danmaku = danmakus.get(i);
+
+                if(!isPaused) {
+                    float newOffset = detalOffset + danmaku.getCurrentOffsetX();
+                    danmaku.setOffsetX(newOffset);
+                }
+
+                if (isOpen) {
+                    danmaku.drawDanmaku();
+                }
+            }
+
+            mLastTime = currentTime;
+        }
+
+        @Override
+        public void onSurfaceDestroyed(GL10 gl) {
+
+        }
+    }
 }
