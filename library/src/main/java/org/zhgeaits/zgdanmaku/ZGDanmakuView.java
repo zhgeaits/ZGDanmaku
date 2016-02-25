@@ -21,6 +21,7 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -157,6 +158,12 @@ public class ZGDanmakuView extends GLSurfaceView {
                     //替换临界区的弹幕
                     if(swapList.size() > 0) {
                         mRenderer.setDanmakus(swapList);
+                    }
+
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        break;
                     }
                 }
             }
