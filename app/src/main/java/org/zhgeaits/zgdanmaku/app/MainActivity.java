@@ -18,12 +18,9 @@ package org.zhgeaits.zgdanmaku.app;
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 
-import org.zhgeaits.zgdanmaku.ZGDanmakuTextureView;
-import org.zhgeaits.zgdanmaku.ZGDanmakuView;
+import org.zhgeaits.zgdanmaku.view.ZGDanmakuTextureView;
 
 public class MainActivity extends Activity {
 

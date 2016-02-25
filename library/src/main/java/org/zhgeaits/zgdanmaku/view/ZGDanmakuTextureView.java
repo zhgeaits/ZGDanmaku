@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.zhgeaits.zgdanmaku;
+package org.zhgeaits.zgdanmaku.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.PixelFormat;
 import android.opengl.GLES20;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -26,6 +25,12 @@ import android.util.Log;
 
 import com.eaglesakura.view.GLTextureView;
 import com.eaglesakura.view.egl.SurfaceColorSpec;
+
+import org.zhgeaits.zgdanmaku.model.ZGDanmaku;
+import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
+import org.zhgeaits.zgdanmaku.utils.DimensUtils;
+import org.zhgeaits.zgdanmaku.utils.MatrixUtils;
+import org.zhgeaits.zgdanmaku.utils.ShaderUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;

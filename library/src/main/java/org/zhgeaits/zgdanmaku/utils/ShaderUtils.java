@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.zhgeaits.zgdanmaku;
+package org.zhgeaits.zgdanmaku.utils;
 
 import android.content.res.Resources;
 import android.opengl.GLES20;

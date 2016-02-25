@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.zhgeaits.zgdanmaku;
+package org.zhgeaits.zgdanmaku.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -21,6 +21,10 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+
+import org.zhgeaits.zgdanmaku.model.ZGDanmaku;
+import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
+import org.zhgeaits.zgdanmaku.utils.DimensUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;

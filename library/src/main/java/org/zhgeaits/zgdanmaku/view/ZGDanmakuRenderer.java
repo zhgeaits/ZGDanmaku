@@ -13,21 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.zhgeaits.zgdanmaku;
+package org.zhgeaits.zgdanmaku.view;
 
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.SystemClock;
-import android.util.Log;
+
+import org.zhgeaits.zgdanmaku.model.ZGDanmaku;
+import org.zhgeaits.zgdanmaku.utils.MatrixUtils;
+import org.zhgeaits.zgdanmaku.utils.ShaderUtils;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.LinkedBlockingDeque;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;

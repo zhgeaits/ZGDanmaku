@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.zhgeaits.zgdanmaku;
+package org.zhgeaits.zgdanmaku.model;
 
 import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
+
+import org.zhgeaits.zgdanmaku.utils.MatrixUtils;
+import org.zhgeaits.zgdanmaku.utils.TexturePool;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
