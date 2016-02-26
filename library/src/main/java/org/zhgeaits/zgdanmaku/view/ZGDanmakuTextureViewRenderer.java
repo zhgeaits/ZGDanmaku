@@ -16,8 +16,9 @@
 package org.zhgeaits.zgdanmaku.view;
 
 import android.opengl.GLES20;
-import android.opengl.GLSurfaceView;
 import android.os.SystemClock;
+
+import com.eaglesakura.view.GLTextureView;
 
 import org.zhgeaits.zgdanmaku.model.ZGDanmaku;
 import org.zhgeaits.zgdanmaku.utils.MatrixUtils;
@@ -28,30 +29,24 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * Created by zhgeatis on 2016/2/22 0022.
- * 弹幕渲染器
- * GL线程每帧都会回调onDrawFrame，初始化纹理，绑定纹理都必须在GL线程去做，不然画不出来东西
- * 尽量不在onDrawFrame锁住临界区，这样GL线程和外面的线程互斥会有卡顿现象。
- * 每次GL线程都完成渲染临界区的所有弹幕，走出屏幕的弹幕交给外面的线程处理。
+ * Created by zhgeaits on 16/2/26.
  */
-public class ZGDanmakuRenderer extends ZGBaseDanmakuRenderer implements GLSurfaceView.Renderer {
+public class ZGDanmakuTextureViewRenderer extends ZGBaseDanmakuRenderer implements GLTextureView.Renderer {
 
     @Override
-    public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
+    public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
         //开启混色功能，这样是为了让png图片的透明能显示
         GLES20.glEnable(GLES20.GL_BLEND);
 
         //指定混色方案
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-
     }
 
     @Override
-    public void onSurfaceChanged(GL10 gl10, int width, int height) {
-
-        this.mViewWidth = width;
-        this.mViewHeight = height;
+    public void onSurfaceChanged(GL10 gl, int width, int height) {
+        mViewWidth = width;
+        mViewHeight = height;
 
         //设置视窗大小及位置为整个view范围
         GLES20.glViewport(0, 0, width, height);
@@ -73,8 +68,7 @@ public class ZGDanmakuRenderer extends ZGBaseDanmakuRenderer implements GLSurfac
     }
 
     @Override
-    public void onDrawFrame(GL10 gl10) {
-
+    public void onDrawFrame(GL10 gl) {
         long currentTime = SystemClock.elapsedRealtime();
         float intervalTime = (float)(currentTime - mLastTime) / 1000.0f;
         float detalOffset = mSpeed * intervalTime;
@@ -104,4 +98,8 @@ public class ZGDanmakuRenderer extends ZGBaseDanmakuRenderer implements GLSurfac
         mLastTime = currentTime;
     }
 
+    @Override
+    public void onSurfaceDestroyed(GL10 gl) {
+
+    }
 }

@@ -20,6 +20,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+import org.zhgeaits.zgdanmaku.utils.DimensUtils;
+
 /**
  * Created by zhgeaits on 16/2/24.
  * 弹幕包装类
@@ -34,10 +36,24 @@ public class ZGDanmakuItem {
     private Paint mPainter;
     private Context mContext;
 
-    public ZGDanmakuItem(Canvas canvas, Paint paint, String text) {
+    public ZGDanmakuItem(String text, Context context) {
+        this.mText = text;
+        this.mContext = context;
+        initDefaultPainters();
+    }
+
+    private void initDefaultPainters() {
+        mCanvas = new Canvas();
+        mPainter = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mPainter.setTextSize(DimensUtils.dip2pixel(mContext, 18));
+        mPainter.setColor(0xffffffff);
+        mPainter.setTextAlign(Paint.Align.LEFT);
+        mPainter.setShadowLayer(2, 3, 3, 0x5a000000);
+    }
+
+    public void setPainters(Canvas canvas, Paint paint) {
         this.mCanvas = canvas;
         this.mPainter = paint;
-        this.mText = text;
     }
 
     public Bitmap getDanmakuBitmap() {

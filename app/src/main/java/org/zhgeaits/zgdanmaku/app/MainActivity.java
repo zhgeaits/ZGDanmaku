@@ -18,9 +18,12 @@ package org.zhgeaits.zgdanmaku.app;
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 
 import org.zhgeaits.zgdanmaku.view.ZGDanmakuTextureView;
+import org.zhgeaits.zgdanmaku.view.ZGDanmakuView;
 
 public class MainActivity extends Activity {
 
@@ -41,33 +44,42 @@ public class MainActivity extends Activity {
         danmakuView = (ZGDanmakuTextureView) findViewById(R.id.danmaku);
         danmakuView.setSpeed(150);
         danmakuView.setLines(10);
-        danmakuView.setLineSpace(2);
+        danmakuView.setLeading(2);
+        danmakuView.start();
 
-//        Button closeSwitcher = (Button) findViewById(R.id.openOrClose);
-//        closeSwitcher.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                danmakuView.setOpen(!danmakuView.isOpen());
-//            }
-//        });
-//
-//        Button pauseSwitcher = (Button) findViewById(R.id.pauseOrResume);
-//        pauseSwitcher.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                danmakuView.setPaused(!danmakuView.isPaused());
-//            }
-//        });
+        Button closeSwitcher = (Button) findViewById(R.id.openOrClose);
+        closeSwitcher.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(danmakuView.isHide()) {
+                    danmakuView.show();
+                } else {
+                    danmakuView.hide();
+                }
+            }
+        });
+
+        Button pauseSwitcher = (Button) findViewById(R.id.pauseOrResume);
+        pauseSwitcher.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(danmakuView.isPause()) {
+                    danmakuView.resume();
+                } else {
+                    danmakuView.pause();
+                }
+            }
+        });
 
         new Thread(new Runnable() {
             @Override
             public void run() {
                 while (true) {
-                    for (int i = 0; i < 10; i ++) {
-                        danmakuView.shotDanmamku("hello world!");
+                    for (int i = 0; i < 100; i ++) {
+                        danmakuView.shotTextDanmamku("hello world!");
                     }
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(10000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
