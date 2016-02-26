@@ -16,22 +16,27 @@
 package org.zhgeaits.zgdanmaku.app;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 
+import org.zhgeaits.zgdanmaku.utils.TexturePool;
+import org.zhgeaits.zgdanmaku.view.IZGDanmakuView;
 import org.zhgeaits.zgdanmaku.view.ZGDanmakuTextureView;
 import org.zhgeaits.zgdanmaku.view.ZGDanmakuView;
 
 public class MainActivity extends Activity {
 
-    private ZGDanmakuTextureView danmakuView;
+    private IZGDanmakuView danmakuView;
+    public static Context gContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        gContext = this;
 
         //设置为全屏
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -41,11 +46,11 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.activity_main);
 
-        danmakuView = (ZGDanmakuTextureView) findViewById(R.id.danmaku);
+        TexturePool.uninit();
+        danmakuView = (IZGDanmakuView) findViewById(R.id.danmaku);
         danmakuView.setSpeed(150);
         danmakuView.setLines(10);
         danmakuView.setLeading(2);
-        danmakuView.start();
 
         Button closeSwitcher = (Button) findViewById(R.id.openOrClose);
         closeSwitcher.setOnClickListener(new View.OnClickListener() {
@@ -79,7 +84,7 @@ public class MainActivity extends Activity {
                         danmakuView.shotTextDanmamku("hello world!");
                     }
                     try {
-                        Thread.sleep(10000);
+                        Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -91,12 +96,13 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        danmakuView.onResume();
+        danmakuView.start();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        danmakuView.onPause();
+        danmakuView.stop();
     }
+
 }

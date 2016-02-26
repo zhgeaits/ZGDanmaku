@@ -36,6 +36,13 @@ public class TexturePool {
     private static int maPositionHandle = -1; //顶点位置属性引用id
     private static int maTexCoorHandle = -1; //顶点纹理坐标属性引用id
 
+    public static void uninit() {
+        mProgram = -1;
+        muMVPMatrixHandle = -1;
+        maPositionHandle = -1;
+        maTexCoorHandle = -1;
+    }
+
     /**
      * 从纹理池获取一个纹理id
      * @return 如果池没有就生成一个

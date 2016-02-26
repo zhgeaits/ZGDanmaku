@@ -16,7 +16,11 @@ android‘s danmaku implemented by opengles 2.0
 
 3.帧率计算  
 
-4.bug fix  
+4.根据帧率变化速度，处理丢帧情况
+
+5.bug fix  
+
+6.创建bitmap优化
 
 ......
 

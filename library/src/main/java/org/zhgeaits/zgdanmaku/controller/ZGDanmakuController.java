@@ -209,7 +209,6 @@ public class ZGDanmakuController implements IZGDanmakuController {
                     //如果弹幕池和临界区都为空的时候就阻塞，不然弹幕池和临界区要不停刷新的
                     if (nextRendererList.size() == 0) {
                         try {
-                            Log.i("zhangge", "wait");
                             mDanmakuPool.waitIfNeed();
                         } catch (InterruptedException e) {
                             break;

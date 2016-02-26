@@ -18,6 +18,7 @@ package org.zhgeaits.zgdanmaku.view;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.SystemClock;
+import android.util.Log;
 
 import org.zhgeaits.zgdanmaku.model.ZGDanmaku;
 import org.zhgeaits.zgdanmaku.utils.MatrixUtils;
@@ -44,7 +45,6 @@ public class ZGDanmakuRenderer extends ZGBaseDanmakuRenderer implements GLSurfac
 
         //指定混色方案
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-
     }
 
     @Override
