@@ -18,6 +18,8 @@ package org.zhgeaits.zgdanmaku.view;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+import com.eaglesakura.view.GLTextureView;
+import com.eaglesakura.view.egl.SurfaceColorSpec;
 
 import org.zhgeaits.zgdanmaku.controller.IZGDanmakuController;
 import org.zhgeaits.zgdanmaku.controller.ZGDanmakuController;
@@ -26,40 +28,45 @@ import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
 /**
  * Created by zhgeaits on 16/2/25.
  * 基于GLTextureView实现的弹幕，GLTextureView来自github开源的实现
- * https://github.com/romannurik/muzei/blob/master/main/src/main/java/com/google/android/apps/muzei/render/GLTextureView.java
- * 这个效率比另外一个TextureView实现的要高，毕竟是google自己写的
+ * https://github.com/eaglesakura/gltextureview.git
+ * 相对比另外两个效率都低一些
  */
-public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuView {
+public class ZGDanmakuTextureView2 extends GLTextureView implements IZGDanmakuView {
 
     private Context mContext;
     private IZGDanmakuController mDanmakuController;
 
-    public ZGDanmakuTextureView(Context context) {
+    public ZGDanmakuTextureView2(Context context) {
         super(context);
         init(context);
     }
 
-    public ZGDanmakuTextureView(Context context, AttributeSet attrs) {
+    public ZGDanmakuTextureView2(Context context, AttributeSet attrs) {
         super(context, attrs);
+        init(context);
+    }
+
+    public ZGDanmakuTextureView2(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
         init(context);
     }
 
     private void init(Context context) {
         this.mContext = context;
 
-        setEGLContextClientVersion(2);
+        //同理setEGLConfigChooser(8, 8, 8, 8, 16, 0)
+        //同理setEGLConfigChooser(8, 8, 8, 8, 16, 0)
+        setSurfaceSpec(SurfaceColorSpec.RGBA8, true, false);
+        setVersion(GLESVersion.OpenGLES20);
 
-        //设置EGL的像素配置
-        setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-
-        IZGDanmakuRenderer renderer = new ZGDanmakuRenderer();
-        setRenderer((GLSurfaceView.Renderer) renderer);
+        IZGDanmakuRenderer renderer = new ZGDanmakuTextureViewRenderer();
+        setRenderer((GLTextureView.Renderer) renderer);
 
         //设置textureview透明
         setOpaque(false);
 
-        setRenderMode(GLTextureView.RENDERMODE_CONTINUOUSLY);
-        //setRenderingThreadType(RenderingThreadType.BackgroundThread);
+        //同理setRenderMode(GLTextureView.RENDERMODE_CONTINUOUSLY);
+        setRenderingThreadType(RenderingThreadType.BackgroundThread);
 
         mDanmakuController = new ZGDanmakuController(context, renderer);
     }

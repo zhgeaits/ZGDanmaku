@@ -18,7 +18,6 @@ package org.zhgeaits.zgdanmaku.view;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.SystemClock;
-import android.util.Log;
 
 import org.zhgeaits.zgdanmaku.model.ZGDanmaku;
 import org.zhgeaits.zgdanmaku.utils.MatrixUtils;

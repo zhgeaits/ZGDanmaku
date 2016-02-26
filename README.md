@@ -1,6 +1,6 @@
 # ZGDanmaku
 
-android‘s danmaku implemented by opengles 2.0
+android danmaku/danmu/tanmu implemented by opengl es 2.0
 
 现在android上的弹幕以后有很多开源的实现了，基本上能够满足大众的需求，但是由于我们业务需求，那些弹幕的性能达不到我们的要求了，于是我们想要改用新的渲染方式实现，那就是opengles。
 

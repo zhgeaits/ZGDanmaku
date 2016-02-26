@@ -21,6 +21,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 
 import org.zhgeaits.zgdanmaku.utils.DimensUtils;
+import org.zhgeaits.zgdanmaku.utils.NativeBitmapFactory;
 
 /**
  * Created by zhgeaits on 16/2/24.
@@ -58,7 +59,7 @@ public class ZGDanmakuItem {
 
     public Bitmap getDanmakuBitmap() {
         if(mBitmap == null) {
-            mBitmap = Bitmap.createBitmap(300, 100, Bitmap.Config.ARGB_8888);
+            mBitmap = NativeBitmapFactory.createBitmap(300, 100, Bitmap.Config.ARGB_8888);
             mCanvas.setBitmap(mBitmap);
             mCanvas.drawText(mText, 0, 90, mPainter);
         }

@@ -17,7 +17,6 @@ package org.zhgeaits.zgdanmaku.view;
 
 import android.opengl.GLES20;
 import android.os.SystemClock;
-import android.util.Log;
 
 import com.eaglesakura.view.GLTextureView;
 
@@ -102,6 +101,6 @@ public class ZGDanmakuTextureViewRenderer extends ZGBaseDanmakuRenderer implemen
 
     @Override
     public void onSurfaceDestroyed(GL10 gl) {
-
     }
+
 }
