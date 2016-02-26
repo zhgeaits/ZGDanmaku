@@ -53,8 +53,16 @@ public interface IZGDanmakuController {
      */
     void resume();
 
+    /**
+     * 弹幕是否暂停
+     * @return
+     */
     boolean isPause();
 
+    /**
+     * 弹幕是否隐藏
+     * @return
+     */
     boolean isHide();
 
     /**

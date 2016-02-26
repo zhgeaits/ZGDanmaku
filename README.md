@@ -14,13 +14,15 @@ android danmaku/danmu/tanmu implemented by opengl es 2.0
 
 2.缓存策略的修改  
 
-3.帧率计算  
+3.帧率计算，根据帧率变化速度，处理丢帧情况
 
-4.根据帧率变化速度，处理丢帧情况
+4.修改时间同步策略
 
-5.bug fix  
+5.线程互斥等处理
 
-6.创建bitmap优化
+6.根据文本长度创建bitmap
+
+7.bug fix  
 
 ......
 
@@ -28,8 +30,12 @@ android danmaku/danmu/tanmu implemented by opengl es 2.0
 
 ### Dependencies
 
-由于glsurfaceview不能介于view的中间层，要么底层，要么顶层，是做不到处于中间层，然后透明的，所以需要使用TextureView。
+1.由于glsurfaceview不能介于view的中间层，要么底层，要么顶层，是做不到处于中间层，然后透明的，所以需要使用TextureView。
 
 
+GLTextureView：  
+https://github.com/eaglesakura/gltextureview.git  
+https://github.com/romannurik/muzei/blob/master/main/src/main/java/com/google/android/apps/muzei/render/GLTextureView.java
 
-GLTextureView：https://github.com/eaglesakura/gltextureview.git
+2.使用了DanmakuFlameMaster的创建bitmap方法：  
+https://github.com/Bilibili/DanmakuFlameMaster
