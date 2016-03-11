@@ -59,9 +59,13 @@ public class ZGDanmakuItem {
 
     public Bitmap getDanmakuBitmap() {
         if(mBitmap == null) {
-            mBitmap = NativeBitmapFactory.createBitmap(300, 100, Bitmap.Config.ARGB_8888);
+            int baseline = (int) (-mPainter.ascent() + 0.5f);
+            int height = (int) (mPainter.descent() + baseline + 0.5f);
+            int width = (int) (mPainter.measureText(mText) + 0.5f);
+
+            mBitmap = NativeBitmapFactory.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             mCanvas.setBitmap(mBitmap);
-            mCanvas.drawText(mText, 0, 90, mPainter);
+            mCanvas.drawText(mText, 0, baseline, mPainter);
         }
         return mBitmap;
     }
