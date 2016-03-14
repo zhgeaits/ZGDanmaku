@@ -48,8 +48,8 @@ public class MainActivity extends Activity {
 
         TexturePool.uninit();
         danmakuView = (IZGDanmakuView) findViewById(R.id.danmaku);
-        danmakuView.setSpeed(150);
-        danmakuView.setLines(10);
+        danmakuView.setSpeed(100);
+        danmakuView.setLines(15);
         danmakuView.setLeading(2);
 
         Button closeSwitcher = (Button) findViewById(R.id.openOrClose);
@@ -76,33 +76,23 @@ public class MainActivity extends Activity {
             }
         });
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    for (int i = 0; i < 100; i ++) {
-                        danmakuView.shotTextDanmamku("hello world!");
-                    }
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
+        for (int i = 0; i < 1000; i ++) {
+            danmakuView.shotTextDanmamku("hello world!");
+        }
+
+        danmakuView.start();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        danmakuView.start();
+        danmakuView.resume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        danmakuView.stop();
+        danmakuView.pause();
     }
 
 }

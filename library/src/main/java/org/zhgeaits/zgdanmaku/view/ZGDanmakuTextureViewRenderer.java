@@ -17,6 +17,7 @@ package org.zhgeaits.zgdanmaku.view;
 
 import android.opengl.GLES20;
 import android.os.SystemClock;
+import android.util.Log;
 
 import com.eaglesakura.view.GLTextureView;
 
@@ -72,7 +73,7 @@ public class ZGDanmakuTextureViewRenderer extends ZGBaseDanmakuRenderer implemen
 
         long currentTime = SystemClock.elapsedRealtime();
         float intervalTime = (float)(currentTime - mLastTime) / 1000.0f;
-        float detalOffset = mSpeed * intervalTime;
+        float detalOffset = mSpeed * 100;
 
         //设置屏幕背景色RGBA
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -83,6 +84,9 @@ public class ZGDanmakuTextureViewRenderer extends ZGBaseDanmakuRenderer implemen
         //绘制弹幕纹理
         List<ZGDanmaku> danmakus = mDanmakus;
         int size = danmakus.size();
+
+        Log.i("zhangge", "onDrawFrame size=" + size + ",isPaused=" + isPaused + ",isHide=" + isHide);
+
         for (int i = 0; i < size; i ++) {
             ZGDanmaku danmaku = danmakus.get(i);
 

@@ -83,6 +83,9 @@ public class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
     @Override
     public void setPause(boolean pause) {
         isPaused = pause;
+        if (!isPaused) {
+            mLastTime = 0;
+        }
     }
 
     @Override

@@ -10,7 +10,7 @@
         android:text="openOrClose"
         android:layout_height="wrap_content" />
 
-    <org.zhgeaits.zgdanmaku.view.ZGDanmakuView
+    <org.zhgeaits.zgdanmaku.view.ZGDanmakuTextureView
         android:id="@+id/danmaku"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

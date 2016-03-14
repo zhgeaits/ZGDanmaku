@@ -18,6 +18,7 @@ package org.zhgeaits.zgdanmaku.view;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.SystemClock;
+import android.util.Log;
 
 import org.zhgeaits.zgdanmaku.model.ZGDanmaku;
 import org.zhgeaits.zgdanmaku.utils.MatrixUtils;
@@ -75,6 +76,11 @@ public class ZGDanmakuRenderer extends ZGBaseDanmakuRenderer implements GLSurfac
     public void onDrawFrame(GL10 gl10) {
 
         long currentTime = SystemClock.elapsedRealtime();
+        if(mLastTime == 0) {
+            mLastTime = currentTime;
+            return;
+        }
+
         float intervalTime = (float)(currentTime - mLastTime) / 1000.0f;
         float detalOffset = mSpeed * intervalTime;
 
@@ -87,6 +93,9 @@ public class ZGDanmakuRenderer extends ZGBaseDanmakuRenderer implements GLSurfac
         //绘制弹幕纹理
         List<ZGDanmaku> danmakus = mDanmakus;
         int size = danmakus.size();
+
+        Log.i("zhangge", "onDrawFrame size=" + size + ",isPaused=" + isPaused + ",isHide=" + isHide);
+
         for (int i = 0; i < size; i ++) {
             ZGDanmaku danmaku = danmakus.get(i);
 
