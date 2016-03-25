@@ -99,10 +99,10 @@ public class ZGDanmakuRenderer extends ZGBaseDanmakuRenderer implements GLSurfac
         for (int i = 0; i < size; i ++) {
             ZGDanmaku danmaku = danmakus.get(i);
 
-            if(!isPaused) {
-                float newOffset = detalOffset + danmaku.getCurrentOffsetX();
-                danmaku.setOffsetX(newOffset);
-            }
+//            if(!isPaused) {
+//            }
+            float newOffset = detalOffset + danmaku.getCurrentOffsetX();
+            danmaku.setOffsetX(newOffset);
 
             if (!isHide) {
                 danmaku.drawDanmaku();

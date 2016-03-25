@@ -97,11 +97,13 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
     @Override
     public void pause() {
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        onPause();
         mDanmakuController.pause();
     }
 
     @Override
     public void resume() {
+        onResume();
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
         requestRender();
         mDanmakuController.resume();

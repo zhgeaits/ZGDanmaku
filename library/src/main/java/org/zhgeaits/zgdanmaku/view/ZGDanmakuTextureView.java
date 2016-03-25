@@ -91,12 +91,14 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
 
     @Override
     public void pause() {
+//        onPause();
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         mDanmakuController.pause();
     }
 
     @Override
     public void resume() {
+//        onResume();
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
         requestRender();
         mDanmakuController.resume();
