@@ -66,9 +66,9 @@ public class MatrixUtils {
      * @param cx  摄像机位置x
      * @param cy  摄像机位置y
      * @param cz  摄像机位置z
-     * @param tx  摄像机目标点x
-     * @param ty  摄像机目标点y
-     * @param tz  摄像机目标点z
+     * @param tx  观察目标点x
+     * @param ty  观察目标点y
+     * @param tz  观察目标点z
      * @param upx 摄像机UP向量X分量
      * @param upy 摄像机UP向量Y分量
      * @param upz 摄像机UP向量Z分量
@@ -80,10 +80,10 @@ public class MatrixUtils {
     /**
      * 设置透视投影参数
      *
-     * @param left   near面的left
-     * @param right  near面的right
-     * @param bottom near面的bottom
-     * @param top    near面的top
+     * @param left   left面的x坐标
+     * @param right  right面的x坐标
+     * @param bottom bottom的y坐标
+     * @param top    top面的y坐标
      * @param near   near面距离
      * @param far    far面距离
      */
@@ -94,10 +94,10 @@ public class MatrixUtils {
     /**
      * 设置正交投影参数
      *
-     * @param left   near面的left
-     * @param right  near面的right
-     * @param bottom near面的bottom
-     * @param top    near面的top
+     * @param left   left面的x坐标
+     * @param right  right面的x坐标
+     * @param bottom bottom的y坐标
+     * @param top    top面的y坐标
      * @param near   near面距离
      * @param far    far面距离
      */
