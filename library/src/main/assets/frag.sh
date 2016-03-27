@@ -1,5 +1,5 @@
 precision mediump float;
-varying vec2 vTextureCoord; //接收从顶点着色器过来的参数
+varying vec2 vTextureCoord; //接收的纹理坐标
 uniform sampler2D sTexture;//纹理内容数据
 void main()                         
 {           

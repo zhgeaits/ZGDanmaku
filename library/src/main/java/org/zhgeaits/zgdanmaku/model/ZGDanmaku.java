@@ -64,7 +64,7 @@ public class ZGDanmaku {
             return;
         }
 
-        //初始化顶点坐标与纹理着色数据
+        //初始化顶点坐标与纹理坐标
         initVertexData();
 
         //初始化着色器
@@ -142,17 +142,17 @@ public class ZGDanmaku {
     }
 
     /**
-     * 初始化顶点坐标与着色数据
+     * 初始化顶点坐标与纹理坐标
      */
     public void initVertexData() {
         //顶点坐标数据
-        //顶点坐标系：窗口取值范围是-1至1，所以，左上角坐标是(-1,1),终点坐标是(0,0)，右下角坐标是(1, -1)
+        //顶点坐标系：窗口取值范围是-1至1，所以，左上角坐标是(-1,1),中点坐标是(0,0)，右下角坐标是(1, -1)
         //其实就是把坐标给归一化了，下面是计算弹幕的归一化宽和高
         //实际上顶点坐标是正负1的，所以弹幕在坐标系中要乘以2，放大两倍
         float danmakuHeight = (float) mBitmap.getHeight() / mViewHeight * 2.0f;
         float danmakuWidth = (float) mBitmap.getWidth() / mViewWidth * 2.0f;
 
-        //弹幕四个角的顶点坐标，我默认把它绘制在屏幕的左上角了，这样方便处理
+        //弹幕四个角的顶点坐标，我默认把它绘制在屏幕的左上角了，这样方便理解偏移计算
         //为什么不是顺时针或者逆时针，实际上opengl只能绘制三角形，所以，
         //这里其实是绘制了两个三角形的，前三个点和后三个点分别是三角形
         float vertices[] = new float[]
@@ -171,9 +171,9 @@ public class ZGDanmaku {
         mVertexBuffer.put(vertices);
         mVertexBuffer.position(0);
 
-        //把纹理绘制到矩形中去，就需要制定读取纹理的坐标
+        //把纹理绘制到矩形中去，就需要指定读取纹理的坐标
         //纹理坐标系：范围是0-1，左上角坐标是(0,0),右下角坐标是(1,1)
-        float texCoor[] = new float[]//顶点颜色值数组，每个顶点4个色彩值RGBA
+        float texCoor[] = new float[]
                 {
                         0, 0,   //左上角
                         1, 0,   //右上角
@@ -204,14 +204,14 @@ public class ZGDanmaku {
     private void initTexture() {
         mTextureId = TexturePool.pollTextureId();
 
-        //绑定纹理，并制定纹理的采样方式
+        //绑定纹理，并指定纹理的采样方式
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureId);
         GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
         GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
         GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
         GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
 
-        //把bitmap加载到纹理
+        //把bitmap映射到纹理
         //纹理类型在OpenGL ES中必须为GL10.GL_TEXTURE_2D
         //第二个参数是纹理的层次，0表示基本图像层，可以理解为直接贴图
         //最后一个参数是纹理边框尺寸
@@ -266,7 +266,7 @@ public class ZGDanmaku {
         //坐标是xy二维的，所以size是2
         GLES20.glVertexAttribPointer(maTexCoorHandle, 2, GLES20.GL_FLOAT, false, 2 * 4, mTexCoorBuffer);
 
-        //允许顶点位置数据数组
+        //允许使用坐标数据数组
         GLES20.glEnableVertexAttribArray(maPositionHandle);
         GLES20.glEnableVertexAttribArray(maTexCoorHandle);
 
