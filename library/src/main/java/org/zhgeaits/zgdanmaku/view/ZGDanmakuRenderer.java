@@ -94,7 +94,7 @@ public class ZGDanmakuRenderer extends ZGBaseDanmakuRenderer implements GLSurfac
         List<ZGDanmaku> danmakus = mDanmakus;
         int size = danmakus.size();
 
-        Log.i("zhangge", "onDrawFrame size=" + size + ",isPaused=" + isPaused + ",isHide=" + isHide);
+        //Log.i("zhangge", "onDrawFrame size=" + size + ",isPaused=" + isPaused + ",isHide=" + isHide);
 
         for (int i = 0; i < size; i ++) {
             ZGDanmaku danmaku = danmakus.get(i);

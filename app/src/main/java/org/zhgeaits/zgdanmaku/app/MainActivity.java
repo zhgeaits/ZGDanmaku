@@ -42,14 +42,14 @@ public class MainActivity extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         //设置为竖屏模式
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         setContentView(R.layout.activity_main);
 
         TexturePool.uninit();
         danmakuView = (IZGDanmakuView) findViewById(R.id.danmaku);
         danmakuView.setSpeed(100);
-        danmakuView.setLines(15);
+        danmakuView.setLines(24);
         danmakuView.setLeading(2);
 
         Button closeSwitcher = (Button) findViewById(R.id.openOrClose);
