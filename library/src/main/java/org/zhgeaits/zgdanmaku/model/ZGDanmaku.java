@@ -33,7 +33,10 @@ import java.nio.FloatBuffer;
  */
 public class ZGDanmaku {
 
-    private int mTextureId;//绑定的纹理id
+    //这里默认设置纹理id为-1值，在OpenGLES底下，负值是无效的，如果不设置负值，那么int默认是0，是有效的纹理id
+    //当一个弹幕还没有绑定到纹理的时候，业务端触发所有弹幕回收，就会触发回收纹理0,这样在纹理池就有重复的纹理了,
+    //会导致同一个bitmap映射到不通的纹理,但是相同的纹理会在不同的矩阵参数下进行绘制,出现混乱现象了.
+    private int mTextureId = -1;//绑定的纹理id
     private int mProgram;//自定义渲染管线程序id
     private int muMVPMatrixHandle;//总变换矩阵引用id
     private int maPositionHandle; //顶点位置属性引用id
@@ -59,9 +62,9 @@ public class ZGDanmaku {
         this.mDanmakuWidth = mBitmap.getWidth();
     }
 
-    public void init() {
+    public boolean init() {
         if (mBitmap == null) {
-            return;
+            return false;
         }
 
         //初始化顶点坐标与纹理坐标
@@ -71,9 +74,12 @@ public class ZGDanmaku {
         initShader();
 
         //生成纹理，必须在opengl的线程绑定纹理才有用
-        initTexture();
+        if(!initTexture()) {
+            return false;
+        }
 
         isInited = true;
+        return isInited;
     }
 
     /**
@@ -201,8 +207,12 @@ public class ZGDanmaku {
     /**
      * 初始化纹理
      */
-    private void initTexture() {
+    private boolean initTexture() {
         mTextureId = TexturePool.pollTextureId();
+
+        if(mTextureId < 0) {
+            return false;
+        }
 
         //绑定纹理，并指定纹理的采样方式
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureId);
@@ -226,6 +236,8 @@ public class ZGDanmaku {
 //                0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, byteBuffer);
 
         mBitmap.recycle();
+
+        return true;
     }
 
     public void uninit() {
@@ -237,8 +249,8 @@ public class ZGDanmaku {
      */
     public void drawDanmaku() {
 
-        if(!isInited) {
-            init();
+        if(!isInited && !init()) {
+            return;
         }
 
         //使用shader程序

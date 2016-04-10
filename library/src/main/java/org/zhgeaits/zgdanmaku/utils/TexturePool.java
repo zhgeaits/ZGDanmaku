@@ -17,8 +17,10 @@ package org.zhgeaits.zgdanmaku.utils;
 
 import android.opengl.GLES20;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Set;
 
 /**
  * Created by zhgeaits on 16/2/24.
@@ -29,7 +31,7 @@ import java.util.Queue;
  */
 public class TexturePool {
 
-    private static Queue<Integer> mPool = new LinkedList<>();
+    private static Set<Integer> mPool = new HashSet<>();
 
     private static int mProgram = -1;//自定义渲染管线程序id
     private static int muMVPMatrixHandle = -1;//总变换矩阵引用id
@@ -49,14 +51,21 @@ public class TexturePool {
      */
     public synchronized static int pollTextureId() {
         if (mPool.size() > 0) {
-            return mPool.poll();
+            int texureId = mPool.iterator().next();
+            mPool.remove(texureId);
+            return texureId;
         }
-
         //生成纹理ID
-        int[] textures = new int[1];
-
+        //一次生成4个id, 这里怀疑，如果生成了一个id，但是还没使用，即没有绑定，那么下次还会生成这个id
+        int[] textures = new int[4];
         //第一个参数是生成纹理的数量
-        GLES20.glGenTextures(1, textures, 0);
+        GLES20.glGenTextures(4, textures, 0);
+
+        for (int i = 1; i < 4; i ++) {
+            if(textures[i] > -1) {
+                mPool.add(textures[i]);
+            }
+        }
 
         return textures[0];
     }
@@ -66,7 +75,9 @@ public class TexturePool {
      * @param textureId
      */
     public synchronized static void offerTextureId(int textureId) {
-        mPool.offer(textureId);
+        if(textureId > -1) {
+            mPool.add(textureId);
+        }
     }
 
     /**
