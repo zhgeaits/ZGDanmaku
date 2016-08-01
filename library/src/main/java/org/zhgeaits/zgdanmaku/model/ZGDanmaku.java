@@ -18,6 +18,7 @@ package org.zhgeaits.zgdanmaku.model;
 import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
+import android.util.Log;
 
 import org.zhgeaits.zgdanmaku.utils.MatrixUtils;
 import org.zhgeaits.zgdanmaku.utils.TexturePool;
@@ -225,15 +226,16 @@ public class ZGDanmaku {
         //纹理类型在OpenGL ES中必须为GL10.GL_TEXTURE_2D
         //第二个参数是纹理的层次，0表示基本图像层，可以理解为直接贴图
         //最后一个参数是纹理边框尺寸
-        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, mBitmap, 0);
+//        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, mBitmap, 0);
 
-//        ByteBuffer byteBuffer = ByteBuffer.allocate(mBitmap.getByteCount());
-//        byteBuffer.order(ByteOrder.nativeOrder());
-//        mBitmap.copyPixelsFromBuffer(byteBuffer);
-//        byteBuffer.position(0);
+        //使用glTexImage2D的原因是它比texImage2D效率更高一些,据说texImage2D会把bitmap重新创建一次,我没有去验证
+        ByteBuffer byteBuffer = ByteBuffer.allocate(mBitmap.getByteCount());
+        byteBuffer.order(ByteOrder.nativeOrder());
+        mBitmap.copyPixelsToBuffer(byteBuffer);
+        byteBuffer.position(0);
 
-//        GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, mBitmap.getWidth(), mBitmap.getHeight(),
-//                0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, byteBuffer);
+        GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, mBitmap.getWidth(), mBitmap.getHeight(),
+                0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, byteBuffer);
 
         mBitmap.recycle();
 
@@ -242,6 +244,7 @@ public class ZGDanmaku {
 
     public void uninit() {
         TexturePool.offerTextureId(mTextureId);
+        mTextureId = -1;
     }
 
     /**
@@ -249,7 +252,7 @@ public class ZGDanmaku {
      */
     public void drawDanmaku() {
 
-        if(!isInited && !init()) {
+        if((!isInited && !init()) || mTextureId < 0) {
             return;
         }
 
