@@ -102,6 +102,11 @@ public class ZGDanmakuController implements IZGDanmakuController {
     }
 
     @Override
+    public boolean isStarted() {
+        return false;
+    }
+
+    @Override
     public boolean isPause() {
         return mRenderer.isPause();
     }

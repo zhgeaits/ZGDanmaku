@@ -31,7 +31,8 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * Created by zhgeatis on 2016/2/22 0022.
  * 弹幕渲染器
- * GL线程每帧都会回调onDrawFrame，初始化纹理，绑定纹理都必须在GL线程去做，不然画不出来东西
+ * GL线程每帧都会回调onDrawFrame;
+ * 初始化纹理，绑定纹理都必须在GL线程去做，不然画不出来东西
  * 尽量不在onDrawFrame锁住临界区，这样GL线程和外面的线程互斥会有卡顿现象。
  * 每次GL线程都完成渲染临界区的所有弹幕，走出屏幕的弹幕交给外面的线程处理。
  */
@@ -94,7 +95,7 @@ public class ZGDanmakuRenderer extends ZGBaseDanmakuRenderer implements GLSurfac
         List<ZGDanmaku> danmakus = mDanmakus;
         int size = danmakus.size();
 
-        //Log.i("zhangge", "onDrawFrame size=" + size + ",isPaused=" + isPaused + ",isHide=" + isHide);
+        Log.i("zhangge", "onDrawFrame size=" + size + ",isPaused=" + isPaused + ",isHide=" + isHide);
 
         for (int i = 0; i < size; i ++) {
             ZGDanmaku danmaku = danmakus.get(i);

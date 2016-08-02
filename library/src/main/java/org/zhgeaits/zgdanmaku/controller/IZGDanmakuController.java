@@ -54,6 +54,12 @@ public interface IZGDanmakuController {
     void resume();
 
     /**
+     * 是否已经开始了
+     * @return
+     */
+    boolean isStarted();
+
+    /**
      * 弹幕是否暂停
      * @return
      */

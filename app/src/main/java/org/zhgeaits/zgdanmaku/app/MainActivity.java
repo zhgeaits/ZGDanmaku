@@ -42,7 +42,7 @@ public class MainActivity extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         //设置为竖屏模式
-        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         setContentView(R.layout.activity_main);
 
@@ -52,11 +52,23 @@ public class MainActivity extends Activity {
         danmakuView.setLines(24);
         danmakuView.setLeading(2);
 
-        Button closeSwitcher = (Button) findViewById(R.id.openOrClose);
+        Button startSwitcher = (Button) findViewById(R.id.StartOrStop);
+        startSwitcher.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!danmakuView.isStarted()) {
+                    danmakuView.start();
+                } else {
+                    danmakuView.stop();
+                }
+            }
+        });
+
+        Button closeSwitcher = (Button) findViewById(R.id.OpenOrClose);
         closeSwitcher.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(danmakuView.isHide()) {
+                if(danmakuView.isHided()) {
                     danmakuView.show();
                 } else {
                     danmakuView.hide();
@@ -64,11 +76,11 @@ public class MainActivity extends Activity {
             }
         });
 
-        Button pauseSwitcher = (Button) findViewById(R.id.pauseOrResume);
+        Button pauseSwitcher = (Button) findViewById(R.id.PauseOrResume);
         pauseSwitcher.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(danmakuView.isPause()) {
+                if(danmakuView.isPaused()) {
                     danmakuView.resume();
                 } else {
                     danmakuView.pause();
@@ -79,20 +91,18 @@ public class MainActivity extends Activity {
         for (int i = 0; i < 1000; i ++) {
             danmakuView.shotTextDanmamku("hello world!");
         }
-
-        danmakuView.start();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        danmakuView.resume();
+//        danmakuView.resume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        danmakuView.pause();
+//        danmakuView.pause();
     }
 
 }

@@ -43,6 +43,8 @@ public interface IZGDanmakuRenderer {
 
     void setPause(boolean pause);
 
+    boolean isStarted();
+
     boolean isPause();
 
     boolean isHide();

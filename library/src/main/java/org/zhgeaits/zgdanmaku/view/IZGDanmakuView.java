@@ -51,9 +51,22 @@ public interface IZGDanmakuView {
      */
     void resume();
 
-    boolean isPause();
+    /**
+     * 是否已经开始
+     */
+    boolean isStarted();
 
-    boolean isHide();
+    /**
+     * 是否暂停
+     * @return
+     */
+    boolean isPaused();
+
+    /**
+     * 是否隐藏了
+     * @return
+     */
+    boolean isHided();
 
     /**
      * 设置行数

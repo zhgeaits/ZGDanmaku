@@ -18,6 +18,7 @@ package org.zhgeaits.zgdanmaku.model;
 import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
+import android.os.Build;
 import android.util.Log;
 
 import org.zhgeaits.zgdanmaku.utils.MatrixUtils;
@@ -229,7 +230,13 @@ public class ZGDanmaku {
 //        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, mBitmap, 0);
 
         //使用glTexImage2D的原因是它比texImage2D效率更高一些,据说texImage2D会把bitmap重新创建一次,我没有去验证
-        ByteBuffer byteBuffer = ByteBuffer.allocate(mBitmap.getByteCount());
+        int byteCount;
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB_MR1) {
+            byteCount = mBitmap.getByteCount();
+        } else {
+            byteCount = mBitmap.getRowBytes() * mBitmap.getHeight();
+        }
+        ByteBuffer byteBuffer = ByteBuffer.allocate(byteCount);
         byteBuffer.order(ByteOrder.nativeOrder());
         mBitmap.copyPixelsToBuffer(byteBuffer);
         byteBuffer.position(0);

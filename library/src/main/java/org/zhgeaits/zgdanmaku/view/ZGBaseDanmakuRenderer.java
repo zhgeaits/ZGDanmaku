@@ -24,7 +24,7 @@ import java.util.List;
  * Created by zhgeaits on 16/2/26.
  * 渲染器基类，包含通用的方法
  */
-public class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
+public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
 
     protected List<ZGDanmaku> mDanmakus;              //弹幕临界区
     protected IZGRenderListener mListener;            //初始化成功监听器
@@ -32,6 +32,7 @@ public class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
     protected int mViewHeight;                        //窗口高度
     protected float mSpeed;                           //速度，单位px/s
     protected long mLastTime;                         //绘制上一帧的时间
+    protected boolean isStarted = false;              //是否已经开始
     protected boolean isHide = false;                 //是否打开弹幕
     protected boolean isPaused = false;               //是否暂停弹幕
     protected boolean isInited = false;               //是否初始化完了
@@ -86,6 +87,11 @@ public class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
         if (!isPaused) {
             mLastTime = 0;
         }
+    }
+
+    @Override
+    public boolean isStarted() {
+        return isStarted;
     }
 
     @Override

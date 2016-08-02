@@ -107,12 +107,17 @@ public class ZGDanmakuTextureView2 extends GLTextureView implements IZGDanmakuVi
     }
 
     @Override
-    public boolean isPause() {
+    public boolean isStarted() {
+        return mDanmakuController.isStarted();
+    }
+
+    @Override
+    public boolean isPaused() {
         return mDanmakuController.isPause();
     }
 
     @Override
-    public boolean isHide() {
+    public boolean isHided() {
         return mDanmakuController.isHide();
     }
 

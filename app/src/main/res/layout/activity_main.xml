@@ -4,21 +4,37 @@
     android:background="@color/colorPrimaryDark"
     android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/openOrClose"
-        android:layout_width="wrap_content"
-        android:text="openOrClose"
-        android:layout_height="wrap_content" />
-
     <org.zhgeaits.zgdanmaku.view.ZGDanmakuView
         android:id="@+id/danmaku"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <Button
-        android:id="@+id/pauseOrResume"
-        android:layout_width="wrap_content"
-        android:text="pauseOrResume"
-        android:layout_alignParentRight="true"
-        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/StartOrStop"
+            android:layout_width="wrap_content"
+            android:text="StartOrStop"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/OpenOrClose"
+            android:layout_width="wrap_content"
+            android:text="OpenOrClose"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/PauseOrResume"
+            android:layout_width="wrap_content"
+            android:text="PauseOrResume"
+            android:layout_alignParentRight="true"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+
+
+
+
 </RelativeLayout>
