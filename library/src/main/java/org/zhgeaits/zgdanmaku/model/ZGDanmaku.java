@@ -122,6 +122,14 @@ public class ZGDanmaku {
     }
 
     /**
+     * 增加列偏移量
+     * @param detalOffsetx
+     */
+    public void addDetalOffsetX(float detalOffsetx) {
+        this.offsetX += detalOffsetx;
+    }
+
+    /**
      * 获取当前的行偏移量
      * @return
      */

@@ -28,7 +28,6 @@ import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
  * Created by zhgeatis on 2016/2/22 0022.
  * 弹幕view
  * 含有一个弹幕池，外面发送弹幕即往弹幕池添加一条弹幕。
- * 包含一条弹幕线程:
  */
 public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
 
@@ -138,8 +137,14 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
     }
 
     @Override
-    public void shotTextDanmamku(String text) {
+    public void shotTextDanmaku(String text) {
         ZGDanmakuItem item = new ZGDanmakuItem(text, mContext);
+        mDanmakuController.addDanmaku(item);
+    }
+
+    @Override
+    public void shotTextDanmakuAt(String text, long time) {
+        ZGDanmakuItem item = new ZGDanmakuItem(text, mContext, time);
         mDanmakuController.addDanmaku(item);
     }
 }

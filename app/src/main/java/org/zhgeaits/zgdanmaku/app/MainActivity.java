@@ -19,6 +19,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -88,8 +89,18 @@ public class MainActivity extends Activity {
             }
         });
 
-        for (int i = 0; i < 1000; i ++) {
-            danmakuView.shotTextDanmamku("hello world!");
+//        for (int i = 0; i < 1000; i ++) {
+//            danmakuView.shotTextDanmakuAt("hello world!", i * 100);
+//        }
+
+        danmakuView.start();
+
+        for (int i = 0; i < 10; i ++) {
+            danmakuView.shotTextDanmakuAt("hello world!", 5 * 1000);
+        }
+
+        for (int i = 0; i < 10; i ++) {
+            danmakuView.shotTextDanmakuAt("hello world!", 10 * 1000);
         }
     }
 

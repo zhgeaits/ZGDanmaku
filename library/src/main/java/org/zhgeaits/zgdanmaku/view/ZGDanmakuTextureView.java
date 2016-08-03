@@ -130,8 +130,13 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
     }
 
     @Override
-    public void shotTextDanmamku(String text) {
+    public void shotTextDanmaku(String text) {
         ZGDanmakuItem item = new ZGDanmakuItem(text, mContext);
         mDanmakuController.addDanmaku(item);
+    }
+
+    @Override
+    public void shotTextDanmakuAt(String text, long time) {
+
     }
 }

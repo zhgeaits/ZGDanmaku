@@ -87,8 +87,15 @@ public interface IZGDanmakuView {
     void setSpeed(float speed);
 
     /**
-     * 发送一条弹幕
+     * 马上发送一条弹幕
      * @param text
      */
-    void shotTextDanmamku(String text);
+    void shotTextDanmaku(String text);
+
+    /**
+     * 指定时间发送一条
+     * @param text
+     * @param time
+     */
+    void shotTextDanmakuAt(String text, long time);
 }

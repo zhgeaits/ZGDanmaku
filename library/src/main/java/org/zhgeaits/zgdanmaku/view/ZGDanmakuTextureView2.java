@@ -16,8 +16,8 @@
 package org.zhgeaits.zgdanmaku.view;
 
 import android.content.Context;
-import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+
 import com.eaglesakura.view.GLTextureView;
 import com.eaglesakura.view.egl.SurfaceColorSpec;
 
@@ -132,8 +132,13 @@ public class ZGDanmakuTextureView2 extends GLTextureView implements IZGDanmakuVi
     }
 
     @Override
-    public void shotTextDanmamku(String text) {
+    public void shotTextDanmaku(String text) {
         ZGDanmakuItem item = new ZGDanmakuItem(text, mContext);
         mDanmakuController.addDanmaku(item);
+    }
+
+    @Override
+    public void shotTextDanmakuAt(String text, long time) {
+
     }
 }

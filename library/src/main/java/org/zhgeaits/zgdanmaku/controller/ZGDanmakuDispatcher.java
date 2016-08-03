@@ -37,14 +37,25 @@ import java.util.Map;
  */
 public class ZGDanmakuDispatcher extends Thread {
 
-    private ZGDanmakuPool mDanmakuPool;
-    private IZGDanmakuRenderer mRenderer;
+    /**
+     * 每帧的时间间隔
+     */
+    private final static int DEFAUTL_FRAME_INTERVAL = 16;
+
+    /**
+     * 最大的绘制弹幕数量
+     */
+    private final static int MAX_READERING_NUMBER = 70;
+
+    private ZGDanmakuPool mDanmakuPool;                     // 弹幕池
+    private IZGDanmakuRenderer mRenderer;                   //渲染器
     private Map<Integer, ZGDanmaku> mLinesAvaliable;
-    private String mVertexShader;                       //顶点着色器
-    private String mFragmentShader;                     //片元着色器
+    private String mVertexShader;                           //顶点着色器
+    private String mFragmentShader;                         //片元着色器
     private int mLines;
     private float mLineLeading;
     private boolean mStop;
+    private long time;
 
     public ZGDanmakuDispatcher(ZGDanmakuPool mDanmakuPool, IZGDanmakuRenderer mRenderer,
                                String mVertexShader, String mFragmentShader) {
@@ -105,19 +116,26 @@ public class ZGDanmakuDispatcher extends Thread {
 
     @Override
     public void run() {
-        long currentTime, intervalTime;
-        long lastTime = SystemClock.elapsedRealtime();
-        while (true) {
+        long lastTime, intervalTime;
+        long currentTime = SystemClock.elapsedRealtime();
+        while (!mStop) {
 
+            lastTime = currentTime;
             currentTime = SystemClock.elapsedRealtime();
-
-            if(mStop) {
-                break;
-            }
-
             intervalTime = currentTime - lastTime;
 
-//            Log.i("zhangge-test", "ZGDanmakuDispatcher run intervalTime :" + intervalTime);
+            if (intervalTime < DEFAUTL_FRAME_INTERVAL) {
+                try {
+                    Thread.sleep(DEFAUTL_FRAME_INTERVAL - intervalTime);
+                } catch (InterruptedException e) {
+                }
+                currentTime = SystemClock.elapsedRealtime();
+                intervalTime = currentTime - lastTime;
+            }
+
+            time += intervalTime;
+
+//            Log.i("zhangge-test", "ZGDanmakuDispatcher run intervalTime:" + intervalTime + ", time:" + time);
 
             //读取临界区的弹幕，然后复制到一个新的list，并去掉已经跑出屏幕的弹幕
             List<ZGDanmaku> rendererList = mRenderer.getRendererDanmakuList();
@@ -133,38 +151,33 @@ public class ZGDanmakuDispatcher extends Thread {
                 for (int i = 0; i < mLines; i ++) {
                     if(isLineAvaliable(i)) {
                         ZGDanmakuItem item = mDanmakuPool.poll();
-                        if(item != null) {
-                            ZGDanmaku danmaku = generateDanmaku(item, i);
-                            nextRendererList.add(danmaku);
+                        if (item != null) {
+                            if(item.getShowTime() <= time || item.getShowTime() == -1) {
+                                ZGDanmaku danmaku = generateDanmaku(item, i);
+                                nextRendererList.add(danmaku);
+                            } else {
+                                mDanmakuPool.offer(item);
+                            }
+//                            Log.i("zhangge-test", "ZGDanmakuDispatcher run intervalTime:" + intervalTime + ", time:" + time + ", item.getShowTime():" + item.getShowTime());
                         }
+
                     }
                 }
             }
 
             //如果弹幕池和临界区都为空的时候就阻塞，不然弹幕池和临界区要不停刷新的
-            if (nextRendererList.size() == 0) {
-                try {
-                    mDanmakuPool.waitIfNeed();
-                } catch (InterruptedException e) {
-                    break;
-                }
-            }
+//            if (nextRendererList.size() == 0) {
+//                try {
+//                    mDanmakuPool.waitIfNeed();
+//                } catch (InterruptedException e) {
+//                    break;
+//                }
+//            }
 
             //替换临界区的弹幕
             if (nextRendererList.size() > 0) {
                 mRenderer.setRendererDanmakuList(nextRendererList);
             }
-
-            long interval = currentTime - lastTime;
-
-            if (interval < 16) {
-                try {
-                    Thread.sleep(16 - interval);
-                } catch (InterruptedException e) {
-                }
-            }
-
-            lastTime = currentTime;
         }
     }
 }

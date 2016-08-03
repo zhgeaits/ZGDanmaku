@@ -36,10 +36,19 @@ public class ZGDanmakuItem {
     private Canvas mCanvas;
     private Paint mPainter;
     private Context mContext;
+    private long mTime;//出现的时间
 
     public ZGDanmakuItem(String text, Context context) {
         this.mText = text;
         this.mContext = context;
+        this.mTime = -1;
+        initDefaultPainters();
+    }
+
+    public ZGDanmakuItem(String text, Context context, long time) {
+        this.mText = text;
+        this.mContext = context;
+        this.mTime = time;
         initDefaultPainters();
     }
 
@@ -55,6 +64,14 @@ public class ZGDanmakuItem {
     public void setPainters(Canvas canvas, Paint paint) {
         this.mCanvas = canvas;
         this.mPainter = paint;
+    }
+
+    /**
+     * 获取展示的时间
+     * @return
+     */
+    public long getShowTime() {
+        return mTime;
     }
 
     public Bitmap getDanmakuBitmap() {
