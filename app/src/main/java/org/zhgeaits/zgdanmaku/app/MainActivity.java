@@ -17,6 +17,7 @@ package org.zhgeaits.zgdanmaku.app;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,13 +26,13 @@ import android.view.WindowManager;
 import android.widget.Button;
 
 import org.zhgeaits.zgdanmaku.utils.TexturePool;
+import org.zhgeaits.zgdanmaku.view.GLTextureView;
 import org.zhgeaits.zgdanmaku.view.IZGDanmakuView;
 import org.zhgeaits.zgdanmaku.view.ZGDanmakuTextureView;
 import org.zhgeaits.zgdanmaku.view.ZGDanmakuView;
 
 public class MainActivity extends Activity {
 
-    private IZGDanmakuView danmakuView;
     public static Context gContext;
 
     @Override
@@ -47,73 +48,32 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.activity_main);
 
-        TexturePool.uninit();
-        danmakuView = (IZGDanmakuView) findViewById(R.id.danmaku);
-        danmakuView.setSpeed(100);
-        danmakuView.setLines(24);
-        danmakuView.setLeading(2);
-
-        Button startSwitcher = (Button) findViewById(R.id.StartOrStop);
-        startSwitcher.setOnClickListener(new View.OnClickListener() {
+        Button glsurfaceview = (Button) findViewById(R.id.GLSurfaceView);
+        glsurfaceview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!danmakuView.isStarted()) {
-                    danmakuView.start();
-                } else {
-                    danmakuView.stop();
-                }
+                Intent intent = new Intent(gContext, GLSurfaceViewActivity.class);
+                startActivity(intent);
             }
         });
 
-        Button closeSwitcher = (Button) findViewById(R.id.OpenOrClose);
-        closeSwitcher.setOnClickListener(new View.OnClickListener() {
+        Button gltextureview = (Button) findViewById(R.id.GLTextureView);
+        gltextureview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(danmakuView.isHided()) {
-                    danmakuView.show();
-                } else {
-                    danmakuView.hide();
-                }
+                Intent intent = new Intent(gContext, GLTextureViewActivity.class);
+                startActivity(intent);
             }
         });
 
-        Button pauseSwitcher = (Button) findViewById(R.id.PauseOrResume);
-        pauseSwitcher.setOnClickListener(new View.OnClickListener() {
+        Button gltextureview2 = (Button) findViewById(R.id.GLTexture2View);
+        gltextureview2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(danmakuView.isPaused()) {
-                    danmakuView.resume();
-                } else {
-                    danmakuView.pause();
-                }
+                Intent intent = new Intent(gContext, GLTextureView2Activity.class);
+                startActivity(intent);
             }
         });
-
-//        for (int i = 0; i < 1000; i ++) {
-//            danmakuView.shotTextDanmakuAt("hello world!", i * 100);
-//        }
-
-        danmakuView.start();
-
-        for (int i = 0; i < 10; i ++) {
-            danmakuView.shotTextDanmakuAt("hello world!", 5 * 1000);
-        }
-
-        for (int i = 0; i < 10; i ++) {
-            danmakuView.shotTextDanmakuAt("hello world!", 10 * 1000);
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-//        danmakuView.resume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-//        danmakuView.pause();
     }
 
 }

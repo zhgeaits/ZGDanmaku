@@ -4,27 +4,31 @@
     android:background="@color/colorPrimaryDark"
     android:layout_height="match_parent">
 
+    <org.zhgeaits.zgdanmaku.view.ZGDanmakuView
+        android:id="@+id/danmaku"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_centerInParent="true"
         android:layout_height="wrap_content">
 
         <Button
-            android:id="@+id/GLSurfaceView"
+            android:id="@+id/StartOrStop"
             android:layout_width="wrap_content"
-            android:text="GLSurfaceView"
+            android:text="StartOrStop"
             android:layout_height="wrap_content" />
 
         <Button
-            android:id="@+id/GLTextureView"
+            android:id="@+id/OpenOrClose"
             android:layout_width="wrap_content"
-            android:text="GLTextureView"
+            android:text="OpenOrClose"
             android:layout_height="wrap_content" />
 
         <Button
-            android:id="@+id/GLTexture2View"
+            android:id="@+id/PauseOrResume"
             android:layout_width="wrap_content"
-            android:text="GLTexture2View"
+            android:text="PauseOrResume"
             android:layout_alignParentRight="true"
             android:layout_height="wrap_content" />
     </LinearLayout>
