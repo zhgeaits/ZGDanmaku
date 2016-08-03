@@ -82,6 +82,7 @@ public class ZGDanmakuDispatcher implements Runnable {
         }
 
         if (danmaku.getCurrentOffsetX() > danmaku.getDanmakuWidth()) {
+            mLinesAvaliable.remove(line);
             return true;
         }
 
@@ -234,6 +235,7 @@ public class ZGDanmakuDispatcher implements Runnable {
             //如果临界区没有弹幕,并且弹幕池没有弹幕了,则进行阻塞,这样的能耗低.
             if (rendererList.size() == 0) {
                 try {
+                    resetLines();
                     mDanmakuPool.waitIfNeed();
                 } catch (InterruptedException e) {
                     break;
@@ -244,6 +246,13 @@ public class ZGDanmakuDispatcher implements Runnable {
             for (int i = 0; i < rendererList.size(); i++) {
                 if (!rendererList.get(i).isFinished()) {
                     nextRendererList.add(rendererList.get(i));
+                }
+            }
+
+            // 处理无效的弹道
+            for (int i = 0; i < mLinesAvaliable.size(); i ++) {
+                if (!nextRendererList.contains(mLinesAvaliable.get(i))) {
+                    mLinesAvaliable.put(i, null);
                 }
             }
 

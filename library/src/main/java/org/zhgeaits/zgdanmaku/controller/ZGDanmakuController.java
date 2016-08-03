@@ -83,6 +83,7 @@ public class ZGDanmakuController implements IZGDanmakuController {
 
     @Override
     public void stop() {
+        resume();
         mDispatcher.quit();
         mDanmakuPool.clear();
     }
@@ -146,7 +147,9 @@ public class ZGDanmakuController implements IZGDanmakuController {
 
     @Override
     public void addDanmaku(ZGDanmakuItem danmakuItem) {
-        mDanmakuPool.offer(danmakuItem);
+        if (isStarted()) {
+            mDanmakuPool.offer(danmakuItem);
+        }
     }
 
 }

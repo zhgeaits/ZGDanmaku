@@ -19,6 +19,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -57,13 +58,18 @@ public class GLSurfaceViewActivity extends Activity {
                 if (!danmakuView.isStarted()) {
                     danmakuView.start();
 
-                    for (int i = 0; i < 10; i ++) {
-                        danmakuView.shotTextDanmakuAt("I am 5!", 5 * 1000);
-                    }
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            for (int i = 0; i < 10; i ++) {
+                                danmakuView.shotTextDanmakuAt("I am 3!", 3 * 1000);
+                            }
 
-                    for (int i = 0; i < 10; i ++) {
-                        danmakuView.shotTextDanmakuAt("I am 10!", 10 * 1000);
-                    }
+                            for (int i = 0; i < 10; i ++) {
+                                danmakuView.shotTextDanmakuAt("I am 5!", 5 * 1000);
+                            }
+                        }
+                    }, 1000);
                 } else {
                     danmakuView.stop();
                 }

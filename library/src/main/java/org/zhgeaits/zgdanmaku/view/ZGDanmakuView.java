@@ -77,6 +77,7 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
     @Override
     public void start() {
         Log.i("ZGDanmaku", "ZGDanmakuView start");
+        stop();
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
         requestRender();
         mDanmakuController.start();
@@ -105,16 +106,20 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
     public void pause() {
         // FIXME: 16/8/3 为什么onPause之后再调onResume没用
 //        onPause();
-        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-        mDanmakuController.pause();
+        if (isStarted()) {
+            setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+            mDanmakuController.pause();
+        }
     }
 
     @Override
     public void resume() {
         // FIXME: 16/8/3 为什么onPause之后再调onResume没用
 //        onResume();
-        mDanmakuController.resume();
-        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        if (isStarted()) {
+            mDanmakuController.resume();
+            setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        }
     }
 
     @Override
