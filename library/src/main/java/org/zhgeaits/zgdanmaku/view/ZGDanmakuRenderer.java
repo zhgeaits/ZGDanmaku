@@ -82,26 +82,33 @@ public class ZGDanmakuRenderer extends ZGBaseDanmakuRenderer implements GLSurfac
             return;
         }
 
-        float intervalTime = (float)(currentTime - mLastTime) / 1000.0f;
-        float detalOffset = mSpeed * intervalTime;
+        long intervalTime = currentTime - mLastTime;
 
-        //设置屏幕背景色RGBA
+        if (intervalTime < 16) {
+            try {
+                Thread.sleep(16 - intervalTime);
+            } catch (InterruptedException e) {
+            }
+            currentTime = SystemClock.elapsedRealtime();
+            intervalTime = currentTime - mLastTime;
+        }
+
+        float offsetTime = (float)(intervalTime) / 1000.0f;
+        float detalOffset = mSpeed * offsetTime;
+
+        // 设置屏幕背景色RGBA
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-        //清除深度缓冲与颜色缓冲
+        // 清除深度缓冲与颜色缓冲
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
 
-        //绘制弹幕纹理
+        // 绘制弹幕纹理
         List<ZGDanmaku> danmakus = mDanmakus;
         int size = danmakus.size();
-
-        Log.i("zhangge", "onDrawFrame size=" + size + ",isPaused=" + isPaused + ",isHide=" + isHide);
 
         for (int i = 0; i < size; i ++) {
             ZGDanmaku danmaku = danmakus.get(i);
 
-//            if(!isPaused) {
-//            }
             float newOffset = detalOffset + danmaku.getCurrentOffsetX();
             danmaku.setOffsetX(newOffset);
 
@@ -109,6 +116,11 @@ public class ZGDanmakuRenderer extends ZGBaseDanmakuRenderer implements GLSurfac
                 danmaku.drawDanmaku();
             }
         }
+
+        long now = SystemClock.elapsedRealtime() - currentTime;
+        if (intervalTime < 16) {
+        }
+        Log.i("zhangge-test", "intervalTime:" + intervalTime + ", now:" + now + ", size:" + size);
 
         mLastTime = currentTime;
     }

@@ -15,6 +15,9 @@
  */
 package org.zhgeaits.zgdanmaku.controller;
 
+import android.os.SystemClock;
+import android.util.Log;
+
 import org.zhgeaits.zgdanmaku.model.ZGDanmaku;
 import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
 import org.zhgeaits.zgdanmaku.utils.ZGDanmakuPool;
@@ -102,11 +105,19 @@ public class ZGDanmakuDispatcher extends Thread {
 
     @Override
     public void run() {
+        long currentTime, intervalTime;
+        long lastTime = SystemClock.elapsedRealtime();
         while (true) {
+
+            currentTime = SystemClock.elapsedRealtime();
 
             if(mStop) {
                 break;
             }
+
+            intervalTime = currentTime - lastTime;
+
+//            Log.i("zhangge-test", "ZGDanmakuDispatcher run intervalTime :" + intervalTime);
 
             //读取临界区的弹幕，然后复制到一个新的list，并去掉已经跑出屏幕的弹幕
             List<ZGDanmaku> rendererList = mRenderer.getRendererDanmakuList();
@@ -117,13 +128,15 @@ public class ZGDanmakuDispatcher extends Thread {
                 }
             }
 
-            //获取有效的弹道，然后读取弹幕池的弹幕进行绘制
-            for (int i = 0; i < mLines; i ++) {
-                if(isLineAvaliable(i)) {
-                    ZGDanmakuItem item = mDanmakuPool.poll();
-                    if(item != null) {
-                        ZGDanmaku danmaku = generateDanmaku(item, i);
-                        nextRendererList.add(danmaku);
+            if (nextRendererList.size() < 70) {
+                //获取有效的弹道，然后读取弹幕池的弹幕进行绘制
+                for (int i = 0; i < mLines; i ++) {
+                    if(isLineAvaliable(i)) {
+                        ZGDanmakuItem item = mDanmakuPool.poll();
+                        if(item != null) {
+                            ZGDanmaku danmaku = generateDanmaku(item, i);
+                            nextRendererList.add(danmaku);
+                        }
                     }
                 }
             }
@@ -141,6 +154,17 @@ public class ZGDanmakuDispatcher extends Thread {
             if (nextRendererList.size() > 0) {
                 mRenderer.setRendererDanmakuList(nextRendererList);
             }
+
+            long interval = currentTime - lastTime;
+
+            if (interval < 16) {
+                try {
+                    Thread.sleep(16 - interval);
+                } catch (InterruptedException e) {
+                }
+            }
+
+            lastTime = currentTime;
         }
     }
 }
