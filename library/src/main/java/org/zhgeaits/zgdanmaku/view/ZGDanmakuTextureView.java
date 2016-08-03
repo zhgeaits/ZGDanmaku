@@ -18,6 +18,7 @@ package org.zhgeaits.zgdanmaku.view;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import org.zhgeaits.zgdanmaku.controller.IZGDanmakuController;
 import org.zhgeaits.zgdanmaku.controller.ZGDanmakuController;
@@ -33,6 +34,7 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
 
     private Context mContext;
     private IZGDanmakuController mDanmakuController;
+    private IZGDanmakuRenderer mRenderer;
 
     public ZGDanmakuTextureView(Context context) {
         super(context);
@@ -52,16 +54,17 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
         //设置EGL的像素配置
         setEGLConfigChooser(8, 8, 8, 8, 16, 0);
 
-        IZGDanmakuRenderer renderer = new ZGDanmakuRenderer();
-        setRenderer((GLSurfaceView.Renderer) renderer);
+        mRenderer = new ZGDanmakuRenderer();
+        setRenderer((GLSurfaceView.Renderer) mRenderer);
 
         //设置textureview透明
         setOpaque(false);
 
-        setRenderMode(GLTextureView.RENDERMODE_CONTINUOUSLY);
-        //setRenderingThreadType(RenderingThreadType.BackgroundThread);
+        // 设置渲染模式为被动渲染，在调用start()方法以后再设置为主动模式,
+        // 主动模式有一条后台OPENGL线程每帧都调用onDrawFrame方法
+        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
-        mDanmakuController = new ZGDanmakuController(context, renderer);
+        mDanmakuController = new ZGDanmakuController(context, mRenderer);
     }
 
     @Override
@@ -71,12 +74,20 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
 
     @Override
     public void start() {
+        Log.i("ZGDanmaku", "ZGDanmakuView start");
+        stop();
+        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        requestRender();
         mDanmakuController.start();
     }
 
     @Override
     public void stop() {
         mDanmakuController.stop();
+        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        //清屏
+        mRenderer.getRendererDanmakuList().clear();
+        requestRender();
     }
 
     @Override
@@ -91,17 +102,18 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
 
     @Override
     public void pause() {
-//        onPause();
-        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-        mDanmakuController.pause();
+        if (isStarted()) {
+            setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+            mDanmakuController.pause();
+        }
     }
 
     @Override
     public void resume() {
-//        onResume();
-        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-        requestRender();
-        mDanmakuController.resume();
+        if (isStarted()) {
+            mDanmakuController.resume();
+            setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        }
     }
 
     @Override
@@ -137,6 +149,7 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
 
     @Override
     public void shotTextDanmakuAt(String text, long time) {
-
+        ZGDanmakuItem item = new ZGDanmakuItem(text, mContext, time);
+        mDanmakuController.addDanmaku(item);
     }
 }

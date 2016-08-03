@@ -115,13 +115,18 @@ public class GLSurfaceViewActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-//        danmakuView.resume();
+        danmakuView.resume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-//        danmakuView.pause();
+        danmakuView.pause();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        danmakuView.stop();
+    }
 }

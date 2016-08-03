@@ -19,6 +19,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -47,7 +48,7 @@ public class GLTextureViewActivity extends Activity {
         TexturePool.uninit();
         danmakuView = (IZGDanmakuView) findViewById(R.id.danmaku);
         danmakuView.setSpeed(100);
-        danmakuView.setLines(24);
+        danmakuView.setLines(15);
         danmakuView.setLeading(2);
 
         Button startSwitcher = (Button) findViewById(R.id.StartOrStop);
@@ -56,6 +57,19 @@ public class GLTextureViewActivity extends Activity {
             public void onClick(View v) {
                 if (!danmakuView.isStarted()) {
                     danmakuView.start();
+
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            for (int i = 0; i < 10; i ++) {
+                                danmakuView.shotTextDanmakuAt("I am 3!", 3 * 1000);
+                            }
+
+                            for (int i = 0; i < 10; i ++) {
+                                danmakuView.shotTextDanmakuAt("I am 5!", 5 * 1000);
+                            }
+                        }
+                    }, 1000);
                 } else {
                     danmakuView.stop();
                 }
@@ -86,31 +100,34 @@ public class GLTextureViewActivity extends Activity {
             }
         });
 
-//        for (int i = 0; i < 1000; i ++) {
-//            danmakuView.shotTextDanmakuAt("hello world!", i * 100);
-//        }
+        Button shot = (Button) findViewById(R.id.Shot);
+        shot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                for (int i = 0; i < 10; i ++) {
+                    danmakuView.shotTextDanmaku("hello world!");
+                }
+            }
+        });
 
-        danmakuView.start();
-
-        for (int i = 0; i < 10; i ++) {
-            danmakuView.shotTextDanmakuAt("hello world!", 5 * 1000);
-        }
-
-        for (int i = 0; i < 10; i ++) {
-            danmakuView.shotTextDanmakuAt("hello world!", 10 * 1000);
-        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-//        danmakuView.resume();
+        danmakuView.resume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-//        danmakuView.pause();
+        danmakuView.pause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        danmakuView.stop();
     }
 
 }

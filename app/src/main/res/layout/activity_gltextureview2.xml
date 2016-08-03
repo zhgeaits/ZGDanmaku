@@ -4,7 +4,7 @@
     android:background="@color/colorPrimaryDark"
     android:layout_height="match_parent">
 
-    <org.zhgeaits.zgdanmaku.view.ZGDanmakuView
+    <org.zhgeaits.zgdanmaku.view.ZGDanmakuTextureView2
         android:id="@+id/danmaku"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
@@ -31,10 +31,13 @@
             android:text="PauseOrResume"
             android:layout_alignParentRight="true"
             android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/Shot"
+            android:layout_width="wrap_content"
+            android:text="Shot 10 Danmaku"
+            android:layout_alignParentRight="true"
+            android:layout_height="wrap_content" />
     </LinearLayout>
-
-
-
-
 
 </RelativeLayout>
