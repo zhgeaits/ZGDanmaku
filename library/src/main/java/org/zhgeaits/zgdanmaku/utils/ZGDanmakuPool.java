@@ -50,9 +50,12 @@ public class ZGDanmakuPool {
         notifyAll();
     }
 
-    public synchronized void waitIfNeed() throws InterruptedException{
+    public synchronized boolean waitIfNeed() throws InterruptedException{
         if (size() == 0) {
             wait();
+            return true;
+        } else {
+            return false;
         }
     }
 

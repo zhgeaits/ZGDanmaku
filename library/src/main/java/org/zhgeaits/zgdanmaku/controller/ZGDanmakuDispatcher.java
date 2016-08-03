@@ -236,10 +236,10 @@ public class ZGDanmakuDispatcher implements Runnable {
             if (rendererList.size() == 0) {
                 try {
                     resetLines();
-                    //todo 阻塞了时间不对
-                    mDanmakuPool.waitIfNeed();
+                    if (mDanmakuPool.waitIfNeed()) {
+                        currentTime = SystemClock.elapsedRealtime();
+                    }
                 } catch (InterruptedException e) {
-                    break;
                 }
             }
 
