@@ -47,7 +47,7 @@ public class GLSurfaceViewActivity extends Activity {
         TexturePool.uninit();
         danmakuView = (IZGDanmakuView) findViewById(R.id.danmaku);
         danmakuView.setSpeed(100);
-        danmakuView.setLines(24);
+        danmakuView.setLines(15);
         danmakuView.setLeading(2);
 
         Button startSwitcher = (Button) findViewById(R.id.StartOrStop);
@@ -56,6 +56,14 @@ public class GLSurfaceViewActivity extends Activity {
             public void onClick(View v) {
                 if (!danmakuView.isStarted()) {
                     danmakuView.start();
+
+                    for (int i = 0; i < 10; i ++) {
+                        danmakuView.shotTextDanmakuAt("I am 5!", 5 * 1000);
+                    }
+
+                    for (int i = 0; i < 10; i ++) {
+                        danmakuView.shotTextDanmakuAt("I am 10!", 10 * 1000);
+                    }
                 } else {
                     danmakuView.stop();
                 }
@@ -86,19 +94,16 @@ public class GLSurfaceViewActivity extends Activity {
             }
         });
 
-//        for (int i = 0; i < 1000; i ++) {
-//            danmakuView.shotTextDanmakuAt("hello world!", i * 100);
-//        }
+        Button shot = (Button) findViewById(R.id.Shot);
+        shot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                for (int i = 0; i < 10; i ++) {
+                    danmakuView.shotTextDanmaku("hello world!");
+                }
+            }
+        });
 
-        danmakuView.start();
-
-        for (int i = 0; i < 10; i ++) {
-            danmakuView.shotTextDanmakuAt("hello world!", 5 * 1000);
-        }
-
-        for (int i = 0; i < 10; i ++) {
-            danmakuView.shotTextDanmakuAt("hello world!", 10 * 1000);
-        }
     }
 
     @Override

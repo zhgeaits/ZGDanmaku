@@ -53,9 +53,7 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
     protected long mCurrentTime;                                //当前帧的时间
     protected long mLastTime;                                   //绘制上一帧的时间
     protected long mIntervalTime;                               //每帧的时间间隔
-    protected boolean isStarted = false;                        //是否已经开始
     protected boolean isHide = false;                           //是否打开弹幕
-    protected boolean isPaused = false;                         //是否暂停弹幕
     protected boolean isInited = false;                         //是否初始化完了
 
     public ZGBaseDanmakuRenderer() {
@@ -103,26 +101,13 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
     }
 
     @Override
-    public void setPause(boolean pause) {
-        isPaused = pause;
-        if (!isPaused) {
-            mLastTime = 0;
-        }
-    }
-
-    @Override
-    public boolean isStarted() {
-        return isStarted;
-    }
-
-    @Override
-    public boolean isPause() {
-        return isPaused;
-    }
-
-    @Override
     public boolean isHide() {
         return isHide;
+    }
+
+    @Override
+    public void resume() {
+        mCurrentTime = SystemClock.elapsedRealtime();
     }
 
     protected void surfaceCreated(GL10 gl10, EGLConfig eglConfig) {
@@ -196,8 +181,8 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
 
         long now = SystemClock.elapsedRealtime() - mCurrentTime;
         if (now > 16) {
-            Log.i("zhangge-test", "intervalTime:" + mIntervalTime + ", now:" + now + ", size:" + mDanmakus.size());
         }
+        Log.i("ZGDanmaku", "intervalTime:" + mIntervalTime + ", now:" + now + ", size:" + mDanmakus.size());
     }
 
     public void surfaceDestroyed(GL10 gl) {

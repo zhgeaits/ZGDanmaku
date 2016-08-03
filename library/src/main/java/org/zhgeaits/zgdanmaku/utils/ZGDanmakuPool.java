@@ -18,6 +18,7 @@ package org.zhgeaits.zgdanmaku.utils;
 import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
 
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Queue;
 
 /**
@@ -26,10 +27,10 @@ import java.util.Queue;
  */
 public class ZGDanmakuPool {
 
-    private Queue<ZGDanmakuItem> mCachedDanmaku;
+    private PriorityQueue<ZGDanmakuItem> mCachedDanmaku;
 
     public ZGDanmakuPool() {
-        mCachedDanmaku = new LinkedList<>();
+        mCachedDanmaku = new PriorityQueue<>();
     }
 
     public synchronized void offer(ZGDanmakuItem danmakuItem) {
@@ -53,6 +54,10 @@ public class ZGDanmakuPool {
         if (size() == 0) {
             wait();
         }
+    }
+
+    public synchronized void clear() {
+        mCachedDanmaku.clear();
     }
 
 }

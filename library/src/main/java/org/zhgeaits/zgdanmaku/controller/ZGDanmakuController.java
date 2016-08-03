@@ -16,6 +16,7 @@
 package org.zhgeaits.zgdanmaku.controller;
 
 import android.content.Context;
+import android.util.Log;
 
 import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
 import org.zhgeaits.zgdanmaku.utils.DimensUtils;
@@ -31,9 +32,9 @@ import org.zhgeaits.zgdanmaku.view.IZGRenderListener;
 public class ZGDanmakuController implements IZGDanmakuController {
 
     private Context mContext;
-    private IZGDanmakuRenderer mRenderer;
-    private ZGDanmakuDispatcher mDispatcher;
-    private ZGDanmakuPool mDanmakuPool;
+    private IZGDanmakuRenderer mRenderer;               //弹幕渲染器
+    private ZGDanmakuDispatcher mDispatcher;            //弹幕分发器
+    private ZGDanmakuPool mDanmakuPool;                 //弹幕池
     private String mVertexShader;                       //顶点着色器
     private String mFragmentShader;                     //片元着色器
 
@@ -42,10 +43,13 @@ public class ZGDanmakuController implements IZGDanmakuController {
         mRenderer = renderer;
         mContext = context;
 
+        //加载顶点着色器的脚本内容
+        mVertexShader = ShaderUtils.loadFromAssetsFile("vertex.sh", mContext.getResources());
+
+        //加载片元着色器的脚本内容
+        mFragmentShader = ShaderUtils.loadFromAssetsFile("frag.sh", mContext.getResources());
+
         mDanmakuPool = new ZGDanmakuPool();
-
-        loadShader();
-
         mDispatcher = new ZGDanmakuDispatcher(mDanmakuPool, mRenderer, mVertexShader, mFragmentShader);
 
         //默认50dp/s速度
@@ -55,15 +59,23 @@ public class ZGDanmakuController implements IZGDanmakuController {
         setLeading(2);
     }
 
+    private void _start() {
+        Log.i("ZGDanmaku", "ZGDanmakuController start now.");
+        new Thread(mDispatcher).start();
+    }
+
     @Override
     public void start() {
         if(mRenderer.isOKToRenderer()) {
-            startInternal();
+            _start();
         } else {
+            Log.i("ZGDanmaku", "ZGDanmakuController start after render inited!");
+
+            // FIXME: 16/8/3 有可能出现并发情况,线程不安全,不能准确回调
             mRenderer.setListener(new IZGRenderListener() {
                 @Override
                 public void onInited() {
-                    start();
+                    _start();
                 }
             });
         }
@@ -72,6 +84,7 @@ public class ZGDanmakuController implements IZGDanmakuController {
     @Override
     public void stop() {
         mDispatcher.quit();
+        mDanmakuPool.clear();
     }
 
     @Override
@@ -86,22 +99,27 @@ public class ZGDanmakuController implements IZGDanmakuController {
 
     @Override
     public void pause() {
-        mRenderer.setPause(true);
+        if (isStarted()) {
+            mDispatcher.pause();
+        }
     }
 
     @Override
     public void resume() {
-        mRenderer.setPause(false);
+        if (isStarted()) {
+            mRenderer.resume();
+            mDispatcher.resume();
+        }
     }
 
     @Override
     public boolean isStarted() {
-        return false;
+        return !mDispatcher.isStop();
     }
 
     @Override
     public boolean isPause() {
-        return mRenderer.isPause();
+        return mDispatcher.isPaused();
     }
 
     @Override
@@ -131,15 +149,4 @@ public class ZGDanmakuController implements IZGDanmakuController {
         mDanmakuPool.offer(danmakuItem);
     }
 
-    private void loadShader() {
-        //加载顶点着色器的脚本内容
-        mVertexShader = ShaderUtils.loadFromAssetsFile("vertex.sh", mContext.getResources());
-
-        //加载片元着色器的脚本内容
-        mFragmentShader = ShaderUtils.loadFromAssetsFile("frag.sh", mContext.getResources());
-    }
-
-    private void startInternal() {
-        mDispatcher.start();
-    }
 }

@@ -19,6 +19,7 @@ import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import org.zhgeaits.zgdanmaku.controller.IZGDanmakuController;
 import org.zhgeaits.zgdanmaku.controller.ZGDanmakuController;
@@ -33,6 +34,7 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
 
     private Context mContext;
     private IZGDanmakuController mDanmakuController;
+    private IZGDanmakuRenderer mRenderer;
 
     public ZGDanmakuView(Context context) {
         super(context);
@@ -53,8 +55,8 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
         //设置EGL的像素配置
         setEGLConfigChooser(8, 8, 8, 8, 16, 0);
 
-        IZGDanmakuRenderer renderer = new ZGDanmakuRenderer();
-        setRenderer((Renderer) renderer);
+        mRenderer = new ZGDanmakuRenderer();
+        setRenderer((Renderer) mRenderer);
 
         //设置view为透明，并置于顶层，可以在surfaceview之上
         getHolder().setFormat(PixelFormat.TRANSLUCENT);
@@ -64,7 +66,7 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
         // 主动模式有一条后台OPENGL线程每帧都调用onDrawFrame方法
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
-        mDanmakuController = new ZGDanmakuController(context, renderer);
+        mDanmakuController = new ZGDanmakuController(context, mRenderer);
     }
 
     @Override
@@ -74,6 +76,7 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
 
     @Override
     public void start() {
+        Log.i("ZGDanmaku", "ZGDanmakuView start");
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
         requestRender();
         mDanmakuController.start();
@@ -82,6 +85,10 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
     @Override
     public void stop() {
         mDanmakuController.stop();
+        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        //清屏
+        mRenderer.getRendererDanmakuList().clear();
+        requestRender();
     }
 
     @Override
@@ -96,7 +103,7 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
 
     @Override
     public void pause() {
-        // todo fix me why onPause doesn't work?
+        // FIXME: 16/8/3 为什么onPause之后再调onResume没用
 //        onPause();
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         mDanmakuController.pause();
@@ -104,11 +111,10 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
 
     @Override
     public void resume() {
-        // todo fix me: why onResume doesn't work?
+        // FIXME: 16/8/3 为什么onPause之后再调onResume没用
 //        onResume();
-        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-        requestRender();
         mDanmakuController.resume();
+        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
     }
 
     @Override

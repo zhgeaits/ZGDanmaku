@@ -29,26 +29,26 @@ import org.zhgeaits.zgdanmaku.utils.NativeBitmapFactory;
  * 每个弹幕就是一个bitmap
  * 可以从这里进行扩展
  */
-public class ZGDanmakuItem {
+public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
 
     private Bitmap mBitmap;
     private String mText;
     private Canvas mCanvas;
     private Paint mPainter;
     private Context mContext;
-    private long mTime;//出现的时间
+    private long mOffsetTime;//出现的时间
 
     public ZGDanmakuItem(String text, Context context) {
         this.mText = text;
         this.mContext = context;
-        this.mTime = -1;
+        this.mOffsetTime = -1;
         initDefaultPainters();
     }
 
     public ZGDanmakuItem(String text, Context context, long time) {
         this.mText = text;
         this.mContext = context;
-        this.mTime = time;
+        this.mOffsetTime = time;
         initDefaultPainters();
     }
 
@@ -70,8 +70,8 @@ public class ZGDanmakuItem {
      * 获取展示的时间
      * @return
      */
-    public long getShowTime() {
-        return mTime;
+    public long getOffsetTime() {
+        return mOffsetTime;
     }
 
     public Bitmap getDanmakuBitmap() {
@@ -93,5 +93,13 @@ public class ZGDanmakuItem {
             return 0;
         }
         return mBitmap.getHeight();
+    }
+
+    @Override
+    public int compareTo(ZGDanmakuItem another) {
+        if (another == null) {
+            return 0;
+        }
+        return (int) (mOffsetTime - another.mOffsetTime);
     }
 }
