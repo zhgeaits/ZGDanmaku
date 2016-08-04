@@ -27,6 +27,14 @@ public class MatrixUtils {
     private static float[] mTranslateMatrix = new float[16];//具体物体的移动旋转矩阵
     private static float[] mFinalMatrix;//最后起作用的总变换矩阵
 
+    public static float[] getProjectMatrix() {
+        return mProjectMatrix;
+    }
+
+    public static float[] getCameraMatrix() {
+        return mCameraMatrix;
+    }
+
     /**
      * 获取不变换初始矩阵
      */

@@ -45,7 +45,7 @@ public class ZGDanmakuDispatcher implements Runnable {
     /**
      * 最大的绘制弹幕数量
      */
-    private final static int MAX_READERING_NUMBER = 70;
+    private final static int MAX_READERING_NUMBER = 150;
 
     private ZGDanmakuPool mDanmakuPool;                     // 弹幕池
     private IZGDanmakuRenderer mRenderer;                   //渲染器

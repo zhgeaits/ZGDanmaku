@@ -33,10 +33,15 @@ public class TexturePool {
 
     private static Set<Integer> mPool = new HashSet<>();
 
-    private static int mProgram = -1;//自定义渲染管线程序id
-    private static int muMVPMatrixHandle = -1;//总变换矩阵引用id
-    private static int maPositionHandle = -1; //顶点位置属性引用id
-    private static int maTexCoorHandle = -1; //顶点纹理坐标属性引用id
+    private static int mProgram = -1;               //自定义渲染管线程序id
+    private static int muMVPMatrixHandle = -1;      //总变换矩阵引用id
+    private static int maPositionHandle = -1;       //顶点位置属性引用id
+    private static int maTexCoorHandle = -1;        //顶点纹理坐标属性引用id
+    private static int mOffsetXHandle = -1;                             //x偏移量引用id
+    private static int mOffsetYHandle = -1;                             //y偏移量引用id
+    private static int mOffsetZHandle = -1;                             //z偏移量引用id
+    private static int mViewWidthHandle = -1;                           //屏幕宽引用id
+    private static int mViewHeightHandle = -1;                          //屏幕高引用id
 
     public static void uninit() {
         mProgram = -1;
@@ -125,6 +130,42 @@ public class TexturePool {
             maTexCoorHandle = GLES20.glGetAttribLocation(mProgram, "aTexCoor");
         }
         return maTexCoorHandle;
+    }
+
+    public static int getOffsetXHandle() {
+        if (mOffsetXHandle == -1) {
+            mOffsetXHandle = GLES20.glGetUniformLocation(mProgram, "offsetX");
+        }
+        return mOffsetXHandle;
+    }
+
+    public static int getOffsetYHandle() {
+        if (mOffsetYHandle == -1) {
+            mOffsetYHandle = GLES20.glGetUniformLocation(mProgram, "offsetY");
+        }
+        return mOffsetYHandle;
+    }
+
+    public static int getOffsetZHandle() {
+        if (mOffsetZHandle == -1) {
+            mOffsetZHandle = GLES20.glGetUniformLocation(mProgram, "offsetZ");
+        }
+        return mOffsetZHandle;
+    }
+
+    public static int getViewWidthHandle() {
+        if (mViewWidthHandle == -1) {
+            mViewWidthHandle = GLES20.glGetUniformLocation(mProgram, "mViewWidth");
+        }
+        return mViewWidthHandle;
+    }
+
+    public static int getViewHeightHandle() {
+        if (mViewHeightHandle == -1) {
+            mViewHeightHandle = GLES20.glGetUniformLocation(mProgram, "mViewHeight");
+        }
+        return mViewHeightHandle;
+
     }
 }
 

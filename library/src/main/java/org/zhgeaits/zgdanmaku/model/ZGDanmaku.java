@@ -17,16 +17,16 @@ package org.zhgeaits.zgdanmaku.model;
 
 import android.graphics.Bitmap;
 import android.opengl.GLES20;
-import android.opengl.GLUtils;
 import android.os.Build;
-import android.util.Log;
 
 import org.zhgeaits.zgdanmaku.utils.MatrixUtils;
 import org.zhgeaits.zgdanmaku.utils.TexturePool;
+import org.zhgeaits.zgdanmaku.utils.ZGMatrix;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.Map;
 
 /**
  * Created by zhgeatis on 2016/2/22 0022.
@@ -35,29 +35,38 @@ import java.nio.FloatBuffer;
  */
 public class ZGDanmaku {
 
-    //这里默认设置纹理id为-1值，在OpenGLES底下，负值是无效的，如果不设置负值，那么int默认是0，是有效的纹理id
-    //当一个弹幕还没有绑定到纹理的时候，业务端触发所有弹幕回收，就会触发回收纹理0,这样在纹理池就有重复的纹理了,
-    //会导致同一个bitmap映射到不通的纹理,但是相同的纹理会在不同的矩阵参数下进行绘制,出现混乱现象了.
-    private int mTextureId = -1;//绑定的纹理id
-    private int mProgram;//自定义渲染管线程序id
-    private int muMVPMatrixHandle;//总变换矩阵引用id
-    private int maPositionHandle; //顶点位置属性引用id
-    private int maTexCoorHandle; //顶点纹理坐标属性引用id
+    /**
+     * 这里默认设置纹理id为-1值，在OpenGLES底下，负值是无效的，如果不设置负值，那么int默认是0，是有效的纹理id
+     * 当一个弹幕还没有绑定到纹理的时候，业务端触发所有弹幕回收，就会触发回收纹理0,这样在纹理池就有重复的纹理了,
+     * 会导致同一个bitmap映射到不通的纹理,但是相同的纹理会在不同的矩阵参数下进行绘制,出现混乱现象了.
+     */
+    private int mTextureId = -1;                            //绑定的纹理id
+    private int mProgram;                                   //自定义渲染管线程序id
+    private int muMVPMatrixHandle;                          //总变换矩阵引用id
+    private int maPositionHandle;                           //顶点位置属性引用id
+    private int maTexCoorHandle;                            //顶点纹理坐标属性引用id
 
-    private String mVertexShader;//顶点着色器
-    private String mFragmentShader;//片元着色器
+    private int mOffsetXHandle;                             //x偏移量引用id
+    private int mOffsetYHandle;                             //y偏移量引用id
+    private int mOffsetZHandle;                             //z偏移量引用id
+    private int mViewWidthHandle;                           //屏幕宽引用id
+    private int mViewHeightHandle;                          //屏幕高引用id
 
-    private FloatBuffer mVertexBuffer;//顶点坐标数据缓冲
-    private FloatBuffer mTexCoorBuffer;//顶点纹理坐标数据缓冲
+    private String mVertexShader;                           //顶点着色器
+    private String mFragmentShader;                         //片元着色器
 
-    private Bitmap mBitmap;//弹幕纹理
-    private float offsetX;//偏移的x坐标，范围是0-mViewWidth
-    private float offsetY;//偏移的y坐标，范围是0-mViewHeight
-    private int mViewWidth;//窗口宽度
-    private int mViewHeight;//窗口高度
-    private int mDanmakuWidth;//弹幕宽度
-    private int mVertexCount = 4;//纹理顶点个数，这个是矩形，四个顶点
-    private boolean isInited = false;
+    private FloatBuffer mVertexBuffer;                      //顶点坐标数据缓冲
+    private FloatBuffer mTexCoorBuffer;                     //顶点纹理坐标数据缓冲
+
+    private Bitmap mBitmap;                                 //弹幕纹理
+    private float offsetX;                                  //偏移的x坐标，范围是0-mViewWidth
+    private float offsetY;                                  //偏移的y坐标，范围是0-mViewHeight
+    private int mViewWidth;                                 //窗口宽度
+    private int mViewHeight;                                //窗口高度
+    private int mDanmakuWidth;                              //弹幕宽度
+    private int mVertexCount = 4;                           //纹理顶点个数，这个是矩形，四个顶点
+    private boolean isInited = false;                       //是否已经初始化
+    private ZGMatrix mMatrix;                               //矩阵
 
     public ZGDanmaku(Bitmap bitmap) {
         this.mBitmap = bitmap;
@@ -79,6 +88,11 @@ public class ZGDanmaku {
         if(!initTexture()) {
             return false;
         }
+
+        mMatrix = new ZGMatrix();
+
+        //初始化矩阵
+        mMatrix.initMatrix();
 
         isInited = true;
         return isInited;
@@ -212,6 +226,12 @@ public class ZGDanmaku {
         maPositionHandle = TexturePool.getMaPositionHandle();
         maTexCoorHandle = TexturePool.getMaTexCoorHandle();
         muMVPMatrixHandle = TexturePool.getMuMVPMatrixHandle();
+
+        mOffsetXHandle = TexturePool.getOffsetXHandle();
+        mOffsetYHandle = TexturePool.getOffsetYHandle();
+        mOffsetZHandle = TexturePool.getOffsetZHandle();
+        mViewWidthHandle = TexturePool.getViewWidthHandle();
+        mViewHeightHandle = TexturePool.getViewHeightHandle();
     }
 
     /**
@@ -274,19 +294,15 @@ public class ZGDanmaku {
         //使用shader程序
         GLES20.glUseProgram(mProgram);
 
-        //初始化矩阵
-        MatrixUtils.setInitStack();
+        //将屏幕宽高和偏移坐标
+        GLES20.glUniform1f(mViewWidthHandle, mViewWidth);
+        GLES20.glUniform1f(mViewHeightHandle, mViewHeight);
+        GLES20.glUniform1f(mOffsetXHandle, -offsetX);
+        GLES20.glUniform1f(mOffsetYHandle, -offsetY);
+        GLES20.glUniform1f(mOffsetZHandle, 0);
 
-        //首先把弹幕移动到右上角
-        MatrixUtils.transtate(2.0f, 0, 0);
-
-        //弹幕平移，同理坐标放大两倍
-        float unitY = -offsetY / mViewHeight * 2.0f;
-        float unitX = -offsetX / mViewWidth * 2.0f;
-        MatrixUtils.transtate(unitX, unitY, 0);
-
-        //将最终变换矩阵传入shader程序
-        GLES20.glUniformMatrix4fv(muMVPMatrixHandle, 1, false, MatrixUtils.getFinalMatrix(), 0);
+        //将矩阵传入shader程序
+        GLES20.glUniformMatrix4fv(muMVPMatrixHandle, 1, false, mMatrix.getInitMatrix(), 0);
 
         //传递顶点位置数据
         //坐标是xyz三维，所以size是3，每个float是4个字节，所以stride是3 * 4
