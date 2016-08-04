@@ -71,6 +71,10 @@ public class ZGDanmaku {
     public ZGDanmaku(Bitmap bitmap) {
         this.mBitmap = bitmap;
         this.mDanmakuWidth = mBitmap.getWidth();
+
+        //初始化矩阵
+        mMatrix = new ZGMatrix();
+        mMatrix.initMatrix();
     }
 
     public boolean init() {
@@ -88,11 +92,6 @@ public class ZGDanmaku {
         if(!initTexture()) {
             return false;
         }
-
-        mMatrix = new ZGMatrix();
-
-        //初始化矩阵
-        mMatrix.initMatrix();
 
         isInited = true;
         return isInited;

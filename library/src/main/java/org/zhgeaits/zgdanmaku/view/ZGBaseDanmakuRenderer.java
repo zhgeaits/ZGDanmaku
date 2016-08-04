@@ -181,8 +181,8 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
 
         long now = SystemClock.elapsedRealtime() - mCurrentTime;
         if (now > 16) {
+            Log.i("ZGDanmaku", "intervalTime:" + mIntervalTime + ", now:" + now + ", size:" + mDanmakus.size());
         }
-        Log.i("ZGDanmaku", "intervalTime:" + mIntervalTime + ", now:" + now + ", size:" + mDanmakus.size());
     }
 
     public void surfaceDestroyed(GL10 gl) {

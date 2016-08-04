@@ -226,7 +226,7 @@ public class ZGDanmakuDispatcher implements Runnable {
 
             time += intervalTime;
 
-            Log.i("ZGDanmaku", "ZGDanmakuDispatcher run intervalTime:" + intervalTime + ", time:" + time);
+//            Log.i("ZGDanmaku", "ZGDanmakuDispatcher run intervalTime:" + intervalTime + ", time:" + time);
 
             //读取临界区的弹幕，然后复制到一个新的list，并去掉已经跑出屏幕的弹幕
             //todo 这样性能OK?

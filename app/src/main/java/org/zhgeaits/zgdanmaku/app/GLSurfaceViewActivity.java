@@ -104,7 +104,7 @@ public class GLSurfaceViewActivity extends Activity {
         shot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for (int i = 0; i < 10; i ++) {
+                for (int i = 0; i < 1000; i ++) {
                     danmakuView.shotTextDanmaku("hello world!");
                 }
             }
