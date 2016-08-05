@@ -140,6 +140,16 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
         }
 
         mCurrentTime = SystemClock.elapsedRealtime();
+
+        if (mDanmakus != null && mDanmakus.size() > 0) {
+            for (int i = 0; i < mDanmakus.size(); i++) {
+                ZGDanmaku danmaku = mDanmakus.get(i);
+                if (danmaku != null) {
+                    danmaku.setViewSize(width, height);
+                    danmaku.initVertexData();
+                }
+            }
+        }
     }
 
     protected void drawFrame(GL10 gl10) {
