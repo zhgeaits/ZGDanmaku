@@ -18,7 +18,6 @@ package org.zhgeaits.zgdanmaku.view;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import org.zhgeaits.zgdanmaku.controller.IZGDanmakuController;
 import org.zhgeaits.zgdanmaku.controller.ZGDanmakuController;
@@ -74,7 +73,6 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
 
     @Override
     public void start() {
-        Log.i("ZGDanmaku", "ZGDanmakuView start");
         stop();
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
         requestRender();
@@ -148,8 +146,24 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
     }
 
     @Override
+    public void shotTextDanmaku(String text, int color, float size) {
+        ZGDanmakuItem item = new ZGDanmakuItem(text, mContext);
+        item.setTextColor(color);
+        item.setTextSize(size);
+        mDanmakuController.addDanmaku(item);
+    }
+
+    @Override
     public void shotTextDanmakuAt(String text, long time) {
         ZGDanmakuItem item = new ZGDanmakuItem(text, mContext, time);
+        mDanmakuController.addDanmaku(item);
+    }
+
+    @Override
+    public void shotTextDanmakuAt(String text, long time, int color, float size) {
+        ZGDanmakuItem item = new ZGDanmakuItem(text, mContext, time);
+        item.setTextColor(color);
+        item.setTextSize(size);
         mDanmakuController.addDanmaku(item);
     }
 }

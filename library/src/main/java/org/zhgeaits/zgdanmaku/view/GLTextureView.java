@@ -1545,15 +1545,18 @@ public class GLTextureView extends TextureView implements TextureView.SurfaceTex
 
     static class LogWriter extends Writer {
 
-        @Override public void close() {
+        @Override
+        public void close() {
             flushBuilder();
         }
 
-        @Override public void flush() {
+        @Override
+        public void flush() {
             flushBuilder();
         }
 
-        @Override public void write(char[] buf, int offset, int count) {
+        @Override
+        public void write(char[] buf, int offset, int count) {
             for(int i = 0; i < count; i++) {
                 char c = buf[offset + i];
                 if ( c == '\n') {

@@ -19,11 +19,11 @@ import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import org.zhgeaits.zgdanmaku.controller.IZGDanmakuController;
 import org.zhgeaits.zgdanmaku.controller.ZGDanmakuController;
 import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
+import org.zhgeaits.zgdanmaku.utils.ZGLog;
 
 /**
  * Created by zhgeatis on 2016/2/22 0022.
@@ -61,6 +61,8 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
         //设置view为透明，并置于顶层，可以在surfaceview之上
         getHolder().setFormat(PixelFormat.TRANSLUCENT);
         setZOrderOnTop(true);
+        //这个可以让在surfaceview之上
+//        setZOrderMediaOverlay(true);
 
         // 设置渲染模式为被动渲染，在调用start()方法以后再设置为主动模式,
         // 主动模式有一条后台OPENGL线程每帧都调用onDrawFrame方法
@@ -76,7 +78,7 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
 
     @Override
     public void start() {
-        Log.i("ZGDanmaku", "ZGDanmakuView start");
+        ZGLog.i("ZGDanmakuView start");
         stop();
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
         requestRender();
@@ -85,6 +87,7 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
 
     @Override
     public void stop() {
+        ZGLog.i("ZGDanmakuView stop");
         mDanmakuController.stop();
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         //清屏
@@ -94,11 +97,13 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
 
     @Override
     public void hide() {
+        ZGLog.i("ZGDanmakuView hide");
         mDanmakuController.hide();
     }
 
     @Override
     public void show() {
+        ZGLog.i("ZGDanmakuView show");
         mDanmakuController.show();
     }
 
@@ -107,6 +112,7 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
         // FIXME: 16/8/3 为什么onPause之后再调onResume没用
 //        onPause();
         if (isStarted()) {
+            ZGLog.i("ZGDanmakuView pause");
             setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
             mDanmakuController.pause();
         }
@@ -117,6 +123,7 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
         // FIXME: 16/8/3 为什么onPause之后再调onResume没用
 //        onResume();
         if (isStarted()) {
+            ZGLog.i("ZGDanmakuView resume");
             mDanmakuController.resume();
             setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
         }
@@ -154,8 +161,24 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
     }
 
     @Override
+    public void shotTextDanmaku(String text, int color, float size) {
+        ZGDanmakuItem item = new ZGDanmakuItem(text, mContext);
+        item.setTextColor(color);
+        item.setTextSize(size);
+        mDanmakuController.addDanmaku(item);
+    }
+
+    @Override
     public void shotTextDanmakuAt(String text, long time) {
         ZGDanmakuItem item = new ZGDanmakuItem(text, mContext, time);
+        mDanmakuController.addDanmaku(item);
+    }
+
+    @Override
+    public void shotTextDanmakuAt(String text, long time, int color, float size) {
+        ZGDanmakuItem item = new ZGDanmakuItem(text, mContext, time);
+        item.setTextColor(color);
+        item.setTextSize(size);
         mDanmakuController.addDanmaku(item);
     }
 }

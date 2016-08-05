@@ -16,12 +16,12 @@
 package org.zhgeaits.zgdanmaku.controller;
 
 import android.content.Context;
-import android.util.Log;
 
 import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
 import org.zhgeaits.zgdanmaku.utils.DimensUtils;
 import org.zhgeaits.zgdanmaku.utils.ShaderUtils;
 import org.zhgeaits.zgdanmaku.utils.ZGDanmakuPool;
+import org.zhgeaits.zgdanmaku.utils.ZGLog;
 import org.zhgeaits.zgdanmaku.view.IZGDanmakuRenderer;
 import org.zhgeaits.zgdanmaku.view.IZGRenderListener;
 
@@ -60,7 +60,7 @@ public class ZGDanmakuController implements IZGDanmakuController {
     }
 
     private void _start() {
-        Log.i("ZGDanmaku", "ZGDanmakuController start now.");
+        ZGLog.i("ZGDanmakuController start now.");
         new Thread(mDispatcher).start();
     }
 
@@ -69,7 +69,7 @@ public class ZGDanmakuController implements IZGDanmakuController {
         if(mRenderer.isOKToRenderer()) {
             _start();
         } else {
-            Log.i("ZGDanmaku", "ZGDanmakuController start after render inited!");
+            ZGLog.i("ZGDanmakuController start after render inited!");
 
             // FIXME: 16/8/3 有可能出现并发情况,线程不安全,不能准确回调
             mRenderer.setListener(new IZGRenderListener() {
@@ -83,6 +83,7 @@ public class ZGDanmakuController implements IZGDanmakuController {
 
     @Override
     public void stop() {
+        ZGLog.i("ZGDanmakuController stop now.");
         resume();
         mDispatcher.quit();
         mDanmakuPool.clear();
@@ -101,6 +102,7 @@ public class ZGDanmakuController implements IZGDanmakuController {
     @Override
     public void pause() {
         if (isStarted()) {
+            ZGLog.i("ZGDanmakuController pause now.");
             mDispatcher.pause();
         }
     }
@@ -108,6 +110,7 @@ public class ZGDanmakuController implements IZGDanmakuController {
     @Override
     public void resume() {
         if (isStarted()) {
+            ZGLog.i("ZGDanmakuController resume now.");
             mRenderer.resume();
             mDispatcher.resume();
         }
@@ -148,6 +151,7 @@ public class ZGDanmakuController implements IZGDanmakuController {
     @Override
     public void addDanmaku(ZGDanmakuItem danmakuItem) {
         if (isStarted()) {
+            ZGLog.d("addDanmaku at time:" + danmakuItem.getOffsetTime());
             mDanmakuPool.offer(danmakuItem);
         }
     }

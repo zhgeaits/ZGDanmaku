@@ -32,11 +32,13 @@ import org.zhgeaits.zgdanmaku.utils.NativeBitmapFactory;
 public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
 
     private Bitmap mBitmap;
-    private String mText;
+    public String mText;
     private Canvas mCanvas;
     private Paint mPainter;
     private Context mContext;
     private long mOffsetTime;//出现的时间
+    private int mColor;//字体颜色
+    private float mSize;//字体大小
 
     public ZGDanmakuItem(String text, Context context) {
         this.mText = text;
@@ -61,6 +63,20 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
         mPainter.setShadowLayer(2, 3, 3, 0x5a000000);
     }
 
+    public void setTextColor(int color) {
+        if (mPainter == null) {
+            initDefaultPainters();
+        }
+        mPainter.setColor(color);
+    }
+
+    public void  setTextSize(float size) {
+        if (mPainter == null) {
+            initDefaultPainters();
+        }
+        mPainter.setTextSize(DimensUtils.dip2pixel(mContext, size));
+    }
+
     public void setPainters(Canvas canvas, Paint paint) {
         this.mCanvas = canvas;
         this.mPainter = paint;
@@ -80,9 +96,12 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
             int height = (int) (mPainter.descent() + baseline + 0.5f);
             int width = (int) (mPainter.measureText(mText) + 0.5f);
 
-            mBitmap = NativeBitmapFactory.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            mCanvas.setBitmap(mBitmap);
-            mCanvas.drawText(mText, 0, baseline, mPainter);
+            if(height > 0 && width > 0) {
+                //这里用到了ARGB_8888, 用RGB565会没有透明的.注意要和GLES20.glTexImage2D对应,不然会崩的
+                mBitmap = NativeBitmapFactory.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                mCanvas.setBitmap(mBitmap);
+                mCanvas.drawText(mText, 0, baseline, mPainter);
+            }
         }
         return mBitmap;
     }

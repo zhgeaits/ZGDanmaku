@@ -16,12 +16,12 @@
 package org.zhgeaits.zgdanmaku.controller;
 
 import android.os.SystemClock;
-import android.util.Log;
 import android.util.SparseArray;
 
 import org.zhgeaits.zgdanmaku.model.ZGDanmaku;
 import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
 import org.zhgeaits.zgdanmaku.utils.ZGDanmakuPool;
+import org.zhgeaits.zgdanmaku.utils.ZGLog;
 import org.zhgeaits.zgdanmaku.view.IZGDanmakuRenderer;
 
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ public class ZGDanmakuDispatcher implements Runnable {
 
     public ZGDanmakuDispatcher(ZGDanmakuPool mDanmakuPool, IZGDanmakuRenderer mRenderer,
                                String mVertexShader, String mFragmentShader) {
-        mLinesAvaliable = new SparseArray<>();
+        mLinesAvaliable = new SparseArray<ZGDanmaku>();
         this.mDanmakuPool = mDanmakuPool;
         this.mRenderer = mRenderer;
         this.mVertexShader = mVertexShader;
@@ -71,13 +71,15 @@ public class ZGDanmakuDispatcher implements Runnable {
 
     /**
      * 判断某弹道是否可用
+     *
      * @param line
      * @return
      */
     private synchronized boolean isLineAvaliable(int line) {
+
         ZGDanmaku danmaku = mLinesAvaliable.get(line);
 
-        if(danmaku == null) {
+        if (danmaku == null) {
             return true;
         }
 
@@ -91,6 +93,7 @@ public class ZGDanmakuDispatcher implements Runnable {
 
     /**
      * 从ZGDanmakuItem生成一个ZGDanmaku
+     *
      * @param item
      * @param line
      * @return
@@ -110,10 +113,12 @@ public class ZGDanmakuDispatcher implements Runnable {
 
     /**
      * 占用某弹道
+     *
      * @param line
      * @param danmaku
      */
     private synchronized void inValidableLine(int line, ZGDanmaku danmaku) {
+        ZGLog.d("ZGDanmakuDispatcher inValidableLine line=" + line);
         mLinesAvaliable.put(line, danmaku);
     }
 
@@ -126,6 +131,7 @@ public class ZGDanmakuDispatcher implements Runnable {
 
     /**
      * 设置行距
+     *
      * @param leading
      */
     public void setLeading(float leading) {
@@ -134,6 +140,7 @@ public class ZGDanmakuDispatcher implements Runnable {
 
     /**
      * 设置行数
+     *
      * @param lines
      */
     public void setLines(int lines) {
@@ -144,6 +151,7 @@ public class ZGDanmakuDispatcher implements Runnable {
      * 停止弹幕
      */
     public void quit() {
+        ZGLog.i("ZGDanmakuDispatcher quit.");
         mStop = true;
         resetLines();
         mDanmakuPool.wakeIfNeed();
@@ -151,6 +159,7 @@ public class ZGDanmakuDispatcher implements Runnable {
 
     /**
      * 是否已经暂停
+     *
      * @return
      */
     public boolean isPaused() {
@@ -180,6 +189,7 @@ public class ZGDanmakuDispatcher implements Runnable {
 
     /**
      * 是否已经暂停了
+     *
      * @return
      */
     public boolean isStop() {
@@ -188,7 +198,7 @@ public class ZGDanmakuDispatcher implements Runnable {
 
     @Override
     public void run() {
-        Log.i("ZGDanmaku", "ZGDanmakuDispatcher running");
+        ZGLog.i("ZGDanmakuDispatcher running");
 
         resetLines();
         mStop = false;
@@ -200,14 +210,14 @@ public class ZGDanmakuDispatcher implements Runnable {
             //暂停
             synchronized (mPaused) {
                 if (mPaused.get()) {
-                    Log.i("ZGDanmaku", "dispatcher paused");
+                    ZGLog.i("dispatcher paused");
                     try {
                         mPaused.wait();
                         mPaused.set(false);
                     } catch (InterruptedException e) {
                     }
                     currentTime = SystemClock.elapsedRealtime();
-                    Log.i("ZGDanmaku", "dispatcher resume");
+                    ZGLog.i("dispatcher resume");
                 }
             }
 
@@ -226,7 +236,7 @@ public class ZGDanmakuDispatcher implements Runnable {
 
             time += intervalTime;
 
-//            Log.i("ZGDanmaku", "ZGDanmakuDispatcher run intervalTime:" + intervalTime + ", time:" + time);
+            ZGLog.d("ZGDanmakuDispatcher run intervalTime:" + intervalTime + ", time:" + time);
 
             //读取临界区的弹幕，然后复制到一个新的list，并去掉已经跑出屏幕的弹幕
             //todo 这样性能OK?
@@ -234,16 +244,13 @@ public class ZGDanmakuDispatcher implements Runnable {
 
             //如果临界区没有弹幕,并且弹幕池没有弹幕了,则进行阻塞,这样的能耗低.
             if (rendererList.size() == 0) {
-                try {
-                    resetLines();
-                    if (mDanmakuPool.waitIfNeed()) {
-                        currentTime = SystemClock.elapsedRealtime();
-                    }
-                } catch (InterruptedException e) {
+                resetLines();
+                if (mDanmakuPool.waitIfNeed()) {
+                    currentTime = SystemClock.elapsedRealtime();
                 }
             }
 
-            List<ZGDanmaku> nextRendererList = new ArrayList<>();
+            List<ZGDanmaku> nextRendererList = new ArrayList<ZGDanmaku>();
             for (int i = 0; i < rendererList.size(); i++) {
                 if (!rendererList.get(i).isFinished()) {
                     nextRendererList.add(rendererList.get(i));
@@ -251,7 +258,7 @@ public class ZGDanmakuDispatcher implements Runnable {
             }
 
             // 处理无效的弹道
-            for (int i = 0; i < mLinesAvaliable.size(); i ++) {
+            for (int i = 0; i < mLinesAvaliable.size(); i++) {
                 if (!nextRendererList.contains(mLinesAvaliable.get(i))) {
                     mLinesAvaliable.put(i, null);
                 }
@@ -261,13 +268,15 @@ public class ZGDanmakuDispatcher implements Runnable {
 
             if (nextRendererList.size() + mLines < MAX_READERING_NUMBER) {
                 //获取有效的弹道，然后读取弹幕池的弹幕进行绘制
-                for (int i = 0; i < mLines; i ++) {
-                    if(isLineAvaliable(i)) {
+                for (int i = 0; i < mLines; i++) {
+                    boolean isLineAvaliabled = isLineAvaliable(i);
+                    ZGLog.d("ZGDanmakuDispatcher isLineAvaliable line=" + i + ", isLineAvaliabled=" +isLineAvaliabled);
+                    if (isLineAvaliabled) {
                         //取出时间最小的弹幕
                         ZGDanmakuItem item = mDanmakuPool.poll();
                         if (item != null) {
                             //如果弹幕偏移时间比较小或者是即时发送的弹幕则进行发送.
-                            if(item.getOffsetTime() <= time || item.getOffsetTime() == -1) {
+                            if (item.getOffsetTime() <= time || item.getOffsetTime() == -1) {
                                 ZGDanmaku danmaku = generateDanmaku(item, i);
                                 nextRendererList.add(danmaku);
                             } else {

@@ -17,7 +17,6 @@ package org.zhgeaits.zgdanmaku.utils;
 
 import android.content.res.Resources;
 import android.opengl.GLES20;
-import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -55,12 +54,14 @@ public class ShaderUtils {
 
             //若编译失败则显示错误日志并删除此shader
             if (compiled[0] == 0) {
-                Log.e("ES20_ERROR", "Could not compile shader " + shaderType + ":");
-                Log.e("ES20_ERROR", GLES20.glGetShaderInfoLog(shader));
+                ZGLog.e("ES20_ERROR" + "Could not compile shader " + shaderType + ":");
+                ZGLog.e("ES20_ERROR" + GLES20.glGetShaderInfoLog(shader));
                 GLES20.glDeleteShader(shader);
                 shader = 0;
             }
         }
+
+        ZGLog.d("loadShader result= " + shader + " shaderType=" + shaderType + ", source=" + source);
         return shader;
     }
 
@@ -110,12 +111,13 @@ public class ShaderUtils {
 
             //若链接失败则报错并删除程序
             if (linkStatus[0] != GLES20.GL_TRUE) {
-                Log.e("ES20_ERROR", "Could not link program: ");
-                Log.e("ES20_ERROR", GLES20.glGetProgramInfoLog(program));
+                ZGLog.e("ES20_ERROR" + "Could not link program: ");
+                ZGLog.e("ES20_ERROR" + GLES20.glGetProgramInfoLog(program));
                 GLES20.glDeleteProgram(program);
                 program = 0;
             }
         }
+        ZGLog.d("createProgram program=" + program + ", \nvertexSource[" + vertexSource + "]" + ", \nfragmentSource[" + fragmentSource + "]");
         return program;
     }
 
@@ -127,7 +129,7 @@ public class ShaderUtils {
     public static void checkGlError(String operation) {
         int error;
         while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
-            Log.e("ES20_ERROR", operation + ": glError " + error);
+            ZGLog.e("ES20_ERROR" + operation + ": glError " + error);
             throw new RuntimeException(operation + ": glError " + error);
         }
     }
@@ -153,8 +155,10 @@ public class ShaderUtils {
             in.close();
             result = new String(buff, "UTF-8");
             result = result.replaceAll("\\r\\n", "\n");
+
+            ZGLog.d("loadFromAssetsFile result=" + result);
         } catch (Exception e) {
-            e.printStackTrace();
+            ZGLog.e("loadFromAssetsFile", e);
         }
         return result;
     }

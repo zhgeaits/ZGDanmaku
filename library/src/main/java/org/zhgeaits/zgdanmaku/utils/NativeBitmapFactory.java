@@ -175,9 +175,9 @@ public class NativeBitmapFactory {
     private static native boolean release();
 
     private static native Bitmap createBitmap(int width, int height, int nativeConfig,
-            boolean hasAlpha);
+                                              boolean hasAlpha);
 
     private static native Bitmap createBitmap19(int width, int height, int nativeConfig,
-            boolean hasAlpha);
+                                                boolean hasAlpha);
 
 }

@@ -17,10 +17,10 @@ package org.zhgeaits.zgdanmaku.view;
 
 import android.opengl.GLES20;
 import android.os.SystemClock;
-import android.util.Log;
 
 import org.zhgeaits.zgdanmaku.model.ZGDanmaku;
 import org.zhgeaits.zgdanmaku.utils.MatrixUtils;
+import org.zhgeaits.zgdanmaku.utils.ZGLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +57,7 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
     protected boolean isInited = false;                         //是否初始化完了
 
     public ZGBaseDanmakuRenderer() {
-        mDanmakus = new ArrayList<>();
+        mDanmakus = new ArrayList<ZGDanmaku>();
     }
 
     @Override
@@ -111,6 +111,9 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
     }
 
     protected void surfaceCreated(GL10 gl10, EGLConfig eglConfig) {
+
+        ZGLog.i("surfaceCreated ");
+
         //开启混色功能，这样是为了让png图片的透明能显示
         GLES20.glEnable(GLES20.GL_BLEND);
 
@@ -119,6 +122,8 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
     }
 
     protected void surfaceChanged(GL10 gl10, int width, int height) {
+
+        ZGLog.i("surfaceChanged width:" + width + ", height:" + height);
 
         this.mViewWidth = width;
         this.mViewHeight = height;
@@ -178,20 +183,20 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
         // 清除深度缓冲与颜色缓冲
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
 
-        if (!isHide) {
-            // 绘制弹幕纹理
-            List<ZGDanmaku> danmakus = mDanmakus;
+        // 绘制弹幕纹理
+        List<ZGDanmaku> danmakus = mDanmakus;
 
-            for (int i = 0; i < danmakus.size(); i++) {
-                ZGDanmaku danmaku = danmakus.get(i);
-                danmaku.addDetalOffsetX(mDetalOffset);
+        for (int i = 0; i < danmakus.size(); i++) {
+            ZGDanmaku danmaku = danmakus.get(i);
+            danmaku.addDetalOffsetX(mDetalOffset);
+            if (!isHide) {
                 danmaku.drawDanmaku();
             }
         }
 
         long now = SystemClock.elapsedRealtime() - mCurrentTime;
         if (now > 16) {
-            Log.i("ZGDanmaku", "intervalTime:" + mIntervalTime + ", now:" + now + ", size:" + mDanmakus.size());
+            ZGLog.i("oops, intervalTime:" + mIntervalTime + ", now:" + now + ", size:" + mDanmakus.size() + ", isHide:" + isHide);
         }
     }
 

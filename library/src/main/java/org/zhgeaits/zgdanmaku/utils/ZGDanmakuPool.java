@@ -15,11 +15,10 @@
  */
 package org.zhgeaits.zgdanmaku.utils;
 
+
 import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
 
-import java.util.LinkedList;
 import java.util.PriorityQueue;
-import java.util.Queue;
 
 /**
  * Created by zhgeaits on 16/2/25.
@@ -30,7 +29,7 @@ public class ZGDanmakuPool {
     private PriorityQueue<ZGDanmakuItem> mCachedDanmaku;
 
     public ZGDanmakuPool() {
-        mCachedDanmaku = new PriorityQueue<>();
+        mCachedDanmaku = new PriorityQueue<ZGDanmakuItem>();
     }
 
     public synchronized void offer(ZGDanmakuItem danmakuItem) {
@@ -47,12 +46,21 @@ public class ZGDanmakuPool {
     }
 
     public synchronized void wakeIfNeed() {
+        ZGLog.d("ZGDanmakuPool wakeIfNeed");
+
         notifyAll();
     }
 
-    public synchronized boolean waitIfNeed() throws InterruptedException{
+    public synchronized boolean waitIfNeed() {
         if (size() == 0) {
-            wait();
+            ZGLog.d("ZGDanmakuPool waitIfNeed");
+
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                ZGLog.e("waitIfNeed error", e);
+            }
+
             return true;
         } else {
             return false;
@@ -60,6 +68,7 @@ public class ZGDanmakuPool {
     }
 
     public synchronized void clear() {
+        ZGLog.d("ZGDanmakuPool clear");
         mCachedDanmaku.clear();
     }
 

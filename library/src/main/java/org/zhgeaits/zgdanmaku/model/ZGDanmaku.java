@@ -19,14 +19,12 @@ import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.os.Build;
 
-import org.zhgeaits.zgdanmaku.utils.MatrixUtils;
 import org.zhgeaits.zgdanmaku.utils.TexturePool;
 import org.zhgeaits.zgdanmaku.utils.ZGMatrix;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.util.Map;
 
 /**
  * Created by zhgeatis on 2016/2/22 0022.
