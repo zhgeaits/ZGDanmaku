@@ -19,6 +19,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Typeface;
+import android.text.TextPaint;
 
 import org.zhgeaits.zgdanmaku.utils.DimensUtils;
 import org.zhgeaits.zgdanmaku.utils.NativeBitmapFactory;
@@ -35,10 +37,9 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
     public String mText;
     private Canvas mCanvas;
     private Paint mPainter;
+    private Paint mStrokePainter;
     private Context mContext;
     private long mOffsetTime;//出现的时间
-    private int mColor;//字体颜色
-    private float mSize;//字体大小
 
     public ZGDanmakuItem(String text, Context context) {
         this.mText = text;
@@ -56,11 +57,22 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
 
     private void initDefaultPainters() {
         mCanvas = new Canvas();
-        mPainter = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mPainter.setTextSize(DimensUtils.dip2pixel(mContext, 18));
-        mPainter.setColor(0xffffffff);
+
+        mPainter = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        mPainter.setTextSize(DimensUtils.dip2pixel(mContext, 20));
+        mPainter.setColor(0xFFFFFFFF);
         mPainter.setTextAlign(Paint.Align.LEFT);
-        mPainter.setShadowLayer(2, 3, 3, 0x5a000000);
+//        Typeface font = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD);
+//        mPainter.setTypeface(font);
+
+        mStrokePainter = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        mStrokePainter.setTextSize(DimensUtils.dip2pixel(mContext, 20));
+        mStrokePainter.setColor(0xFF000000);
+        mStrokePainter.setTextAlign(Paint.Align.LEFT);
+        mStrokePainter.setStyle(Paint.Style.STROKE);
+        mStrokePainter.setStrokeWidth(4.0f);
+        mStrokePainter.setShadowLayer(4, 0, 0, 0xFF000000);
+//        mStrokePainter.setTypeface(font);
     }
 
     public void setTextColor(int color) {
@@ -100,6 +112,7 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
                 //这里用到了ARGB_8888, 用RGB565会没有透明的.注意要和GLES20.glTexImage2D对应,不然会崩的
                 mBitmap = NativeBitmapFactory.createBitmap(width, height, Bitmap.Config.ARGB_8888);
                 mCanvas.setBitmap(mBitmap);
+                mCanvas.drawText(mText, 0, baseline, mStrokePainter);
                 mCanvas.drawText(mText, 0, baseline, mPainter);
             }
         }

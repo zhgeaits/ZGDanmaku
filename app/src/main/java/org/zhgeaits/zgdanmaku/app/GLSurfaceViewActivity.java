@@ -48,7 +48,7 @@ public class GLSurfaceViewActivity extends Activity {
         TexturePool.uninit();
         danmakuView = (IZGDanmakuView) findViewById(R.id.danmaku);
         danmakuView.setSpeed(100);
-        danmakuView.setLines(15);
+        danmakuView.setLines(14);
         danmakuView.setLeading(2);
 
         Button startSwitcher = (Button) findViewById(R.id.StartOrStop);
