@@ -131,6 +131,22 @@ public class ZGDanmakuDispatcher implements Runnable {
     }
 
     /**
+     * 判断是否发这条弹幕
+     * @param item
+     * @return
+     */
+    private boolean shouldShow(ZGDanmakuItem item) {
+        if (item.getOffsetTime() == -1) {
+            return true;
+        }
+
+        if (item.getOffsetTime() <= time && time <= item.getLateTime()) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * 设置行距
      *
      * @param leading
@@ -304,7 +320,7 @@ public class ZGDanmakuDispatcher implements Runnable {
                         ZGDanmakuItem item = mDanmakuPool.poll();
                         if (item != null) {
                             //如果弹幕偏移时间比较小或者是即时发送的弹幕则进行发送.
-                            if (item.getOffsetTime() <= time || item.getOffsetTime() == -1) {
+                            if (shouldShow(item)) {
                                 ZGDanmaku danmaku = generateDanmaku(item, i);
                                 nextRendererList.add(danmaku);
                             } else {

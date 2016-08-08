@@ -78,6 +78,9 @@ public class ZGDanmaku {
 
     public ZGDanmaku(Bitmap bitmap) {
         this.mBitmap = bitmap;
+        if (mBitmap == null) {
+            return;
+        }
         this.mDanmakuWidth = mBitmap.getWidth();
 
         //初始化矩阵

@@ -39,11 +39,13 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
     private Paint mStrokePainter;
     private Context mContext;
     private long mOffsetTime;//出现的时间
+    private long mLateTime;//最迟出现的时间
 
     public ZGDanmakuItem(String text, Context context) {
         this.mText = text;
         this.mContext = context;
         this.mOffsetTime = -1;
+        this.mLateTime = Long.MAX_VALUE;
         initDefaultPainters();
     }
 
@@ -51,6 +53,7 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
         this.mText = text;
         this.mContext = context;
         this.mOffsetTime = time;
+        this.mLateTime = mOffsetTime + 5000;
         initDefaultPainters();
     }
 
@@ -99,6 +102,10 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
      */
     public long getOffsetTime() {
         return mOffsetTime;
+    }
+
+    public long getLateTime() {
+        return mLateTime;
     }
 
     public Bitmap getDanmakuBitmap() {
