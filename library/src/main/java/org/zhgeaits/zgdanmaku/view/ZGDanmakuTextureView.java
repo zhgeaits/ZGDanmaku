@@ -18,6 +18,7 @@ package org.zhgeaits.zgdanmaku.view;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 
 import org.zhgeaits.zgdanmaku.controller.IZGDanmakuController;
 import org.zhgeaits.zgdanmaku.controller.ZGDanmakuController;
@@ -55,6 +56,8 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
 
         mRenderer = new ZGDanmakuRenderer();
         setRenderer((GLSurfaceView.Renderer) mRenderer);
+        DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
+        mRenderer.setDisplayDensity(displayMetrics.density);
 
         //设置textureview透明
         setOpaque(false);

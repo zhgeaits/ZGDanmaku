@@ -65,6 +65,15 @@ public class ZGDanmaku {
     private int mVertexCount = 4;                           //纹理顶点个数，这个是矩形，四个顶点
     private boolean isInited = false;                       //是否已经初始化
     private ZGMatrix mMatrix;                               //矩阵
+    private float mDetalX;                                  //步长, 每毫秒移动的距离
+
+    public final static float BILI_PLAYER_WIDTH = 682;
+    public final static long COMMON_DANMAKU_DURATION = 3800; // B站原始分辨率下弹幕存活时间
+    public final static long MIN_DANMAKU_DURATION = 4000;
+    public final static long MAX_DANMAKU_DURATION_HIGH_DENSITY = 9000;
+    public long REAL_DANMAKU_DURATION = COMMON_DANMAKU_DURATION;
+    public long MAX_DANMAKU_DURATION = MIN_DANMAKU_DURATION;
+
 
     public ZGDanmaku(Bitmap bitmap) {
         this.mBitmap = bitmap;
@@ -91,6 +100,8 @@ public class ZGDanmaku {
             return false;
         }
 
+        calculateDetal();
+
         isInited = true;
         return isInited;
     }
@@ -111,9 +122,25 @@ public class ZGDanmaku {
      * @param width
      * @param height
      */
-    public void setViewSize(int width, int height) {
+    public void setViewSize(int width, int height, float viewportSizeFactor) {
         this.mViewWidth = width;
         this.mViewHeight = height;
+
+        REAL_DANMAKU_DURATION = (long) (COMMON_DANMAKU_DURATION * (viewportSizeFactor
+                * mViewWidth / BILI_PLAYER_WIDTH));
+        REAL_DANMAKU_DURATION = Math.min(MAX_DANMAKU_DURATION_HIGH_DENSITY,
+                REAL_DANMAKU_DURATION);
+        REAL_DANMAKU_DURATION = Math.max(MIN_DANMAKU_DURATION, REAL_DANMAKU_DURATION);
+
+        MAX_DANMAKU_DURATION = Math.max(COMMON_DANMAKU_DURATION, MAX_DANMAKU_DURATION);
+        MAX_DANMAKU_DURATION = Math.max(REAL_DANMAKU_DURATION, MAX_DANMAKU_DURATION);
+    }
+
+    /**
+     * 计算步长
+     */
+    private void calculateDetal() {
+        mDetalX = (float)(mBitmap.getWidth() + mViewWidth) / (float)MAX_DANMAKU_DURATION;
     }
 
     /**
@@ -140,6 +167,13 @@ public class ZGDanmaku {
         this.offsetX += detalOffsetx;
     }
 
+    /**
+     * 移动
+     * @param time
+     */
+    public void move(long time) {
+        this.offsetX += (mDetalX * time);
+    }
     /**
      * 获取当前的行偏移量
      * @return

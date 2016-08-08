@@ -106,6 +106,13 @@ public class GLSurfaceViewActivity extends Activity {
             public void onClick(View v) {
                 for (int i = 0; i < 1000; i ++) {
                     danmakuView.shotTextDanmaku("hello world!");
+                    danmakuView.shotTextDanmaku("23333");
+                    danmakuView.shotTextDanmaku("SBBBBBBBBBBBBBBBBBBBBBBBB");
+                    danmakuView.shotTextDanmaku("hanimeiadsfa");
+                    danmakuView.shotTextDanmaku("fuck you all");
+                    danmakuView.shotTextDanmaku("fuck man");
+                    danmakuView.shotTextDanmaku("SBBBBBBBBBBBBBBBBBBBBBBBBddddd");
+                    danmakuView.shotTextDanmaku("23333333333333333333");
                 }
             }
         });

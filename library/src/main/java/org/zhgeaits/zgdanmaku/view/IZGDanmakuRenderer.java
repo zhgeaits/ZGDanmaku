@@ -36,6 +36,10 @@ public interface IZGDanmakuRenderer {
 
     int getViewHeight();
 
+    float getViewportSizeFactor();
+
+    void setDisplayDensity(float density);
+
     void setListener(IZGRenderListener listener);
 
     void setSpeed(float speed);

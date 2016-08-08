@@ -106,7 +106,7 @@ public class ZGDanmakuDispatcher implements Runnable {
 
         float offsetY = (item.getDanmakuHeight() + mLineLeading) * line;
         danmaku.setOffsetY(offsetY);
-        danmaku.setViewSize(mRenderer.getViewWidth(), mRenderer.getViewHeight());
+        danmaku.setViewSize(mRenderer.getViewWidth(), mRenderer.getViewHeight(), mRenderer.getViewportSizeFactor());
         danmaku.setShader(mVertexShader, mFragmentShader);
 
         return danmaku;

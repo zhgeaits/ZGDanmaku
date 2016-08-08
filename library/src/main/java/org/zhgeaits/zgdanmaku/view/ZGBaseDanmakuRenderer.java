@@ -15,6 +15,7 @@
  */
 package org.zhgeaits.zgdanmaku.view;
 
+import android.content.Context;
 import android.opengl.GLES20;
 import android.os.SystemClock;
 
@@ -56,6 +57,7 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
     protected boolean isHide = false;                           //是否打开弹幕
     protected boolean isInited = false;                         //是否初始化完了
     protected boolean isPaused = false;                         //是否已经暂停
+    protected float mDispDensity = 1.0f;                        //默认的屏幕密度 160dpi
 
     public ZGBaseDanmakuRenderer() {
         mDanmakus = new ArrayList<ZGDanmaku>();
@@ -84,6 +86,16 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
     @Override
     public int getViewHeight() {
         return mViewHeight;
+    }
+
+    @Override
+    public float getViewportSizeFactor() {
+        return 1 / (mDispDensity - 0.6f);
+    }
+
+    @Override
+    public void setDisplayDensity(float density) {
+        this.mDispDensity = density;
     }
 
     @Override
@@ -156,7 +168,7 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
             for (int i = 0; i < mDanmakus.size(); i++) {
                 ZGDanmaku danmaku = mDanmakus.get(i);
                 if (danmaku != null) {
-                    danmaku.setViewSize(width, height);
+                    danmaku.setViewSize(width, height, getViewportSizeFactor());
                     danmaku.initVertexData();
                 }
             }
@@ -173,16 +185,13 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
          * 如果帧率快了,则调整一下
          */
         if (mIntervalTime < DEFAUTL_FRAME_INTERVAL) {
-            try {
-                Thread.sleep(DEFAUTL_FRAME_INTERVAL - mIntervalTime);
-            } catch (InterruptedException e) {
-            }
+            SystemClock.sleep(DEFAUTL_FRAME_INTERVAL - mIntervalTime);
             mCurrentTime = SystemClock.elapsedRealtime();
             mIntervalTime = mCurrentTime - mLastTime;
         }
 
         if (!isPaused) {
-            mDetalOffset = mSpeed * ((float) (mIntervalTime) / 1000.0f);
+//            mDetalOffset = mSpeed * ((float) (mIntervalTime) / 1000.0f);
         } else {
             mDetalOffset = 0;
         }
@@ -198,7 +207,8 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
 
         for (int i = 0; i < danmakus.size(); i++) {
             ZGDanmaku danmaku = danmakus.get(i);
-            danmaku.addDetalOffsetX(mDetalOffset);
+//            danmaku.addDetalOffsetX(mDetalOffset);
+            danmaku.move(16);
             if (!isHide) {
                 danmaku.drawDanmaku();
             }

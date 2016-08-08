@@ -19,6 +19,7 @@ import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 
 import org.zhgeaits.zgdanmaku.controller.IZGDanmakuController;
 import org.zhgeaits.zgdanmaku.controller.ZGDanmakuController;
@@ -57,6 +58,8 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
 
         mRenderer = new ZGDanmakuRenderer();
         setRenderer((Renderer) mRenderer);
+        DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
+        mRenderer.setDisplayDensity(displayMetrics.density);
 
         //设置view为透明，并置于顶层，可以在surfaceview之上
         getHolder().setFormat(PixelFormat.TRANSLUCENT);
