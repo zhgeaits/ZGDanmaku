@@ -27,9 +27,9 @@ mat4 getFinalMatrix()
     float unitZ;
 
     //弹幕平移，同理坐标放大两倍
-    unitX = offsetX / mViewWidth * 2.0f;
-    unitY = offsetY / mViewHeight * 2.0f;
-    unitZ = 0.0f;
+    unitX = offsetX / mViewWidth * 2.0;
+    unitY = offsetY / mViewHeight * 2.0;
+    unitZ = 0.0;
 
     mat4 final = translateM(unitX, unitY, unitZ);
     return final;

@@ -54,8 +54,8 @@ public class ShaderUtils {
 
             //若编译失败则显示错误日志并删除此shader
             if (compiled[0] == 0) {
-                ZGLog.e("ES20_ERROR" + "Could not compile shader " + shaderType + ":");
-                ZGLog.e("ES20_ERROR" + GLES20.glGetShaderInfoLog(shader));
+                ZGLog.e("ES20_ERROR:" + "Could not compile shader " + shaderType + ":");
+                ZGLog.e("ES20_ERROR:\n" + GLES20.glGetShaderInfoLog(shader));
                 GLES20.glDeleteShader(shader);
                 shader = 0;
             }

@@ -19,7 +19,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Typeface;
 import android.text.TextPaint;
 
 import org.zhgeaits.zgdanmaku.utils.DimensUtils;
