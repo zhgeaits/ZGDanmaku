@@ -99,12 +99,18 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
     public void hide() {
         ZGLog.i("ZGDanmakuView hide");
         mDanmakuController.hide();
+        if (isPaused()) {
+            requestRender();
+        }
     }
 
     @Override
     public void show() {
         ZGLog.i("ZGDanmakuView show");
         mDanmakuController.show();
+        if (isPaused()) {
+            requestRender();
+        }
     }
 
     @Override
@@ -180,5 +186,10 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
         item.setTextColor(color);
         item.setTextSize(size);
         mDanmakuController.addDanmaku(item);
+    }
+
+    @Override
+    public void seek(long time) {
+        mDanmakuController.updateTime(time);
     }
 }

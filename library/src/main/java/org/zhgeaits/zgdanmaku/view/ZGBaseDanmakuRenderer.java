@@ -55,6 +55,7 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
     protected long mIntervalTime;                               //每帧的时间间隔
     protected boolean isHide = false;                           //是否打开弹幕
     protected boolean isInited = false;                         //是否初始化完了
+    protected boolean isPaused = false;                         //是否已经暂停
 
     public ZGBaseDanmakuRenderer() {
         mDanmakus = new ArrayList<ZGDanmaku>();
@@ -103,6 +104,11 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
     @Override
     public boolean isHide() {
         return isHide;
+    }
+
+    @Override
+    public void setPaused(boolean paused) {
+        this.isPaused = paused;
     }
 
     @Override
@@ -175,7 +181,11 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
             mIntervalTime = mCurrentTime - mLastTime;
         }
 
-        mDetalOffset = mSpeed * ((float) (mIntervalTime) / 1000.0f);
+        if (!isPaused) {
+            mDetalOffset = mSpeed * ((float) (mIntervalTime) / 1000.0f);
+        } else {
+            mDetalOffset = 0;
+        }
 
         // 设置屏幕背景色RGBA
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);

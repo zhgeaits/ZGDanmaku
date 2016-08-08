@@ -57,6 +57,7 @@ public class ZGDanmakuDispatcher implements Runnable {
     private boolean mStop;                                  //是否暂停
     private long time;                                      //当前时间轴
     private volatile AtomicBoolean mPaused;                 //暂停锁
+    private boolean isSeek;                                 //是否执行了seek
 
     public ZGDanmakuDispatcher(ZGDanmakuPool mDanmakuPool, IZGDanmakuRenderer mRenderer,
                                String mVertexShader, String mFragmentShader) {
@@ -188,6 +189,16 @@ public class ZGDanmakuDispatcher implements Runnable {
     }
 
     /**
+     * 更新时间
+     * @param time
+     */
+    public synchronized void updateTime(long time) {
+        this.time = time;
+        isSeek = true;
+        ZGLog.i("updateTime time:" + time);
+    }
+
+    /**
      * 是否已经暂停了
      *
      * @return
@@ -202,7 +213,11 @@ public class ZGDanmakuDispatcher implements Runnable {
 
         resetLines();
         mStop = false;
-        time = 0;
+        boolean firstSeek = false;
+        if (!isSeek) {
+            time = 0;
+            firstSeek = true;
+        }
         long lastTime, intervalTime;
         long currentTime = SystemClock.elapsedRealtime();
         while (!mStop) {
@@ -234,7 +249,20 @@ public class ZGDanmakuDispatcher implements Runnable {
                 intervalTime = currentTime - lastTime;
             }
 
-            time += intervalTime;
+            synchronized (this) {
+                time += intervalTime;
+                if (isSeek) {
+                    //这里只是临时的做法
+                    isSeek = false;
+                    if (!firstSeek) {
+                        mDanmakuPool.clear();
+                    }
+                    firstSeek = false;
+                    //如果seek以后,只清空弹幕池的弹幕,还在屏幕的弹幕(就是在渲染器里面的弹幕)还继续跑
+//                    mRenderer.setRendererDanmakuList(new ArrayList<ZGDanmaku>());
+                    continue;
+                }
+            }
 
             ZGLog.d("ZGDanmakuDispatcher run intervalTime:" + intervalTime + ", time:" + time);
 

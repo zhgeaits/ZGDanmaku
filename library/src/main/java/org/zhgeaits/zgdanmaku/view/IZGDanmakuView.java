@@ -87,6 +87,12 @@ public interface IZGDanmakuView {
     void setSpeed(float speed);
 
     /**
+     * seek时间
+     * @param time
+     */
+    void seek(long time);
+
+    /**
      * 马上发送一条弹幕
      * @param text
      */

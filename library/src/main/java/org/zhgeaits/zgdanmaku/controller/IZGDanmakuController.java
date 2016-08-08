@@ -90,6 +90,12 @@ public interface IZGDanmakuController {
     void setSpeed(float speed);
 
     /**
+     * 更新时间
+     * @param time
+     */
+    void updateTime(long time);
+
+    /**
      * 添加一个弹幕
      * @param danmakuItem
      */

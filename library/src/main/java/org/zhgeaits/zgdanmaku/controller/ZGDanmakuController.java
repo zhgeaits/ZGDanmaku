@@ -149,6 +149,11 @@ public class ZGDanmakuController implements IZGDanmakuController {
     }
 
     @Override
+    public void updateTime(long time) {
+        mDispatcher.updateTime(time);
+    }
+
+    @Override
     public void addDanmaku(ZGDanmakuItem danmakuItem) {
         if (isStarted()) {
             ZGLog.d("addDanmaku at time:" + danmakuItem.getOffsetTime());

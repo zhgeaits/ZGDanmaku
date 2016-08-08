@@ -166,4 +166,9 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
         item.setTextSize(size);
         mDanmakuController.addDanmaku(item);
     }
+
+    @Override
+    public void seek(long time) {
+        mDanmakuController.updateTime(time);
+    }
 }
