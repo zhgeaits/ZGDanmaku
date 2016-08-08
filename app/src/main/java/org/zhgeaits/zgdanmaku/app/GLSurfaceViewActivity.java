@@ -112,9 +112,9 @@ public class GLSurfaceViewActivity extends Activity {
                     danmakuView.shotTextDanmaku("hey you all", 0xff8c8c8c, 20);
                     danmakuView.shotTextDanmaku("hey man", 0xffFF8900, 20);
                     danmakuView.shotTextDanmaku("wo ai zhangge, ta shi wu di shuai ge!");
-                    danmakuView.shotTextDanmaku("23333333333333333333");
-                    danmakuView.shotTextDanmaku("i love hanmeimei.");
-                    danmakuView.shotTextDanmaku("shit man!");
+                    danmakuView.shotTextDanmaku("23333333333333333333", 0xFF009688, 20);
+                    danmakuView.shotTextDanmaku("I love hanmeimei.", 0xFFFF0004, 20);
+                    danmakuView.shotTextDanmaku("shit man!", 0xFFFFFF00, 20);
                 }
             }
         });
