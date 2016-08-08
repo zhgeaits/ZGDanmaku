@@ -104,8 +104,17 @@ public class GLTextureViewActivity extends Activity {
         shot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for (int i = 0; i < 10; i ++) {
-                    danmakuView.shotTextDanmaku("hello world!");
+                for (int i = 0; i < 1000; i ++) {
+                    danmakuView.shotTextDanmaku("hello world!", 0xffFF4081, 20);
+                    danmakuView.shotTextDanmaku("23333", 0xffFFBB33, 20);
+                    danmakuView.shotTextDanmaku("SBBBBBBBBBBBBBBBBBBBBBBBB");
+                    danmakuView.shotTextDanmaku("hanmeimei", 0xff3aca4e, 20);
+                    danmakuView.shotTextDanmaku("hey you all", 0xff8c8c8c, 20);
+                    danmakuView.shotTextDanmaku("hey man", 0xffFF8900, 20);
+                    danmakuView.shotTextDanmaku("SBBBBBBBBBBBBBBBBBBBBBBBBddddd");
+                    danmakuView.shotTextDanmaku("23333333333333333333");
+                    danmakuView.shotTextDanmaku("i love hanmeimei.");
+                    danmakuView.shotTextDanmaku("shit man!");
                 }
             }
         });

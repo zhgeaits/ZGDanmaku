@@ -23,6 +23,7 @@ import android.util.DisplayMetrics;
 import org.zhgeaits.zgdanmaku.controller.IZGDanmakuController;
 import org.zhgeaits.zgdanmaku.controller.ZGDanmakuController;
 import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
+import org.zhgeaits.zgdanmaku.utils.ZGLog;
 
 /**
  * Created by zhgeaits on 16/2/25.
@@ -58,6 +59,7 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
         setRenderer((GLSurfaceView.Renderer) mRenderer);
         DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
         mRenderer.setDisplayDensity(displayMetrics.density);
+        mRenderer.useTextureView();
 
         //设置textureview透明
         setOpaque(false);
@@ -76,6 +78,7 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
 
     @Override
     public void start() {
+        ZGLog.i("ZGDanmakuView start");
         stop();
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
         requestRender();
@@ -84,6 +87,7 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
 
     @Override
     public void stop() {
+        ZGLog.i("ZGDanmakuView stop");
         mDanmakuController.stop();
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         //清屏
@@ -93,17 +97,28 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
 
     @Override
     public void hide() {
+        ZGLog.i("ZGDanmakuView hide");
         mDanmakuController.hide();
+        if (isPaused()) {
+            requestRender();
+        }
     }
 
     @Override
     public void show() {
+        ZGLog.i("ZGDanmakuView show");
         mDanmakuController.show();
+        if (isPaused()) {
+            requestRender();
+        }
     }
 
     @Override
     public void pause() {
+        // FIXME: 16/8/3 为什么onPause之后再调onResume没用
+//        onPause();
         if (isStarted()) {
+            ZGLog.i("ZGDanmakuView pause");
             setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
             mDanmakuController.pause();
         }
@@ -111,7 +126,10 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
 
     @Override
     public void resume() {
+        // FIXME: 16/8/3 为什么onPause之后再调onResume没用
+//        onResume();
         if (isStarted()) {
+            ZGLog.i("ZGDanmakuView resume");
             mDanmakuController.resume();
             setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
         }

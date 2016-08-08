@@ -24,6 +24,7 @@ import javax.microedition.khronos.opengles.GL10;
  * Created by zhgeaits on 16/2/26.
  * ZGDanmakuTextureView2的渲染器
  */
+@Deprecated
 public class ZGDanmakuTextureViewRenderer extends ZGBaseDanmakuRenderer implements GLTextureView.Renderer {
 
     @Override

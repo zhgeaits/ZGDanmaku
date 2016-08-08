@@ -51,4 +51,6 @@ public interface IZGDanmakuRenderer {
     void resume();
 
     void setPaused(boolean paused);
+
+    void useTextureView();
 }

@@ -34,6 +34,7 @@ import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
  * https://github.com/eaglesakura/gltextureview.git
  * 相对比另外两个效率都低一些
  */
+@Deprecated
 public class ZGDanmakuTextureView2 extends GLTextureView implements IZGDanmakuView {
 
     private Context mContext;

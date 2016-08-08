@@ -18,6 +18,7 @@ package org.zhgeaits.zgdanmaku.view;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.os.SystemClock;
+import android.util.Log;
 
 import org.zhgeaits.zgdanmaku.model.ZGDanmaku;
 import org.zhgeaits.zgdanmaku.utils.MatrixUtils;
@@ -43,7 +44,7 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
      * 默认每帧的时间间隔,16ms,即60帧/s
      * 实际上OpenGLES是基于硬件的,Android这边的GLSurfaceView都是60帧/s
      */
-    private final static int DEFAUTL_FRAME_INTERVAL = 16;
+    private static int DEFAUTL_FRAME_INTERVAL = 16;
 
     protected List<ZGDanmaku> mDanmakus;                        //弹幕临界区
     protected IZGRenderListener mListener;                      //初始化成功监听器
@@ -58,6 +59,7 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
     protected boolean isInited = false;                         //是否初始化完了
     protected boolean isPaused = false;                         //是否已经暂停
     protected float mDispDensity = 1.0f;                        //默认的屏幕密度 160dpi
+    protected boolean useTextureView = false;                   //根据使用TextureView进行优化
 
     public ZGBaseDanmakuRenderer() {
         mDanmakus = new ArrayList<ZGDanmaku>();
@@ -128,6 +130,12 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
         mCurrentTime = SystemClock.elapsedRealtime();
     }
 
+    @Override
+    public void useTextureView() {
+        useTextureView = true;
+        DEFAUTL_FRAME_INTERVAL = 6;
+    }
+
     protected void surfaceCreated(GL10 gl10, EGLConfig eglConfig) {
 
         ZGLog.i("surfaceCreated ");
@@ -177,8 +185,22 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
 
     protected void drawFrame(GL10 gl10) {
 
-//        long now = 0;
-//        mCurrentTime = SystemClock.elapsedRealtime();
+        if (useTextureView) {
+            mLastTime = mCurrentTime;
+            mCurrentTime = SystemClock.elapsedRealtime();
+            mIntervalTime = mCurrentTime - mLastTime;
+
+            /**
+             * 如果帧率快了,则调整一下
+             */
+            if (mIntervalTime < DEFAUTL_FRAME_INTERVAL) {
+                SystemClock.sleep(DEFAUTL_FRAME_INTERVAL - mIntervalTime);
+                mCurrentTime = SystemClock.elapsedRealtime();
+                mIntervalTime = mCurrentTime - mLastTime;
+            }
+
+            ZGLog.i("zhangge-test mIntervalTime:" + mIntervalTime);
+        }
 
         if (!isPaused) {
             mIntervalTime = DEFAUTL_FRAME_INTERVAL;
@@ -202,11 +224,6 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
                 danmaku.drawDanmaku();
             }
         }
-
-//        now = SystemClock.elapsedRealtime() - mCurrentTime;
-//        if (now > 16) {
-//            ZGLog.i("oops, intervalTime:" + mIntervalTime + ", now:" + now + ", size:" + mDanmakus.size() + ", isHide:" + isHide);
-//        }
     }
 
     public void surfaceDestroyed(GL10 gl) {
