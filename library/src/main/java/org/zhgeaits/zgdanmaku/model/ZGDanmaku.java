@@ -66,6 +66,7 @@ public class ZGDanmaku {
     private boolean isInited = false;                       //是否已经初始化
     private ZGMatrix mMatrix;                               //矩阵
     private float mDetalX;                                  //步长, 每毫秒移动的距离
+    private float mStep;                                    //每帧移动的距离
 
     public final static float BILI_PLAYER_WIDTH = 682;
     public final static long COMMON_DANMAKU_DURATION = 3800; // B站原始分辨率下弹幕存活时间
@@ -100,8 +101,6 @@ public class ZGDanmaku {
             return false;
         }
 
-        calculateDetal();
-
         isInited = true;
         return isInited;
     }
@@ -134,6 +133,8 @@ public class ZGDanmaku {
 
         MAX_DANMAKU_DURATION = Math.max(COMMON_DANMAKU_DURATION, MAX_DANMAKU_DURATION);
         MAX_DANMAKU_DURATION = Math.max(REAL_DANMAKU_DURATION, MAX_DANMAKU_DURATION);
+
+        calculateDetal();
     }
 
     /**
@@ -172,7 +173,10 @@ public class ZGDanmaku {
      * @param time
      */
     public void move(long time) {
-        this.offsetX += (mDetalX * time);
+        if (mStep == 0) {
+            mStep = mDetalX * time;
+        }
+        this.offsetX += mStep;
     }
     /**
      * 获取当前的行偏移量

@@ -177,23 +177,13 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
 
     protected void drawFrame(GL10 gl10) {
 
-        mLastTime = mCurrentTime;
-        mCurrentTime = SystemClock.elapsedRealtime();
-        mIntervalTime = mCurrentTime - mLastTime;
-
-        /**
-         * 如果帧率快了,则调整一下
-         */
-        if (mIntervalTime < DEFAUTL_FRAME_INTERVAL) {
-            SystemClock.sleep(DEFAUTL_FRAME_INTERVAL - mIntervalTime);
-            mCurrentTime = SystemClock.elapsedRealtime();
-            mIntervalTime = mCurrentTime - mLastTime;
-        }
+//        long now = 0;
+//        mCurrentTime = SystemClock.elapsedRealtime();
 
         if (!isPaused) {
-//            mDetalOffset = mSpeed * ((float) (mIntervalTime) / 1000.0f);
+            mIntervalTime = DEFAUTL_FRAME_INTERVAL;
         } else {
-            mDetalOffset = 0;
+            mIntervalTime = 0;
         }
 
         // 设置屏幕背景色RGBA
@@ -207,17 +197,16 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
 
         for (int i = 0; i < danmakus.size(); i++) {
             ZGDanmaku danmaku = danmakus.get(i);
-//            danmaku.addDetalOffsetX(mDetalOffset);
-            danmaku.move(16);
+            danmaku.move(mIntervalTime);
             if (!isHide) {
                 danmaku.drawDanmaku();
             }
         }
 
-        long now = SystemClock.elapsedRealtime() - mCurrentTime;
-        if (now > 16) {
-            ZGLog.i("oops, intervalTime:" + mIntervalTime + ", now:" + now + ", size:" + mDanmakus.size() + ", isHide:" + isHide);
-        }
+//        now = SystemClock.elapsedRealtime() - mCurrentTime;
+//        if (now > 16) {
+//            ZGLog.i("oops, intervalTime:" + mIntervalTime + ", now:" + now + ", size:" + mDanmakus.size() + ", isHide:" + isHide);
+//        }
     }
 
     public void surfaceDestroyed(GL10 gl) {
