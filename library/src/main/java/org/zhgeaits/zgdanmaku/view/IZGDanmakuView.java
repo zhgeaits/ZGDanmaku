@@ -98,6 +98,10 @@ public interface IZGDanmakuView {
      */
     void shotTextDanmaku(String text);
 
+    void shotTextDanmaku(String text, int color);
+
+    void shotTextDanmaku(String text, float size);
+
     /**
      * 马上发送一条弹幕, 带有颜色和大小
      * @param text
@@ -112,6 +116,10 @@ public interface IZGDanmakuView {
      * @param time
      */
     void shotTextDanmakuAt(String text, long time);
+
+    void shotTextDanmakuAt(String text, long time, int color);
+
+    void shotTextDanmakuAt(String text, long time, float size);
 
     /**
      * 指定时间发送一条, 带有颜色和大小
