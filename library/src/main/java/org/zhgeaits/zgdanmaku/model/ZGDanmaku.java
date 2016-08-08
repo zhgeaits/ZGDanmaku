@@ -68,14 +68,6 @@ public class ZGDanmaku {
     private float mDetalX;                                  //步长, 每毫秒移动的距离
     private float mStep;                                    //每帧移动的距离
 
-    public final static float BILI_PLAYER_WIDTH = 682;
-    public final static long COMMON_DANMAKU_DURATION = 3800; // B站原始分辨率下弹幕存活时间
-    public final static long MIN_DANMAKU_DURATION = 4000;
-    public final static long MAX_DANMAKU_DURATION_HIGH_DENSITY = 9000;
-    public long REAL_DANMAKU_DURATION = COMMON_DANMAKU_DURATION;
-    public long MAX_DANMAKU_DURATION = MIN_DANMAKU_DURATION;
-
-
     public ZGDanmaku(Bitmap bitmap) {
         this.mBitmap = bitmap;
         if (mBitmap == null) {
@@ -124,27 +116,9 @@ public class ZGDanmaku {
      * @param width
      * @param height
      */
-    public void setViewSize(int width, int height, float viewportSizeFactor) {
+    public void setViewSize(int width, int height) {
         this.mViewWidth = width;
         this.mViewHeight = height;
-
-        REAL_DANMAKU_DURATION = (long) (COMMON_DANMAKU_DURATION * (viewportSizeFactor
-                * mViewWidth / BILI_PLAYER_WIDTH));
-        REAL_DANMAKU_DURATION = Math.min(MAX_DANMAKU_DURATION_HIGH_DENSITY,
-                REAL_DANMAKU_DURATION);
-        REAL_DANMAKU_DURATION = Math.max(MIN_DANMAKU_DURATION, REAL_DANMAKU_DURATION);
-
-        MAX_DANMAKU_DURATION = Math.max(COMMON_DANMAKU_DURATION, MAX_DANMAKU_DURATION);
-        MAX_DANMAKU_DURATION = Math.max(REAL_DANMAKU_DURATION, MAX_DANMAKU_DURATION);
-
-        calculateDetal();
-    }
-
-    /**
-     * 计算步长
-     */
-    private void calculateDetal() {
-        mDetalX = (float)(mBitmap.getWidth() + mViewWidth) / (float)MAX_DANMAKU_DURATION;
     }
 
     /**
@@ -181,6 +155,23 @@ public class ZGDanmaku {
         }
         this.offsetX += mStep;
     }
+
+    /**
+     * 获取1ms移动的距离
+     * @return
+     */
+    public float getDetalX() {
+        return mDetalX;
+    }
+
+    /**
+     * 设置1ms移动的距离
+     * @param detalX
+     */
+    public void setDetalX(float detalX) {
+        this.mDetalX = detalX;
+    }
+
     /**
      * 获取当前的行偏移量
      * @return

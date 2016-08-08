@@ -23,6 +23,7 @@ import android.text.TextPaint;
 
 import org.zhgeaits.zgdanmaku.utils.DimensUtils;
 import org.zhgeaits.zgdanmaku.utils.NativeBitmapFactory;
+import org.zhgeaits.zgdanmaku.utils.ZGLog;
 
 /**
  * Created by zhgeaits on 16/2/24.
@@ -32,12 +33,20 @@ import org.zhgeaits.zgdanmaku.utils.NativeBitmapFactory;
  */
 public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
 
+    public final static float BILI_PLAYER_WIDTH = 682;
+    public final static long COMMON_DANMAKU_DURATION = 3800; // B站原始分辨率下弹幕存活时间
+    public final static long MIN_DANMAKU_DURATION = 4000;
+    public final static long MAX_DANMAKU_DURATION_HIGH_DENSITY = 9000;
+    public long REAL_DANMAKU_DURATION = COMMON_DANMAKU_DURATION;
+    public long MAX_DANMAKU_DURATION = MIN_DANMAKU_DURATION;
+
     private Bitmap mBitmap;
     public String mText;
     private Canvas mCanvas;
     private Paint mPainter;
     private Paint mStrokePainter;
     private Context mContext;
+    private float mDetalX;
     private long mOffsetTime;//出现的时间
     private long mLateTime;//最迟出现的时间
 
@@ -114,12 +123,16 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
             int height = (int) (mPainter.descent() + baseline + 0.5f);
             int width = (int) (mPainter.measureText(mText) + 0.5f);
 
-            if(height > 0 && width > 0) {
-                //这里用到了ARGB_8888, 用RGB565会没有透明的.注意要和GLES20.glTexImage2D对应,不然会崩的
-                mBitmap = NativeBitmapFactory.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                mCanvas.setBitmap(mBitmap);
-                mCanvas.drawText(mText, 0, baseline, mStrokePainter);
-                mCanvas.drawText(mText, 0, baseline, mPainter);
+            try {
+                if(height > 0 && width > 0) {
+                    //这里用到了ARGB_8888, 用RGB565会没有透明的.注意要和GLES20.glTexImage2D对应,不然会崩的
+                    mBitmap = NativeBitmapFactory.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                    mCanvas.setBitmap(mBitmap);
+                    mCanvas.drawText(mText, 0, baseline, mStrokePainter);
+                    mCanvas.drawText(mText, 0, baseline, mPainter);
+                }
+            } catch (OutOfMemoryError e) {
+                ZGLog.e("getDanmakuBitmap oom:", e);
             }
         }
         return mBitmap;
@@ -131,6 +144,44 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
             return 0;
         }
         return mBitmap.getHeight();
+    }
+
+    public int getDanmakuWidth() {
+        getDanmakuBitmap();
+        if (mBitmap == null) {
+            return 0;
+        }
+        return mBitmap.getWidth();
+    }
+
+    /**
+     * 计算每1ms的步长
+     * @param width
+     * @param height
+     * @param viewportSizeFactor
+     */
+    public void updateDetalX(int width, int height, float viewportSizeFactor) {
+        REAL_DANMAKU_DURATION = (long) (COMMON_DANMAKU_DURATION * (viewportSizeFactor
+                * width / BILI_PLAYER_WIDTH));
+        REAL_DANMAKU_DURATION = Math.min(MAX_DANMAKU_DURATION_HIGH_DENSITY,
+                REAL_DANMAKU_DURATION);
+        REAL_DANMAKU_DURATION = Math.max(MIN_DANMAKU_DURATION, REAL_DANMAKU_DURATION);
+
+        MAX_DANMAKU_DURATION = Math.max(COMMON_DANMAKU_DURATION, MAX_DANMAKU_DURATION);
+        MAX_DANMAKU_DURATION = Math.max(REAL_DANMAKU_DURATION, MAX_DANMAKU_DURATION);
+
+        calculateDetal(width, height);
+    }
+
+    /**
+     * 计算步长
+     */
+    private void calculateDetal(int width, int height) {
+        mDetalX = (float)(getDanmakuWidth() + width) / (float)MAX_DANMAKU_DURATION;
+    }
+
+    public float getDetalX() {
+        return mDetalX;
     }
 
     @Override

@@ -93,6 +93,41 @@ public class ZGDanmakuDispatcher implements Runnable {
     }
 
     /**
+     * 寻找一条追不上的弹道
+     * @return
+     */
+    private synchronized int findFittestLine(ZGDanmakuItem item) {
+
+        int line = -1;
+        item.updateDetalX(mRenderer.getViewWidth(), mRenderer.getViewHeight(), mRenderer.getViewportSizeFactor());
+        float scrollTime = mRenderer.getViewWidth() / item.getDetalX();
+
+        for (int i = 0; i < mLines; i++) {
+            ZGDanmaku danmaku = mLinesAvaliable.get(i);
+
+            if (danmaku == null) {
+                return i;
+            }
+
+            if (danmaku.getCurrentOffsetX() > danmaku.getDanmakuWidth() + mLineLeading * 5) {
+                if (item.getDetalX() <= danmaku.getDetalX()) {
+                    line = i;
+                    break;
+                }
+                float preTime = (mRenderer.getViewWidth() - danmaku.getCurrentOffsetX() + danmaku.getDanmakuWidth()) / danmaku.getDetalX();
+                float time = Math.min(preTime, scrollTime);
+                float speed = item.getDetalX() - danmaku.getDetalX();
+                float distance = time * speed;
+                if (distance <= danmaku.getCurrentOffsetX() - danmaku.getDanmakuWidth()) {
+                    line = i;
+                    break;
+                }
+            }
+        }
+        return line;
+    }
+
+    /**
      * 从ZGDanmakuItem生成一个ZGDanmaku
      *
      * @param item
@@ -106,7 +141,8 @@ public class ZGDanmakuDispatcher implements Runnable {
 
         float offsetY = (item.getDanmakuHeight() + mLineLeading) * line;
         danmaku.setOffsetY(offsetY);
-        danmaku.setViewSize(mRenderer.getViewWidth(), mRenderer.getViewHeight(), mRenderer.getViewportSizeFactor());
+        danmaku.setViewSize(mRenderer.getViewWidth(), mRenderer.getViewHeight());
+        danmaku.setDetalX(item.getDetalX());
         danmaku.setShader(mVertexShader, mFragmentShader);
 
         return danmaku;
@@ -132,6 +168,7 @@ public class ZGDanmakuDispatcher implements Runnable {
 
     /**
      * 判断是否发这条弹幕
+     * 如果弹幕出现时间在可发送区间内,或者是即时发送的弹幕则进行发送.
      * @param item
      * @return
      */
@@ -141,6 +178,18 @@ public class ZGDanmakuDispatcher implements Runnable {
         }
 
         if (item.getOffsetTime() <= time && time <= item.getLateTime()) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 是否该丢弃这个弹幕了
+     * @param item
+     * @return
+     */
+    private boolean shouldDrop(ZGDanmakuItem item) {
+        if (time > item.getLateTime()) {
             return true;
         }
         return false;
@@ -301,33 +350,23 @@ public class ZGDanmakuDispatcher implements Runnable {
                 }
             }
 
-            // 处理无效的弹道
-            for (int i = 0; i < mLinesAvaliable.size(); i++) {
-                if (!nextRendererList.contains(mLinesAvaliable.get(i))) {
-                    mLinesAvaliable.put(i, null);
-                }
-            }
-
-            //todo 能否预先计算偏移的位置?
-
             if (nextRendererList.size() + mLines < MAX_READERING_NUMBER) {
-                //获取有效的弹道，然后读取弹幕池的弹幕进行绘制
-                for (int i = 0; i < mLines; i++) {
-                    boolean isLineAvaliabled = isLineAvaliable(i);
-                    ZGLog.d("ZGDanmakuDispatcher isLineAvaliable line=" + i + ", isLineAvaliabled=" +isLineAvaliabled);
-                    if (isLineAvaliabled) {
-                        //取出时间最小的弹幕
-                        ZGDanmakuItem item = mDanmakuPool.poll();
-                        if (item != null) {
-                            //如果弹幕偏移时间比较小或者是即时发送的弹幕则进行发送.
-                            if (shouldShow(item)) {
-                                ZGDanmaku danmaku = generateDanmaku(item, i);
-                                nextRendererList.add(danmaku);
-                            } else {
-                                mDanmakuPool.offer(item);
-                            }
-                        }
 
+                for (int i = 0; i < mLines; i++) {
+                    //取出时间最小的弹幕
+                    ZGDanmakuItem item = mDanmakuPool.poll();
+                    if (item != null) {
+                        if (shouldShow(item)) {
+                            int line = findFittestLine(item);
+                            if (line == -1) {
+                                mDanmakuPool.offer(item);
+                                continue;
+                            }
+                            ZGDanmaku danmaku = generateDanmaku(item, line);
+                            nextRendererList.add(danmaku);
+                        } else if (!shouldDrop(item)){
+                            mDanmakuPool.offer(item);
+                        }
                     }
                 }
             }

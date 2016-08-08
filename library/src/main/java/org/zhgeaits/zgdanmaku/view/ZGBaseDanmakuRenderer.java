@@ -168,7 +168,7 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
             for (int i = 0; i < mDanmakus.size(); i++) {
                 ZGDanmaku danmaku = mDanmakus.get(i);
                 if (danmaku != null) {
-                    danmaku.setViewSize(width, height, getViewportSizeFactor());
+                    danmaku.setViewSize(width, height);
                     danmaku.initVertexData();
                 }
             }
