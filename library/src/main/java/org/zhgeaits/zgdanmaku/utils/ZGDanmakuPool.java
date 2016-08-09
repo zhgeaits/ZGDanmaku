@@ -41,6 +41,14 @@ public class ZGDanmakuPool {
         return mCachedDanmaku.poll();
     }
 
+    public synchronized ZGDanmakuItem peek() {
+        return mCachedDanmaku.peek();
+    }
+
+    public synchronized void remove(ZGDanmakuItem item) {
+        mCachedDanmaku.remove(item);
+    }
+
     public synchronized int size() {
         return mCachedDanmaku.size();
     }

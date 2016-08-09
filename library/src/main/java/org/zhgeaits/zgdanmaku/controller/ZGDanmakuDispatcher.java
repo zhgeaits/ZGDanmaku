@@ -354,18 +354,18 @@ public class ZGDanmakuDispatcher implements Runnable {
 
                 for (int i = 0; i < mLines; i++) {
                     //取出时间最小的弹幕
-                    ZGDanmakuItem item = mDanmakuPool.poll();
+                    ZGDanmakuItem item = mDanmakuPool.peek();
                     if (item != null) {
                         if (shouldShow(item)) {
                             int line = findFittestLine(item);
                             if (line == -1) {
-                                mDanmakuPool.offer(item);
                                 continue;
                             }
+                            mDanmakuPool.remove(item);
                             ZGDanmaku danmaku = generateDanmaku(item, line);
                             nextRendererList.add(danmaku);
-                        } else if (!shouldDrop(item)){
-                            mDanmakuPool.offer(item);
+                        } else if (shouldDrop(item)){
+                            mDanmakuPool.remove(item);
                         }
                     }
                 }
