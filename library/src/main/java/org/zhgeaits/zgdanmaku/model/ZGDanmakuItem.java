@@ -93,11 +93,12 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
         mPainter.setColor(color);
     }
 
-    public void  setTextSize(float size) {
+    public void setTextSize(float size) {
         if (mPainter == null) {
             initDefaultPainters();
         }
         mPainter.setTextSize(DimensUtils.dip2pixel(mContext, size));
+        mStrokePainter.setTextSize(DimensUtils.dip2pixel(mContext, size));
     }
 
     public void setPainters(Canvas canvas, Paint paint) {
