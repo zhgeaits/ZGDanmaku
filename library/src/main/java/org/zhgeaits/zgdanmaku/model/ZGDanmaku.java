@@ -153,7 +153,9 @@ public class ZGDanmaku {
         if (mStep == 0) {
             mStep = mDetalX * time;
         }
-        this.offsetX += mStep;
+        if (time > 0) {
+            this.offsetX += mStep;
+        }
     }
 
     /**

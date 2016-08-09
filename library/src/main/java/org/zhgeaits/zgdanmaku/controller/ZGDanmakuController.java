@@ -104,6 +104,7 @@ public class ZGDanmakuController implements IZGDanmakuController {
         if (isStarted()) {
             ZGLog.i("ZGDanmakuController pause now.");
             mDispatcher.pause();
+            mRenderer.setPaused(true);
         }
     }
 

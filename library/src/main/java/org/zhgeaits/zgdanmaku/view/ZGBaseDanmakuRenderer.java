@@ -128,6 +128,7 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
     @Override
     public void resume() {
         mCurrentTime = SystemClock.elapsedRealtime();
+        isPaused = false;
     }
 
     @Override
