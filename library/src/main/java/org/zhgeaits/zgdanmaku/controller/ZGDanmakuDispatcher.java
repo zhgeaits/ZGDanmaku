@@ -22,6 +22,7 @@ import org.zhgeaits.zgdanmaku.model.ZGDanmaku;
 import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
 import org.zhgeaits.zgdanmaku.utils.ZGDanmakuPool;
 import org.zhgeaits.zgdanmaku.utils.ZGLog;
+import org.zhgeaits.zgdanmaku.utils.ZGTimer;
 import org.zhgeaits.zgdanmaku.view.IZGDanmakuRenderer;
 
 import java.util.ArrayList;
@@ -39,8 +40,9 @@ public class ZGDanmakuDispatcher implements Runnable {
 
     /**
      * 每帧的时间间隔
+     * 原本应该16ms对应60帧的,不过,这里可以再设置小一些
      */
-    private final static int DEFAUTL_FRAME_INTERVAL = 16;
+    private final static int DEFAUTL_FRAME_INTERVAL = 10;
 
     /**
      * 最大的绘制弹幕数量
@@ -55,7 +57,6 @@ public class ZGDanmakuDispatcher implements Runnable {
     private int mLines;                                     //弹幕行数
     private float mLineLeading;                             //行距
     private boolean mStop;                                  //是否暂停
-    private long time;                                      //当前时间轴
     private volatile AtomicBoolean mPaused;                 //暂停锁
     private boolean isSeek;                                 //是否执行了seek
 
@@ -177,7 +178,7 @@ public class ZGDanmakuDispatcher implements Runnable {
             return true;
         }
 
-        if (item.getOffsetTime() <= time && time <= item.getLateTime()) {
+        if (item.getOffsetTime() <= ZGTimer.getInstance().getTime() && ZGTimer.getInstance().getTime() <= item.getLateTime()) {
             return true;
         }
         return false;
@@ -189,7 +190,7 @@ public class ZGDanmakuDispatcher implements Runnable {
      * @return
      */
     private boolean shouldDrop(ZGDanmakuItem item) {
-        if (time > item.getLateTime()) {
+        if (ZGTimer.getInstance().getTime() > item.getLateTime()) {
             return true;
         }
         return false;
@@ -258,8 +259,10 @@ public class ZGDanmakuDispatcher implements Runnable {
      * @param time
      */
     public synchronized void updateTime(long time) {
-        this.time = time;
+        ZGTimer.getInstance().syncTime(time);
         isSeek = true;
+        //不清空弹幕池的话,业务可能会重复塞弹幕
+        mDanmakuPool.clear();
         ZGLog.i("updateTime time:" + time);
     }
 
@@ -278,10 +281,8 @@ public class ZGDanmakuDispatcher implements Runnable {
 
         resetLines();
         mStop = false;
-        boolean firstSeek = false;
         if (!isSeek) {
-            time = 0;
-            firstSeek = true;
+            ZGTimer.getInstance().syncTime(0);
         }
         long lastTime, intervalTime;
         long currentTime = SystemClock.elapsedRealtime();
@@ -306,33 +307,24 @@ public class ZGDanmakuDispatcher implements Runnable {
             intervalTime = currentTime - lastTime;
 
             if (intervalTime < DEFAUTL_FRAME_INTERVAL) {
-                try {
-                    Thread.sleep(DEFAUTL_FRAME_INTERVAL - intervalTime);
-                } catch (InterruptedException e) {
-                }
+                SystemClock.sleep(DEFAUTL_FRAME_INTERVAL - intervalTime);
                 currentTime = SystemClock.elapsedRealtime();
                 intervalTime = currentTime - lastTime;
             }
 
-            synchronized (this) {
-                time += intervalTime;
-                if (isSeek) {
-                    //这里只是临时的做法
-                    isSeek = false;
-                    if (!firstSeek) {
-                        mDanmakuPool.clear();
-                    }
-                    firstSeek = false;
-                    //如果seek以后,只清空弹幕池的弹幕,还在屏幕的弹幕(就是在渲染器里面的弹幕)还继续跑
-//                    mRenderer.setRendererDanmakuList(new ArrayList<ZGDanmaku>());
-                    continue;
-                }
+            ZGTimer.getInstance().addInterval(intervalTime);
+            if (isSeek) {
+                isSeek = false;
+                ZGLog.i("seek happened at time:" + ZGTimer.getInstance().getTime());
+                //seek以后,只清空弹幕池的弹幕,还在屏幕的弹幕(就是在渲染器里面的弹幕)还继续跑
+                //更好的做法是全部调整屏幕弹幕的位置
+                continue;
             }
 
-            ZGLog.d("ZGDanmakuDispatcher run intervalTime:" + intervalTime + ", time:" + time);
+            ZGLog.d("ZGDanmakuDispatcher run intervalTime:" + intervalTime + ", at time:" + ZGTimer.getInstance().getTime());
 
-            //读取临界区的弹幕，然后复制到一个新的list，并去掉已经跑出屏幕的弹幕
             //todo 这样性能OK?
+            //读取临界区的弹幕，然后复制到一个新的list，并去掉已经跑出屏幕的弹幕
             List<ZGDanmaku> rendererList = mRenderer.getRendererDanmakuList();
 
             //如果临界区没有弹幕,并且弹幕池没有弹幕了,则进行阻塞,这样的能耗低.
@@ -351,7 +343,6 @@ public class ZGDanmakuDispatcher implements Runnable {
             }
 
             if (nextRendererList.size() + mLines < MAX_READERING_NUMBER) {
-
                 for (int i = 0; i < mLines; i++) {
                     //取出时间最小的弹幕
                     ZGDanmakuItem item = mDanmakuPool.peek();
@@ -364,7 +355,9 @@ public class ZGDanmakuDispatcher implements Runnable {
                             mDanmakuPool.remove(item);
                             ZGDanmaku danmaku = generateDanmaku(item, line);
                             nextRendererList.add(danmaku);
+                            ZGLog.d("ZGDanmakuDispatcher shot item:" + item.mText);
                         } else if (shouldDrop(item)){
+                            ZGLog.d("ZGDanmakuDispatcher drop item:" + item.mText);
                             mDanmakuPool.remove(item);
                         }
                     }

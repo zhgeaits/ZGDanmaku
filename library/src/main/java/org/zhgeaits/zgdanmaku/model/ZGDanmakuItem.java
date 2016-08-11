@@ -17,10 +17,13 @@ package org.zhgeaits.zgdanmaku.model;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.os.Build;
 import android.text.TextPaint;
 
+import org.zhgeaits.zgdanmaku.utils.BitmapPool;
 import org.zhgeaits.zgdanmaku.utils.DimensUtils;
 import org.zhgeaits.zgdanmaku.utils.NativeBitmapFactory;
 import org.zhgeaits.zgdanmaku.utils.ZGLog;
@@ -127,7 +130,17 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
             try {
                 if(height > 0 && width > 0) {
                     //这里用到了ARGB_8888, 用RGB565会没有透明的.注意要和GLES20.glTexImage2D对应,不然会崩的
-                    mBitmap = NativeBitmapFactory.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inSampleSize = 1;
+                    options.outHeight = height;
+                    options.outWidth = width;
+                    Bitmap inBitmap = BitmapPool.getInstance().getBitmapFromReusableSet(options);
+                    if (inBitmap != null) {
+                        mBitmap = Bitmap.createBitmap(inBitmap, 0, 0, width, height);
+                        mBitmap.eraseColor(0x00000000);
+                    } else {
+                        mBitmap = NativeBitmapFactory.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                    }
                     mCanvas.setBitmap(mBitmap);
                     mCanvas.drawText(mText, 0, baseline, mStrokePainter);
                     mCanvas.drawText(mText, 0, baseline, mPainter);

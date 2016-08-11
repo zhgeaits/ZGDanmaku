@@ -69,6 +69,8 @@ public class ZGDanmakuPool {
                 ZGLog.e("waitIfNeed error", e);
             }
 
+            ZGLog.d("ZGDanmakuPool waitIfNeed resume");
+
             return true;
         } else {
             return false;
@@ -76,7 +78,7 @@ public class ZGDanmakuPool {
     }
 
     public synchronized void clear() {
-        ZGLog.d("ZGDanmakuPool clear");
+        ZGLog.i("ZGDanmakuPool clear size:" + mCachedDanmaku.size());
         mCachedDanmaku.clear();
     }
 

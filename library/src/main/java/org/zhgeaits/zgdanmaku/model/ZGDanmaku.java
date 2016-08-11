@@ -19,6 +19,7 @@ import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.os.Build;
 
+import org.zhgeaits.zgdanmaku.utils.BitmapPool;
 import org.zhgeaits.zgdanmaku.utils.TexturePool;
 import org.zhgeaits.zgdanmaku.utils.ZGMatrix;
 
@@ -303,7 +304,7 @@ public class ZGDanmaku {
         GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, mBitmap.getWidth(), mBitmap.getHeight(),
                 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, byteBuffer);
 
-        mBitmap.recycle();
+        BitmapPool.getInstance().cacheOrRecycle(mBitmap);
 
         return true;
     }
