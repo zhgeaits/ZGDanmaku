@@ -200,7 +200,7 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
                 mIntervalTime = mCurrentTime - mLastTime;
             }
 
-            ZGLog.i("zhangge-test mIntervalTime:" + mIntervalTime);
+            ZGLog.d("zhangge-test mIntervalTime:" + mIntervalTime);
         }
 
         if (!isPaused) {

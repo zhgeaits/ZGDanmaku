@@ -174,10 +174,6 @@ public class ZGDanmakuDispatcher implements Runnable {
      * @return
      */
     private boolean shouldShow(ZGDanmakuItem item) {
-        if (item.getOffsetTime() == -1) {
-            return true;
-        }
-
         if (item.getOffsetTime() <= ZGTimer.getInstance().getTime() && ZGTimer.getInstance().getTime() <= item.getLateTime()) {
             return true;
         }
@@ -343,24 +339,30 @@ public class ZGDanmakuDispatcher implements Runnable {
             }
 
             if (nextRendererList.size() + mLines < MAX_READERING_NUMBER) {
-                for (int i = 0; i < mLines; i++) {
-                    //取出时间最小的弹幕
-                    ZGDanmakuItem item = mDanmakuPool.peek();
-                    if (item != null) {
-                        if (shouldShow(item)) {
-                            int line = findFittestLine(item);
-                            if (line == -1) {
-                                continue;
-                            }
-                            mDanmakuPool.remove(item);
-                            ZGDanmaku danmaku = generateDanmaku(item, line);
-                            nextRendererList.add(danmaku);
-                            ZGLog.d("ZGDanmakuDispatcher shot item:" + item.mText);
-                        } else if (shouldDrop(item)){
-                            ZGLog.d("ZGDanmakuDispatcher drop item:" + item.mText);
-                            mDanmakuPool.remove(item);
+                List<ZGDanmakuItem> postLater = new ArrayList<ZGDanmakuItem>();
+                //取出时间最小的弹幕
+                ZGDanmakuItem item = mDanmakuPool.poll();
+                while(item != null) {
+                    if (shouldShow(item)) {
+                        int line = findFittestLine(item);
+                        if (line == -1) {
+                            continue;
                         }
+                        ZGDanmaku danmaku = generateDanmaku(item, line);
+                        nextRendererList.add(danmaku);
+                        ZGLog.d("ZGDanmakuDispatcher shot item:" + item.mText);
+                        break;
+                    } else if (!shouldDrop(item)){
+                        ZGLog.d("ZGDanmakuDispatcher post later item:" + item.mText);
+                        postLater.add(item);
+                    } else {
+                        ZGLog.d("ZGDanmakuDispatcher drop item:" + item.mText);
                     }
+                    item = mDanmakuPool.poll();
+                }
+                if (postLater.size() > 0) {
+                    ZGLog.i("ZGDanmakuDispatcher shot item:" + item.mText);
+                    mDanmakuPool.addAll(postLater);
                 }
             }
 

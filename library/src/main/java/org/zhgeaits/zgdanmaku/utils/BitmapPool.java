@@ -73,7 +73,7 @@ public class BitmapPool {
                 }
             }
         }
-        ZGLog.i("size=" + (size/1024.0/1024.0));
+//        ZGLog.i("size=" + (size/1024.0/1024.0));
     }
 
     /**
@@ -85,10 +85,10 @@ public class BitmapPool {
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) {
                 mReusableBitmaps.add(new SoftReference<Bitmap>(bitmap));
             } else {
-//                bitmap.recycle();
+                bitmap.recycle();
             }
         }
-        size();
+//        size();
     }
 
     /**

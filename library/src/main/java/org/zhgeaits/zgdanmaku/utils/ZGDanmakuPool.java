@@ -18,7 +18,11 @@ package org.zhgeaits.zgdanmaku.utils;
 
 import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Set;
 
 /**
  * Created by zhgeaits on 16/2/25.
@@ -27,18 +31,31 @@ import java.util.PriorityQueue;
 public class ZGDanmakuPool {
 
     private PriorityQueue<ZGDanmakuItem> mCachedDanmaku;
+    private Set<ZGDanmakuItem> mUniques;
 
     public ZGDanmakuPool() {
         mCachedDanmaku = new PriorityQueue<ZGDanmakuItem>();
+        mUniques = new HashSet<ZGDanmakuItem>();
     }
 
     public synchronized void offer(ZGDanmakuItem danmakuItem) {
-        mCachedDanmaku.offer(danmakuItem);
+        if (!mUniques.contains(danmakuItem)) {
+            mCachedDanmaku.offer(danmakuItem);
+            wakeIfNeed();
+        }
+    }
+
+    public synchronized void addAll(List<ZGDanmakuItem> items) {
+        ZGLog.d("ZGDanmakuPool addAll:" + items.size());
+        mCachedDanmaku.addAll(items);
+        mUniques.addAll(items);
         wakeIfNeed();
     }
 
     public synchronized ZGDanmakuItem poll() {
-        return mCachedDanmaku.poll();
+        ZGDanmakuItem item = mCachedDanmaku.poll();
+        mUniques.remove(item);
+        return item;
     }
 
     public synchronized ZGDanmakuItem peek() {
@@ -47,6 +64,7 @@ public class ZGDanmakuPool {
 
     public synchronized void remove(ZGDanmakuItem item) {
         mCachedDanmaku.remove(item);
+        mUniques.remove(item);
     }
 
     public synchronized int size() {
@@ -80,6 +98,7 @@ public class ZGDanmakuPool {
     public synchronized void clear() {
         ZGLog.i("ZGDanmakuPool clear size:" + mCachedDanmaku.size());
         mCachedDanmaku.clear();
+        mUniques.clear();
     }
 
 }

@@ -21,12 +21,14 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Build;
+import android.os.SystemClock;
 import android.text.TextPaint;
 
 import org.zhgeaits.zgdanmaku.utils.BitmapPool;
 import org.zhgeaits.zgdanmaku.utils.DimensUtils;
 import org.zhgeaits.zgdanmaku.utils.NativeBitmapFactory;
 import org.zhgeaits.zgdanmaku.utils.ZGLog;
+import org.zhgeaits.zgdanmaku.utils.ZGTimer;
 
 /**
  * Created by zhgeaits on 16/2/24.
@@ -56,7 +58,7 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
     public ZGDanmakuItem(String text, Context context) {
         this.mText = text;
         this.mContext = context;
-        this.mOffsetTime = -1;
+        this.mOffsetTime = ZGTimer.getInstance().getTime();
         this.mLateTime = Long.MAX_VALUE;
         initDefaultPainters();
     }
@@ -196,6 +198,14 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
 
     public float getDetalX() {
         return mDetalX;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        /**
+         * 重写equals方法,在set集合里面不会出现重复的弹幕
+         */
+        return super.equals(o);
     }
 
     @Override
