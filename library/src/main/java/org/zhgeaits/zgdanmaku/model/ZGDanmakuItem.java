@@ -24,6 +24,7 @@ import android.os.Build;
 import android.os.SystemClock;
 import android.text.TextPaint;
 
+import org.zhgeaits.zgdanmaku.R;
 import org.zhgeaits.zgdanmaku.utils.BitmapPool;
 import org.zhgeaits.zgdanmaku.utils.DimensUtils;
 import org.zhgeaits.zgdanmaku.utils.NativeBitmapFactory;
@@ -51,6 +52,7 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
     private Paint mPainter;
     private Paint mStrokePainter;
     private Context mContext;
+    private int mHeadIcon;
     private float mDetalX;
     private long mOffsetTime;//出现的时间
     private long mLateTime;//最迟出现的时间
@@ -106,6 +108,10 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
         mStrokePainter.setTextSize(DimensUtils.dip2pixel(mContext, size));
     }
 
+    public void setHeadIcon(int resId) {
+        this.mHeadIcon = resId;
+    }
+
     public void setPainters(Canvas canvas, Paint paint) {
         this.mCanvas = canvas;
         this.mPainter = paint;
@@ -128,30 +134,66 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
             int baseline = (int) (-mPainter.ascent() + 0.5f);
             int height = (int) (mPainter.descent() + baseline + 0.5f);
             int width = (int) (mPainter.measureText(mText) + 0.5f);
+            float textX = 0, textY = baseline;
+            float iconX = 0, iconY = 0;
+            int gap = 10;//icon跟文字之间10个像素间距
+
+            Bitmap icon = null;
+            if (mHeadIcon > 0) {
+                try {
+                    icon = BitmapFactory.decodeResource(mContext.getResources(), mHeadIcon);
+                } catch (OutOfMemoryError e) {
+                    ZGLog.e("getDanmakuBitmap decode icon oom:", e);
+                }
+            }
 
             try {
                 if(height > 0 && width > 0) {
-                    //这里用到了ARGB_8888, 用RGB565会没有透明的.注意要和GLES20.glTexImage2D对应,不然会崩的
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inSampleSize = 1;
-                    options.outHeight = height;
-                    options.outWidth = width;
-                    Bitmap inBitmap = BitmapPool.getInstance().getBitmapFromReusableSet(options);
-                    if (inBitmap != null) {
-                        mBitmap = Bitmap.createBitmap(inBitmap, 0, 0, width, height);
-                        mBitmap.eraseColor(0x00000000);
-                    } else {
-                        mBitmap = NativeBitmapFactory.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+
+                    if (icon != null) {
+                        width = icon.getWidth() + width + gap;
+                        if (icon.getHeight() > height) {
+                            textY = (baseline + (icon.getHeight() - height) / 2.0f);
+                        } else {
+                            iconY = ((height - icon.getHeight()) / 2.0f);
+                        }
+                        height = Math.max(icon.getHeight(), height);
                     }
+
+                    //这里用到了ARGB_8888, 用RGB565会没有透明的.注意要和GLES20.glTexImage2D对应,不然会崩的
+                    mBitmap = createBitmap(width, height, Bitmap.Config.ARGB_8888);
                     mCanvas.setBitmap(mBitmap);
-                    mCanvas.drawText(mText, 0, baseline, mStrokePainter);
-                    mCanvas.drawText(mText, 0, baseline, mPainter);
+
+                    if (icon != null) {
+                        mCanvas.drawBitmap(icon, iconX, iconY, mPainter);
+                        textX = icon.getWidth() + gap;
+                    }
+
+                    mCanvas.drawText(mText, textX, textY, mStrokePainter);
+                    mCanvas.drawText(mText, textX, textY, mPainter);
                 }
             } catch (OutOfMemoryError e) {
                 ZGLog.e("getDanmakuBitmap oom:", e);
             }
         }
         return mBitmap;
+    }
+
+    private Bitmap createBitmap(int width, int height, Bitmap.Config config) {
+        Bitmap bitmap = null;
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 1;
+        options.outHeight = height;
+        options.outWidth = width;
+        Bitmap inBitmap = BitmapPool.getInstance().getBitmapFromReusableSet(options);
+        if (inBitmap != null) {
+            bitmap = Bitmap.createBitmap(inBitmap, 0, 0, width, height);
+            bitmap.eraseColor(0x00000000);
+        } else {
+            bitmap = NativeBitmapFactory.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        }
+        return bitmap;
     }
 
     public int getDanmakuHeight() {

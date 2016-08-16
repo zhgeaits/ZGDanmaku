@@ -361,7 +361,7 @@ public class ZGDanmakuDispatcher implements Runnable {
                     item = mDanmakuPool.poll();
                 }
                 if (postLater.size() > 0) {
-                    ZGLog.i("ZGDanmakuDispatcher shot item:" + item.mText);
+                    ZGLog.d("ZGDanmakuDispatcher postLater size:" + postLater.size());
                     mDanmakuPool.addAll(postLater);
                 }
             }
