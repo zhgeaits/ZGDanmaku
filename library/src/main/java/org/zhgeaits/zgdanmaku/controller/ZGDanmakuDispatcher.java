@@ -350,13 +350,13 @@ public class ZGDanmakuDispatcher implements Runnable {
                         }
                         ZGDanmaku danmaku = generateDanmaku(item, line);
                         nextRendererList.add(danmaku);
-                        ZGLog.d("ZGDanmakuDispatcher shot item:" + item.mText);
+                        ZGLog.d("ZGDanmakuDispatcher shot item:" + item.getText());
                         break;
                     } else if (!shouldDrop(item)){
-                        ZGLog.d("ZGDanmakuDispatcher post later item:" + item.mText);
+                        ZGLog.d("ZGDanmakuDispatcher post later item:" + item.getText());
                         postLater.add(item);
                     } else {
-                        ZGLog.d("ZGDanmakuDispatcher drop item:" + item.mText);
+                        ZGLog.d("ZGDanmakuDispatcher drop item:" + item.getText());
                     }
                     item = mDanmakuPool.poll();
                 }

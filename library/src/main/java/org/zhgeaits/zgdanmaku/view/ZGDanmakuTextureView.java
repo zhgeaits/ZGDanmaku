@@ -161,58 +161,8 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
     }
 
     @Override
-    public void shotTextDanmaku(String text) {
-        ZGDanmakuItem item = new ZGDanmakuItem(text, mContext);
-        mDanmakuController.addDanmaku(item);
-    }
-
-    @Override
-    public void shotTextDanmaku(String text, int color) {
-        ZGDanmakuItem item = new ZGDanmakuItem(text, mContext);
-        item.setTextColor(color);
-        mDanmakuController.addDanmaku(item);
-    }
-
-    @Override
-    public void shotTextDanmaku(String text, float size) {
-        ZGDanmakuItem item = new ZGDanmakuItem(text, mContext);
-        item.setTextSize(size);
-        mDanmakuController.addDanmaku(item);
-    }
-
-    @Override
-    public void shotTextDanmaku(String text, int color, float size) {
-        ZGDanmakuItem item = new ZGDanmakuItem(text, mContext);
-        item.setTextColor(color);
-        item.setTextSize(size);
-        mDanmakuController.addDanmaku(item);
-    }
-
-    @Override
-    public void shotTextDanmakuAt(String text, long time) {
-        ZGDanmakuItem item = new ZGDanmakuItem(text, mContext, time);
-        mDanmakuController.addDanmaku(item);
-    }
-
-    @Override
-    public void shotTextDanmakuAt(String text, long time, int color) {
-        ZGDanmakuItem item = new ZGDanmakuItem(text, mContext, time);
-        item.setTextColor(color);
-        mDanmakuController.addDanmaku(item);
-    }
-
-    @Override
-    public void shotTextDanmakuAt(String text, long time, float size) {
-        ZGDanmakuItem item = new ZGDanmakuItem(text, mContext, time);
-        item.setTextSize(size);
-        mDanmakuController.addDanmaku(item);
-    }
-
-    @Override
-    public void shotTextDanmakuAt(String text, long time, int color, float size) {
-        ZGDanmakuItem item = new ZGDanmakuItem(text, mContext, time);
-        item.setTextColor(color);
-        item.setTextSize(size);
+    public void shotDanmaku(ZGDanmakuItem item) {
+        item.setContext(mContext);
         mDanmakuController.addDanmaku(item);
     }
 

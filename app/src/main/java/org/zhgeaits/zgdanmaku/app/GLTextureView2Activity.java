@@ -20,10 +20,13 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 
+import org.zhgeaits.zgdanmaku.model.ZGDanmakuFactory;
+import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
 import org.zhgeaits.zgdanmaku.utils.TexturePool;
 import org.zhgeaits.zgdanmaku.view.IZGDanmakuView;
 
@@ -58,18 +61,6 @@ public class GLTextureView2Activity extends Activity {
                 if (!danmakuView.isStarted()) {
                     danmakuView.start();
 
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            for (int i = 0; i < 10; i ++) {
-                                danmakuView.shotTextDanmakuAt("I am 3!", 3 * 1000);
-                            }
-
-                            for (int i = 0; i < 10; i ++) {
-                                danmakuView.shotTextDanmakuAt("I am 5!", 5 * 1000);
-                            }
-                        }
-                    }, 1000);
                 } else {
                     danmakuView.stop();
                 }
@@ -105,16 +96,35 @@ public class GLTextureView2Activity extends Activity {
             @Override
             public void onClick(View v) {
                 for (int i = 0; i < 10; i ++) {
-                    danmakuView.shotTextDanmaku("hello world!", 0xffFF4081, 20);
-                    danmakuView.shotTextDanmaku("23333", 0xffFFBB33, 20);
-                    danmakuView.shotTextDanmaku("SBBBBBBBBBBBBBBBBBBBBBBBB");
-                    danmakuView.shotTextDanmaku("hanmeimei", 0xff3aca4e, 20);
-                    danmakuView.shotTextDanmaku("hey you all", 0xff8c8c8c, 20);
-                    danmakuView.shotTextDanmaku("hey man", 0xffFF8900, 20);
-                    danmakuView.shotTextDanmaku("SBBBBBBBBBBBBBBBBBBBBBBBBddddd");
-                    danmakuView.shotTextDanmaku("23333333333333333333");
-                    danmakuView.shotTextDanmaku("i love hanmeimei.");
-                    danmakuView.shotTextDanmaku("shit man!");
+                    ZGDanmakuItem item = ZGDanmakuFactory.createTextDanmaku(SystemClock.elapsedRealtime(), "hello world!", 0xffFF4081, 20.0f);
+                    danmakuView.shotDanmaku(item);
+
+                    item = ZGDanmakuFactory.createTextDanmaku(SystemClock.elapsedRealtime(), "zhangshuaige", 0xffFFBB33, 20.0f);
+                    danmakuView.shotDanmaku(item);
+
+                    item = ZGDanmakuFactory.createTextDanmaku(SystemClock.elapsedRealtime(), "SBBBBBBBBBBBBBBBBBBBBBBBBBBBB", 20.0f);
+                    danmakuView.shotDanmaku(item);
+
+                    item = ZGDanmakuFactory.createTextDanmaku(SystemClock.elapsedRealtime(), "hey girl do you like me?", 0xff3aca4e, 20.0f);
+                    danmakuView.shotDanmaku(item);
+
+                    item = ZGDanmakuFactory.createTextDanmaku(SystemClock.elapsedRealtime(), "hey you all", 0xff8c8c8c, 20.0f);
+                    danmakuView.shotDanmaku(item);
+
+                    item = ZGDanmakuFactory.createTextDanmaku(SystemClock.elapsedRealtime(), "hey man", 0xffFF8900, 20.0f);
+                    danmakuView.shotDanmaku(item);
+
+                    item = ZGDanmakuFactory.createTextDanmaku(SystemClock.elapsedRealtime(), "wo ai zhangge, ta shi wu di shuai ge!", 20.0f);
+                    danmakuView.shotDanmaku(item);
+
+                    item = ZGDanmakuFactory.createTextDanmaku(SystemClock.elapsedRealtime(), "23333333333333333333", 0xFF009688, 20.0f);
+                    danmakuView.shotDanmaku(item);
+
+                    item = ZGDanmakuFactory.createTextDanmaku(SystemClock.elapsedRealtime(), "I love hanmeimei.", 0xFFFF0004, 20.0f);
+                    danmakuView.shotDanmaku(item);
+
+                    item = ZGDanmakuFactory.createTextDanmaku(SystemClock.elapsedRealtime(),"shit man!", 0xFFFFFF00, 20.0f);
+                    danmakuView.shotDanmaku(item);
                 }
             }
         });

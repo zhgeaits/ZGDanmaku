@@ -15,6 +15,8 @@
  */
 package org.zhgeaits.zgdanmaku.view;
 
+import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
+
 /**
  * Created by zhgeaits on 16/2/25.
  * 弹幕控件接口
@@ -93,40 +95,8 @@ public interface IZGDanmakuView {
     void seek(long time);
 
     /**
-     * 马上发送一条弹幕
-     * @param text
+     * 发送一条弹幕
+     * @param item
      */
-    void shotTextDanmaku(String text);
-
-    void shotTextDanmaku(String text, int color);
-
-    void shotTextDanmaku(String text, float size);
-
-    /**
-     * 马上发送一条弹幕, 带有颜色和大小
-     * @param text
-     * @param color
-     * @param size 单位dp
-     */
-    void shotTextDanmaku(String text, int color, float size);
-
-    /**
-     * 指定时间发送一条
-     * @param text
-     * @param time
-     */
-    void shotTextDanmakuAt(String text, long time);
-
-    void shotTextDanmakuAt(String text, long time, int color);
-
-    void shotTextDanmakuAt(String text, long time, float size);
-
-    /**
-     * 指定时间发送一条, 带有颜色和大小
-     * @param text
-     * @param time
-     * @param color
-     * @param size 单位dp
-     */
-    void shotTextDanmakuAt(String text, long time, int color, float size);
+    void shotDanmaku(ZGDanmakuItem item);
 }

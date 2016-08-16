@@ -20,11 +20,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.os.Build;
-import android.os.SystemClock;
 import android.text.TextPaint;
 
-import org.zhgeaits.zgdanmaku.R;
 import org.zhgeaits.zgdanmaku.utils.BitmapPool;
 import org.zhgeaits.zgdanmaku.utils.DimensUtils;
 import org.zhgeaits.zgdanmaku.utils.NativeBitmapFactory;
@@ -47,52 +44,74 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
     public long MAX_DANMAKU_DURATION = MIN_DANMAKU_DURATION;
 
     private Bitmap mBitmap;
-    public String mText;
+    private String mText;
     private Canvas mCanvas;
     private Paint mPainter;
     private Paint mStrokePainter;
     private Context mContext;
+    private long id;
     private int mHeadIcon;
     private float mDetalX;
+    private float mTextSize;
     private long mOffsetTime;//出现的时间
     private long mLateTime;//最迟出现的时间
 
-    public ZGDanmakuItem(String text, Context context) {
+    public ZGDanmakuItem(long id, String text) {
+        this.id = id;
         this.mText = text;
-        this.mContext = context;
         this.mOffsetTime = ZGTimer.getInstance().getTime();
         this.mLateTime = Long.MAX_VALUE;
+        this.mTextSize = 20;
         initDefaultPainters();
     }
 
-    public ZGDanmakuItem(String text, Context context, long time) {
-        this.mText = text;
-        this.mContext = context;
-        this.mOffsetTime = time;
-        this.mLateTime = mOffsetTime + 5000;
-        initDefaultPainters();
-    }
-
+    /**
+     * 初始化画笔
+     */
     private void initDefaultPainters() {
         mCanvas = new Canvas();
 
         mPainter = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-        mPainter.setTextSize(DimensUtils.dip2pixel(mContext, 20));
         mPainter.setColor(0xFFFFFFFF);
         mPainter.setTextAlign(Paint.Align.LEFT);
-//        Typeface font = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD);
-//        mPainter.setTypeface(font);
 
         mStrokePainter = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-        mStrokePainter.setTextSize(DimensUtils.dip2pixel(mContext, 20));
         mStrokePainter.setColor(0xFF000000);
         mStrokePainter.setTextAlign(Paint.Align.LEFT);
         mStrokePainter.setStyle(Paint.Style.STROKE);
         mStrokePainter.setStrokeWidth(4.0f);
         mStrokePainter.setShadowLayer(4, 0, 0, 0xFF000000);
-//        mStrokePainter.setTypeface(font);
     }
 
+    /**
+     * 设置context
+     *
+     * @param context
+     */
+    public void setContext(Context context) {
+        this.mContext = context;
+        if (mPainter == null) {
+            initDefaultPainters();
+        }
+        mPainter.setTextSize(DimensUtils.dip2pixel(mContext, mTextSize));
+        mStrokePainter.setTextSize(DimensUtils.dip2pixel(mContext, mTextSize));
+    }
+
+    /**
+     * 设置弹幕的时间
+     *
+     * @param time
+     */
+    public void setOffsetTime(long time) {
+        this.mOffsetTime = time;
+        this.mLateTime = mOffsetTime + 5000;
+    }
+
+    /**
+     * 设置文字颜色
+     *
+     * @param color
+     */
     public void setTextColor(int color) {
         if (mPainter == null) {
             initDefaultPainters();
@@ -100,37 +119,90 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
         mPainter.setColor(color);
     }
 
+    /**
+     * 设置文字大小
+     *
+     * @param size
+     */
     public void setTextSize(float size) {
-        if (mPainter == null) {
-            initDefaultPainters();
-        }
-        mPainter.setTextSize(DimensUtils.dip2pixel(mContext, size));
-        mStrokePainter.setTextSize(DimensUtils.dip2pixel(mContext, size));
+        this.mTextSize = size;
     }
 
+    /**
+     * 设置头像
+     *
+     * @param resId
+     */
     public void setHeadIcon(int resId) {
         this.mHeadIcon = resId;
     }
 
+    /**
+     * 设置画笔
+     *
+     * @param canvas
+     * @param paint
+     */
     public void setPainters(Canvas canvas, Paint paint) {
         this.mCanvas = canvas;
         this.mPainter = paint;
     }
 
+    public String getText() {
+        return mText;
+    }
+
     /**
-     * 获取展示的时间
+     * 获取即时出现时间
+     *
      * @return
      */
     public long getOffsetTime() {
         return mOffsetTime;
     }
 
+    /**
+     * 获取最迟出现时间
+     *
+     * @return
+     */
     public long getLateTime() {
         return mLateTime;
     }
 
+    /**
+     * 获取弹幕高
+     *
+     * @return
+     */
+    public int getDanmakuHeight() {
+        getDanmakuBitmap();
+        if (mBitmap == null) {
+            return 0;
+        }
+        return mBitmap.getHeight();
+    }
+
+    /**
+     * 获取弹幕宽
+     *
+     * @return
+     */
+    public int getDanmakuWidth() {
+        getDanmakuBitmap();
+        if (mBitmap == null) {
+            return 0;
+        }
+        return mBitmap.getWidth();
+    }
+
+    /**
+     * 获取Bitmap
+     *
+     * @return
+     */
     public Bitmap getDanmakuBitmap() {
-        if(mBitmap == null) {
+        if (mBitmap == null) {
             int baseline = (int) (-mPainter.ascent() + 0.5f);
             int height = (int) (mPainter.descent() + baseline + 0.5f);
             int width = (int) (mPainter.measureText(mText) + 0.5f);
@@ -148,7 +220,7 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
             }
 
             try {
-                if(height > 0 && width > 0) {
+                if (height > 0 && width > 0) {
 
                     if (icon != null) {
                         width = icon.getWidth() + width + gap;
@@ -196,24 +268,9 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
         return bitmap;
     }
 
-    public int getDanmakuHeight() {
-        getDanmakuBitmap();
-        if(mBitmap == null) {
-            return 0;
-        }
-        return mBitmap.getHeight();
-    }
-
-    public int getDanmakuWidth() {
-        getDanmakuBitmap();
-        if (mBitmap == null) {
-            return 0;
-        }
-        return mBitmap.getWidth();
-    }
-
     /**
      * 计算每1ms的步长
+     *
      * @param width
      * @param height
      * @param viewportSizeFactor
@@ -232,22 +289,28 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
     }
 
     /**
-     * 计算步长
+     * 计算每帧的步长
      */
     private void calculateDetal(int width, int height) {
-        mDetalX = (float)(getDanmakuWidth() + width) / (float)MAX_DANMAKU_DURATION;
+        mDetalX = (float) (getDanmakuWidth() + width) / (float) MAX_DANMAKU_DURATION;
     }
 
+    /**
+     * 获取每毫秒的步长
+     *
+     * @return
+     */
     public float getDetalX() {
         return mDetalX;
     }
 
     @Override
     public boolean equals(Object o) {
-        /**
-         * 重写equals方法,在set集合里面不会出现重复的弹幕
-         */
-        return super.equals(o);
+        if (o == null) {
+            return false;
+        }
+        ZGDanmakuItem item = (ZGDanmakuItem) o;
+        return item.id == id;
     }
 
     @Override
