@@ -22,6 +22,7 @@ import android.util.DisplayMetrics;
 
 import org.zhgeaits.zgdanmaku.controller.IZGDanmakuController;
 import org.zhgeaits.zgdanmaku.controller.ZGDanmakuController;
+import org.zhgeaits.zgdanmaku.model.ZGDanmakuFactory;
 import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
 import org.zhgeaits.zgdanmaku.utils.ZGLog;
 
@@ -51,6 +52,8 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
 
     private void init(Context context) {
         this.mContext = context;
+
+        ZGDanmakuFactory.setGlobalContext(context);
 
         setEGLContextClientVersion(2);
 
@@ -169,16 +172,12 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
 
     @Override
     public void shotDanmaku(ZGDanmakuItem item) {
-        item.setContext(mContext);
         mDanmakuController.addDanmaku(item);
     }
 
     @Override
     public void shotDanmakuList(List<ZGDanmakuItem> items) {
-        if (items != null && items.size() > 0) {
-            for (ZGDanmakuItem item : items) {
-                item.setContext(mContext);
-            }
+        if (items != null) {
             mDanmakuController.addDanmakus(items);
         }
     }

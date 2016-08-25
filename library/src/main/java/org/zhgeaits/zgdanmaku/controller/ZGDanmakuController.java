@@ -17,7 +17,6 @@ package org.zhgeaits.zgdanmaku.controller;
 
 import android.content.Context;
 
-
 import org.zhgeaits.zgdanmaku.model.ZGDanmakuFactory;
 import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
 import org.zhgeaits.zgdanmaku.utils.DimensUtils;
@@ -154,8 +153,7 @@ public class ZGDanmakuController implements IZGDanmakuController {
     @Override
     public void setLineHeight(float lineHeight) {
         ZGDanmakuItem item = ZGDanmakuFactory.createTextDanmaku(0, "Measure Text Height!", lineHeight);
-        item.setContext(mContext);
-        mDispatcher.setLineHeight(item.getDanmakuHeight());
+        mDispatcher.setLineHeight(item.measureTextHeight());
     }
 
     @Deprecated

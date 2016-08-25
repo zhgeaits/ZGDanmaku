@@ -17,13 +17,11 @@ package org.zhgeaits.zgdanmaku.model;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 
-import org.zhgeaits.zgdanmaku.utils.BitmapPool;
 import org.zhgeaits.zgdanmaku.utils.DimensUtils;
 import org.zhgeaits.zgdanmaku.utils.NativeBitmapFactory;
 import org.zhgeaits.zgdanmaku.utils.ZGLog;
@@ -52,6 +50,7 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
     private Paint mStrokePainter;
     private Context mContext;
     private boolean isStroke;//是否描边
+    private boolean neverDrop;//永远不会丢弃
     private long id;
     private int mHeadIcon;
     private int mBackground;
@@ -61,6 +60,11 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
     private float mTextSize;
     private long mOffsetTime;//出现的时间
     private long mLateTime;//最迟出现的时间
+    private float mIconWidth;//icon的宽度
+    private float mIconHeight;//icon的高度
+    private float mIconLeftMargin;//icon左边距离,单位dp
+    private float mIconRightMargin;//icon右边距离,单位dp
+    private float leftBgPadding, rightBgPadding, topBgPadding, bottomBgPadding;//背景的padding 单位dp
 
     public ZGDanmakuItem(long id, String text) {
         this.id = id;
@@ -71,6 +75,7 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
         this.isStroke = true;
         this.pxSpeed = -1;
         this.dpSpeed = -1;
+        this.mContext = ZGDanmakuFactory.getGlobalContext();
         initDefaultPainters();
     }
 
@@ -83,13 +88,15 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
         mPainter = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         mPainter.setColor(0xFFFFFFFF);
         mPainter.setTextAlign(Paint.Align.LEFT);
+        mPainter.setTextSize(DimensUtils.sp2pixel(mContext, mTextSize));
 
         mStrokePainter = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         mStrokePainter.setColor(0xFF000000);
         mStrokePainter.setTextAlign(Paint.Align.LEFT);
         mStrokePainter.setStyle(Paint.Style.STROKE);
-        mStrokePainter.setStrokeWidth(4.0f);
-        mStrokePainter.setShadowLayer(4, 0, 0, 0xFF000000);
+        mStrokePainter.setStrokeWidth(3.0f);
+        mStrokePainter.setShadowLayer(3, 0, 0, 0xFF000000);
+        mStrokePainter.setTextSize(DimensUtils.sp2pixel(mContext, mTextSize));
     }
 
     /**
@@ -104,7 +111,23 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
         }
         mPainter.setTextSize(DimensUtils.sp2pixel(mContext, mTextSize));
         mStrokePainter.setTextSize(DimensUtils.sp2pixel(mContext, mTextSize));
-        this.pxSpeed = DimensUtils.dip2pixel(mContext, dpSpeed);
+        pxSpeed = DimensUtils.dip2pixel(mContext, dpSpeed);
+    }
+
+    /**
+     * 设置永远不会丢弃
+     * @param neverDrop
+     */
+    public void setNeverDrop(boolean neverDrop) {
+        this.neverDrop = neverDrop;
+    }
+
+    /**
+     * 是否永远不会丢弃
+     * @return
+     */
+    public boolean isNeverDrop() {
+        return neverDrop;
     }
 
     /**
@@ -139,12 +162,15 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
     }
 
     /**
-     * 设置头像
-     *
+     * 设置头像,必须设置宽高,单位dp
      * @param resId
+     * @param width
+     * @param height
      */
-    public void setHeadIcon(int resId) {
+    public void setHeadIcon(int resId, float width, float height) {
         this.mHeadIcon = resId;
+        mIconWidth = width;
+        mIconHeight = height;
     }
 
     /**
@@ -229,7 +255,40 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
     public int measureTextHeight() {
         int baseline = (int) (-mPainter.ascent() + 0.5f);
         int height = (int) (mPainter.descent() + baseline + 0.5f);
+        if (mBackground > 0) {
+            int bgTopPadding = DimensUtils.dip2pixel(mContext, topBgPadding);
+            int bgBottomPadding = DimensUtils.dip2pixel(mContext, bottomBgPadding);
+            height += bgTopPadding + bgBottomPadding;
+        }
+        if (mHeadIcon > 0) {
+            int iconHeight = DimensUtils.dip2pixel(mContext, mIconHeight);
+            height = Math.max(iconHeight, height);
+        }
         return height;
+    }
+
+    /**
+     * 设置Icon左右的距离
+     * @param left
+     * @param right
+     */
+    public void setIconMargin(float left, float right) {
+        mIconLeftMargin = left;
+        mIconRightMargin = right;
+    }
+
+    /**
+     * 设置背景的padding 单位dp
+     * @param left
+     * @param right
+     * @param top
+     * @param bottom
+     */
+    public void setBgPadding(float left, float right, float top, float bottom) {
+        leftBgPadding = left;
+        rightBgPadding = right;
+        topBgPadding = top;
+        bottomBgPadding = bottom;
     }
 
     /**
@@ -243,58 +302,77 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
             int height = (int) (mPainter.descent() + baseline + 0.5f);
             int width = (int) (mPainter.measureText(mText) + 0.5f);
             float textX = 0, textY = baseline;
-            float iconX = 0, iconY = 0;
+
+            int iconWidth = DimensUtils.dip2pixel(mContext, mIconWidth);
+            int iconHeight = DimensUtils.dip2pixel(mContext, mIconHeight);
+            int iconLeftMargin = DimensUtils.dip2pixel(mContext, mIconLeftMargin);
+            int iconRightMargin = DimensUtils.dip2pixel(mContext, mIconRightMargin);
+            int iconLeft = iconLeftMargin, iconTop = 0, iconRight = iconWidth + iconLeftMargin, iconBottom = iconHeight;
+
             int bgLeft = 0, bgTop = 0, bgRight = width, bgBottom = height;
-            int gap = 4;//icon跟文字之间4个像素间距
-            int padding = 20;//背景的padding
+            int bgLeftPadding = DimensUtils.dip2pixel(mContext, leftBgPadding);
+            int bgRightPadding = DimensUtils.dip2pixel(mContext, rightBgPadding);
+            int bgTopPadding = DimensUtils.dip2pixel(mContext, topBgPadding);
+            int bgBottomPadding = DimensUtils.dip2pixel(mContext, bottomBgPadding);
 
             try {
                 if (height > 0 && width > 0) {
 
-                    Bitmap icon = null;
-                    if (mHeadIcon > 0) {
-                        try {
-                            icon = BitmapFactory.decodeResource(mContext.getResources(), mHeadIcon);
-                        } catch (OutOfMemoryError e) {
-                            ZGLog.e("getDanmakuBitmap decode icon oom:", e);
-                        }
-                    }
-
-                    //如果有背景,则重新计算宽高和x,y坐标
+                    //如果有背景
                     if (mBackground > 0) {
-                        width += padding * 2;
-                        height += padding * 2;
-                        textX += padding;
-                        textY += padding;
+                        //重新计算bitmap宽高
+                        width += bgLeftPadding + bgRightPadding;
+                        height += bgTopPadding + bgBottomPadding;
+
+                        //重新text的xy坐标
+                        textX += bgLeftPadding;
+                        textY += bgTopPadding;
+
+                        //重新计算背景的bounds
                         bgRight = width;
                         bgBottom = height;
                     }
 
-                    //如果有头衔icon则重新计算宽高,并计算坐标
-                    if (icon != null) {
-                        width += icon.getWidth() + gap;
+                    //如果有头衔icon
+                    if (mHeadIcon > 0) {
+                        //重新计算bitmap宽高
+                        width += iconWidth + iconLeftMargin + iconRightMargin;
 
-                        textX += icon.getWidth() + gap;
-                        if (icon.getHeight() > height) {
-                            textY = (textY + (icon.getHeight() - height) / 2.0f);
+                        //重新计算text的x坐标
+                        textX += iconWidth + iconLeftMargin + iconRightMargin;
+                        //重新计算背景的bounds
+                        bgLeft += iconWidth + iconLeftMargin + iconRightMargin;
+                        bgRight = width;
+
+                        float diff = Math.abs(iconHeight - height) / 2.0f;
+                        if (iconHeight > height) {
+                            //重新计算text和背景坐标
+                            textY += diff;
+                            bgTop += diff;
+                            bgBottom += diff;
                         } else {
-                            iconY = ((height - icon.getHeight()) / 2.0f);
+                            //重新计算icon坐标
+                            iconTop += diff;
+                            iconBottom += diff;
                         }
 
-                        height = Math.max(icon.getHeight(), height);
-
-                        bgLeft += icon.getWidth() + gap;
-                        bgRight = width;
-                        bgBottom = height;
+                        height = Math.max(iconHeight, height);
                     }
 
-                    //这里用到了ARGB_8888, 用RGB565会没有透明的.注意要和GLES20.glTexImage2D对应,不然会崩的
-                    mBitmap = createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                    mBitmap = createBitmap(width, height);
                     mCanvas.setBitmap(mBitmap);
 
                     //画icon
-                    if (icon != null) {
-                        mCanvas.drawBitmap(icon, iconX, iconY, mPainter);
+                    if (mHeadIcon > 0) {
+                        try {
+                            Drawable drawable = mContext.getResources().getDrawable(mHeadIcon);
+                            if (drawable != null) {
+                                drawable.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+                                drawable.draw(mCanvas);
+                            }
+                        } catch (OutOfMemoryError e) {
+                            ZGLog.e("getDanmakuBitmap decode icon oom:", e);
+                        }
                     }
 
                     //画背景
@@ -310,10 +388,11 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
                         }
                     }
 
+                    //描边
                     if (isStroke) {
-                        //描边
                         mCanvas.drawText(mText, textX, textY, mStrokePainter);
                     }
+
                     //写文字
                     mCanvas.drawText(mText, textX, textY, mPainter);
                 }
@@ -324,7 +403,9 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
         return mBitmap;
     }
 
-    private Bitmap createBitmap(int width, int height, Bitmap.Config config) {
+    private Bitmap createBitmap(int width, int height) {
+        //这里用到了ARGB_8888, 用RGB565会没有透明的.注意要和GLES20.glTexImage2D对应,不然会崩的
+        Bitmap bitmap = NativeBitmapFactory.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 //        Bitmap bitmap = null;
 //        BitmapFactory.Options options = new BitmapFactory.Options();
 //        options.inSampleSize = 1;
@@ -337,7 +418,6 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
 //        } else {
 //            bitmap = NativeBitmapFactory.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 //        }
-        Bitmap bitmap = NativeBitmapFactory.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         return bitmap;
     }
 

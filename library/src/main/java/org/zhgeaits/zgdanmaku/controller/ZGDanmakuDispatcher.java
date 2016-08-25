@@ -26,6 +26,7 @@ import org.zhgeaits.zgdanmaku.utils.ZGTimer;
 import org.zhgeaits.zgdanmaku.view.IZGDanmakuRenderer;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -104,22 +105,58 @@ public class ZGDanmakuDispatcher implements Runnable {
         item.updateDetalX(mRenderer.getViewWidth(), mRenderer.getViewHeight(), mRenderer.getViewportSizeFactor());
         //新弹幕滚完屏幕的时间
         float scrollTime = mRenderer.getViewWidth() / item.getDetalX();
+        int height = item.measureTextHeight();
+        int count = 1;//默认只需要一条弹道
+        if (height > (mLineHeight + mLineLeading)) {
+            count = height / (mLineHeight + mLineLeading);
+            if (height % (mLineHeight + mLineLeading) != 0) {
+                count ++;
+            }
+        }
 
+        //寻找连续可用的弹道
+        LinkedList<Integer> findLines = new LinkedList<Integer>();
         for (int i = 0; i < mLines; i++) {
             ZGDanmaku danmaku = mLinesAvaliable.get(i);
 
             //如果弹道为空
             if (danmaku == null) {
-                line = i;
-                break;
+                if (findLines.size() == 0) {
+                    findLines.add(i);
+                } else {
+                    int last = findLines.getLast();
+                    if (last + 1 == i) {
+                        findLines.add(i);
+                    } else {
+                        findLines.clear();
+                    }
+                }
+                if (findLines.size() == count) {
+                    break;
+                } else {
+                    continue;
+                }
             }
 
             //如果弹幕已经出弹道
             if (danmaku.getCurrentOffsetX() > danmaku.getDanmakuWidth() + danmaku.getDetalX() * 300) {
                 //如果新弹幕的速度比旧弹幕还慢
                 if (item.getDetalX() <= danmaku.getDetalX()) {
-                    line = i;
-                    break;
+                    if (findLines.size() == 0) {
+                        findLines.add(i);
+                    } else {
+                        int last = findLines.getLast();
+                        if (last + 1 == i) {
+                            findLines.add(i);
+                        } else {
+                            findLines.clear();
+                        }
+                    }
+                    if (findLines.size() == count) {
+                        break;
+                    } else {
+                        continue;
+                    }
                 }
                 //旧弹幕滚完屏幕的时间
                 float preTime = (mRenderer.getViewWidth() - danmaku.getCurrentOffsetX() + danmaku.getDanmakuWidth()) / danmaku.getDetalX();
@@ -129,10 +166,26 @@ public class ZGDanmakuDispatcher implements Runnable {
                 //移动的距离如果小于两个弹幕之间的差距
                 float distance = time * speed;
                 if (distance <= danmaku.getCurrentOffsetX() - danmaku.getDanmakuWidth()) {
-                    line = i;
-                    break;
+                    if (findLines.size() == 0) {
+                        findLines.add(i);
+                    } else {
+                        int last = findLines.getLast();
+                        if (last + 1 == i) {
+                            findLines.add(i);
+                        } else {
+                            findLines.clear();
+                        }
+                    }
+                    if (findLines.size() == count) {
+                        break;
+                    } else {
+                        continue;
+                    }
                 }
             }
+        }
+        if (findLines.size() == count) {
+            line = findLines.get(0);
         }
         return line;
     }
@@ -205,6 +258,9 @@ public class ZGDanmakuDispatcher implements Runnable {
      * @return
      */
     private boolean shouldDrop(ZGDanmakuItem item) {
+        if (item.isNeverDrop()) {
+            return false;
+        }
         if (ZGTimer.getInstance().getTime() > item.getLateTime()) {
             return true;
         }

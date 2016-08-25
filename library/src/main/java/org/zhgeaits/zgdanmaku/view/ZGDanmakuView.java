@@ -23,6 +23,7 @@ import android.util.DisplayMetrics;
 
 import org.zhgeaits.zgdanmaku.controller.IZGDanmakuController;
 import org.zhgeaits.zgdanmaku.controller.ZGDanmakuController;
+import org.zhgeaits.zgdanmaku.model.ZGDanmakuFactory;
 import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
 import org.zhgeaits.zgdanmaku.utils.ZGLog;
 
@@ -52,6 +53,8 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
     private void init(Context context) {
         this.mContext = context;
 
+        ZGDanmakuFactory.setGlobalContext(context);
+
         //设置使用opengles 2.0
         setEGLContextClientVersion(2);
 
@@ -65,9 +68,9 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
 
         //设置view为透明，并置于顶层，可以在surfaceview之上
         getHolder().setFormat(PixelFormat.TRANSLUCENT);
-        setZOrderOnTop(true);
+//        setZOrderOnTop(true);
         //这个可以让在surfaceview之上
-//        setZOrderMediaOverlay(true);
+        setZOrderMediaOverlay(true);
 
         // 设置渲染模式为被动渲染，在调用start()方法以后再设置为主动模式,
         // 主动模式有一条后台OPENGL线程每帧都调用onDrawFrame方法
@@ -173,16 +176,12 @@ public class ZGDanmakuView extends GLSurfaceView implements IZGDanmakuView {
 
     @Override
     public void shotDanmaku(ZGDanmakuItem item) {
-        item.setContext(mContext);
         mDanmakuController.addDanmaku(item);
     }
 
     @Override
     public void shotDanmakuList(List<ZGDanmakuItem> items) {
-        if (items != null && items.size() > 0) {
-            for (ZGDanmakuItem item : items) {
-                item.setContext(mContext);
-            }
+        if (items != null) {
             mDanmakuController.addDanmakus(items);
         }
     }

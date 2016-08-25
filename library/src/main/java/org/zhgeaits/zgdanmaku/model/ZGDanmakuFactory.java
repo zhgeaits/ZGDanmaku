@@ -15,11 +15,23 @@
  */
 package org.zhgeaits.zgdanmaku.model;
 
+import android.content.Context;
+
 /**
  * Created by zhgeaits on 16/8/16.
  * 创建弹幕的工厂类
  */
 public class ZGDanmakuFactory {
+
+    private static Context gContext = null;
+
+    public static void setGlobalContext(Context context) {
+        gContext = context.getApplicationContext();
+    }
+
+    public static Context getGlobalContext() {
+        return gContext;
+    }
 
     public static ZGDanmakuItem createTextDanmaku(long id, String text) {
         ZGDanmakuItem item = new ZGDanmakuItem(id, text);
@@ -55,13 +67,16 @@ public class ZGDanmakuFactory {
      * 创建一条弹幕, 带有颜色和大小
      * @param id
      * @param resid icon头像的id
+     * @param width icon的宽
+     * @param height icon的高
      * @param text
      * @param color
-     * @param size 单位dp
+     * @param size 单位sp
+     * @return
      */
-    public static ZGDanmakuItem createRichDanmaku(long id, int resid, String text, int color, float size) {
+    public static ZGDanmakuItem createRichDanmaku(long id, int resid, float width, float height, String text, int color, float size) {
         ZGDanmakuItem item = new ZGDanmakuItem(id, text);
-        item.setHeadIcon(resid);
+        item.setHeadIcon(resid, width, height);
         item.setTextSize(size);
         item.setTextColor(color);
         return item;
@@ -106,14 +121,16 @@ public class ZGDanmakuFactory {
      * 带有颜色和大小, 和icon头像的id
      * @param id
      * @param resid icon头像的id
+     * @param width icon的宽
+     * @param height icon的高
      * @param text
      * @param time
      * @param color
      * @param size 单位dp
      */
-    public static ZGDanmakuItem createRichDanmaku(long id, int resid, String text, long time, int color, float size) {
+    public static ZGDanmakuItem createRichDanmaku(long id, int resid, float width, float height, String text, long time, int color, float size) {
         ZGDanmakuItem item = new ZGDanmakuItem(id, text);
-        item.setHeadIcon(resid);
+        item.setHeadIcon(resid, width, height);
         item.setTextSize(size);
         item.setTextColor(color);
         item.setOffsetTime(time);

@@ -19,7 +19,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
-import android.util.Log;
 
 import java.lang.ref.SoftReference;
 import java.util.Collections;
