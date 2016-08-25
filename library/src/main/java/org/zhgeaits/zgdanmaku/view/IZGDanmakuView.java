@@ -17,6 +17,8 @@ package org.zhgeaits.zgdanmaku.view;
 
 import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
 
+import java.util.List;
+
 /**
  * Created by zhgeaits on 16/2/25.
  * 弹幕控件接口
@@ -83,9 +85,17 @@ public interface IZGDanmakuView {
     void setLeading(float leading);
 
     /**
+     * 设置弹道行高
+     * @param height 字体的大小,单位sp
+     */
+    void setLineHeight(float height);
+
+    /**
      * 设置速度
+     * 每条弹幕都是不同的速度,也可以给弹幕设置固定速度
      * @param speed 单位dp/s
      */
+    @Deprecated
     void setSpeed(float speed);
 
     /**
@@ -95,8 +105,20 @@ public interface IZGDanmakuView {
     void seek(long time);
 
     /**
+     * 同步弹幕时间
+     * @param time
+     */
+    void syncTime(long time);
+
+    /**
      * 发送一条弹幕
      * @param item
      */
     void shotDanmaku(ZGDanmakuItem item);
+
+    /**
+     * 发送一批弹幕
+     * @param items
+     */
+    void shotDanmakuList(List<ZGDanmakuItem> items);
 }

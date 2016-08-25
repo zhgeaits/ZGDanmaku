@@ -15,10 +15,8 @@
  */
 package org.zhgeaits.zgdanmaku.view;
 
-import android.content.Context;
 import android.opengl.GLES20;
 import android.os.SystemClock;
-import android.util.Log;
 
 import org.zhgeaits.zgdanmaku.model.ZGDanmaku;
 import org.zhgeaits.zgdanmaku.utils.MatrixUtils;
@@ -200,7 +198,7 @@ public abstract class ZGBaseDanmakuRenderer implements IZGDanmakuRenderer {
                 mIntervalTime = mCurrentTime - mLastTime;
             }
 
-            ZGLog.d("zhangge-test mIntervalTime:" + mIntervalTime);
+            ZGLog.i("zhangge-test mIntervalTime:" + mIntervalTime);
         }
 
         if (!isPaused) {

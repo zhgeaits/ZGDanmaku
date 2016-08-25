@@ -19,7 +19,6 @@ import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.os.Build;
 
-import org.zhgeaits.zgdanmaku.utils.BitmapPool;
 import org.zhgeaits.zgdanmaku.utils.TexturePool;
 import org.zhgeaits.zgdanmaku.utils.ZGMatrix;
 
@@ -63,6 +62,7 @@ public class ZGDanmaku {
     private int mViewWidth;                                 //窗口宽度
     private int mViewHeight;                                //窗口高度
     private int mDanmakuWidth;                              //弹幕宽度
+    private int mDanmakuHeight;                             //弹幕高度
     private int mVertexCount = 4;                           //纹理顶点个数，这个是矩形，四个顶点
     private boolean isInited = false;                       //是否已经初始化
     private ZGMatrix mMatrix;                               //矩阵
@@ -75,6 +75,7 @@ public class ZGDanmaku {
             return;
         }
         this.mDanmakuWidth = mBitmap.getWidth();
+        this.mDanmakuHeight = mBitmap.getHeight();
 
         //初始化矩阵
         mMatrix = new ZGMatrix();
@@ -128,6 +129,14 @@ public class ZGDanmaku {
      */
     public void setOffsetY(float offsety) {
         this.offsetY = offsety;
+    }
+
+    /**
+     * 获取Y偏移量
+     * @return
+     */
+    public float getOffsetY() {
+        return offsetY;
     }
 
     /**
@@ -189,6 +198,14 @@ public class ZGDanmaku {
      */
     public int getDanmakuWidth() {
         return mDanmakuWidth;
+    }
+
+    /**
+     * 获取弹幕高度
+     * @return
+     */
+    public int getDanmakuHeight() {
+        return mDanmakuHeight;
     }
 
     /**
@@ -304,7 +321,7 @@ public class ZGDanmaku {
         GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, mBitmap.getWidth(), mBitmap.getHeight(),
                 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, byteBuffer);
 
-        BitmapPool.getInstance().cacheOrRecycle(mBitmap);
+        mBitmap.recycle();
 
         return true;
     }

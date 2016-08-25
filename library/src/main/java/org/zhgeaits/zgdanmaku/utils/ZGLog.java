@@ -48,6 +48,9 @@ public class ZGLog {
     }
 
     private static String getExceptionMsg(Throwable ex) {
+        if (ex == null) {
+            return null;
+        }
         Writer writer = new StringWriter();
         PrintWriter printWriter = new PrintWriter(writer);
         ex.printStackTrace(printWriter);

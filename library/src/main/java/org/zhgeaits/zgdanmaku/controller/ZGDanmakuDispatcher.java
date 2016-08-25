@@ -55,7 +55,8 @@ public class ZGDanmakuDispatcher implements Runnable {
     private String mVertexShader;                           //顶点着色器
     private String mFragmentShader;                         //片元着色器
     private int mLines;                                     //弹幕行数
-    private float mLineLeading;                             //行距
+    private int mLineLeading;                               //行距
+    private int mLineHeight;                                //行高
     private boolean mStop;                                  //是否暂停
     private volatile AtomicBoolean mPaused;                 //暂停锁
     private boolean isSeek;                                 //是否执行了seek
@@ -101,23 +102,31 @@ public class ZGDanmakuDispatcher implements Runnable {
 
         int line = -1;
         item.updateDetalX(mRenderer.getViewWidth(), mRenderer.getViewHeight(), mRenderer.getViewportSizeFactor());
+        //新弹幕滚完屏幕的时间
         float scrollTime = mRenderer.getViewWidth() / item.getDetalX();
 
         for (int i = 0; i < mLines; i++) {
             ZGDanmaku danmaku = mLinesAvaliable.get(i);
 
+            //如果弹道为空
             if (danmaku == null) {
-                return i;
+                line = i;
+                break;
             }
 
-            if (danmaku.getCurrentOffsetX() > danmaku.getDanmakuWidth() + mLineLeading * 5) {
+            //如果弹幕已经出弹道
+            if (danmaku.getCurrentOffsetX() > danmaku.getDanmakuWidth() + danmaku.getDetalX() * 300) {
+                //如果新弹幕的速度比旧弹幕还慢
                 if (item.getDetalX() <= danmaku.getDetalX()) {
                     line = i;
                     break;
                 }
+                //旧弹幕滚完屏幕的时间
                 float preTime = (mRenderer.getViewWidth() - danmaku.getCurrentOffsetX() + danmaku.getDanmakuWidth()) / danmaku.getDetalX();
                 float time = Math.min(preTime, scrollTime);
+                //速度差
                 float speed = item.getDetalX() - danmaku.getDetalX();
+                //移动的距离如果小于两个弹幕之间的差距
                 float distance = time * speed;
                 if (distance <= danmaku.getCurrentOffsetX() - danmaku.getDanmakuWidth()) {
                     line = i;
@@ -139,8 +148,18 @@ public class ZGDanmakuDispatcher implements Runnable {
 
         ZGDanmaku danmaku = new ZGDanmaku(item.getDanmakuBitmap());
         inValidableLine(line, danmaku);
+        //如果弹幕高度超出了行高,则占用多行
+        if (danmaku.getDanmakuHeight() > (mLineHeight + mLineLeading)) {
+            int count = danmaku.getDanmakuHeight() / (mLineHeight + mLineLeading);
+            if (danmaku.getDanmakuHeight() % (mLineHeight + mLineLeading) != 0) {
+                count ++;
+            }
+            for (int i = 1; i <= count; i++) {
+                inValidableLine(line + i, danmaku);
+            }
+        }
 
-        float offsetY = (item.getDanmakuHeight() + mLineLeading) * line;
+        float offsetY = (mLineHeight + mLineLeading) * line;
         danmaku.setOffsetY(offsetY);
         danmaku.setViewSize(mRenderer.getViewWidth(), mRenderer.getViewHeight());
         danmaku.setDetalX(item.getDetalX());
@@ -197,10 +216,17 @@ public class ZGDanmakuDispatcher implements Runnable {
      *
      * @param leading
      */
-    public void setLeading(float leading) {
+    public void setLeading(int leading) {
         this.mLineLeading = leading;
     }
 
+    /**
+     * 设置行高
+     * @param lineHeight
+     */
+    public void setLineHeight(int lineHeight) {
+        this.mLineHeight = lineHeight;
+    }
     /**
      * 设置行数
      *
@@ -254,12 +280,11 @@ public class ZGDanmakuDispatcher implements Runnable {
      * 更新时间
      * @param time
      */
-    public synchronized void updateTime(long time) {
-        ZGTimer.getInstance().syncTime(time);
+    public synchronized void seek(long time) {
         isSeek = true;
         //不清空弹幕池的话,业务可能会重复塞弹幕
         mDanmakuPool.clear();
-        ZGLog.i("updateTime time:" + time);
+        ZGLog.i("seek time:" + time);
     }
 
     /**

@@ -25,6 +25,8 @@ import org.zhgeaits.zgdanmaku.controller.ZGDanmakuController;
 import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
 import org.zhgeaits.zgdanmaku.utils.ZGLog;
 
+import java.util.List;
+
 /**
  * Created by zhgeaits on 16/2/25.
  * 基于GLTextureView实现的弹幕，GLTextureView来自github开源的实现
@@ -161,13 +163,33 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
     }
 
     @Override
+    public void setLineHeight(float height) {
+        mDanmakuController.setLineHeight(height);
+    }
+
+    @Override
     public void shotDanmaku(ZGDanmakuItem item) {
         item.setContext(mContext);
         mDanmakuController.addDanmaku(item);
     }
 
     @Override
+    public void shotDanmakuList(List<ZGDanmakuItem> items) {
+        if (items != null && items.size() > 0) {
+            for (ZGDanmakuItem item : items) {
+                item.setContext(mContext);
+            }
+            mDanmakuController.addDanmakus(items);
+        }
+    }
+
+    @Override
     public void seek(long time) {
-        mDanmakuController.updateTime(time);
+        mDanmakuController.seek(time);
+    }
+
+    @Override
+    public void syncTime(long time) {
+        mDanmakuController.syncTime(time);
     }
 }

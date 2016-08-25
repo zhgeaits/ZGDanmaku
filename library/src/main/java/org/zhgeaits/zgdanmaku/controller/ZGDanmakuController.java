@@ -17,13 +17,18 @@ package org.zhgeaits.zgdanmaku.controller;
 
 import android.content.Context;
 
+
+import org.zhgeaits.zgdanmaku.model.ZGDanmakuFactory;
 import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
 import org.zhgeaits.zgdanmaku.utils.DimensUtils;
 import org.zhgeaits.zgdanmaku.utils.ShaderUtils;
 import org.zhgeaits.zgdanmaku.utils.ZGDanmakuPool;
 import org.zhgeaits.zgdanmaku.utils.ZGLog;
+import org.zhgeaits.zgdanmaku.utils.ZGTimer;
 import org.zhgeaits.zgdanmaku.view.IZGDanmakuRenderer;
 import org.zhgeaits.zgdanmaku.view.IZGRenderListener;
+
+import java.util.List;
 
 /**
  * Created by zhgeaits on 16/2/26.
@@ -56,7 +61,10 @@ public class ZGDanmakuController implements IZGDanmakuController {
         setSpeed(50);
 
         //默认8dp行距
-        setLeading(2);
+        setLeading(0);
+
+        //默认每行弹道20sp的高度
+        setLineHeight(20);
     }
 
     private void _start() {
@@ -139,10 +147,18 @@ public class ZGDanmakuController implements IZGDanmakuController {
 
     @Override
     public void setLeading(float leading) {
-        float pxLineSpace = DimensUtils.dip2pixel(mContext, leading);
+        int pxLineSpace = DimensUtils.dip2pixel(mContext, leading);
         mDispatcher.setLeading(pxLineSpace);
     }
 
+    @Override
+    public void setLineHeight(float lineHeight) {
+        ZGDanmakuItem item = ZGDanmakuFactory.createTextDanmaku(0, "Measure Text Height!", lineHeight);
+        item.setContext(mContext);
+        mDispatcher.setLineHeight(item.getDanmakuHeight());
+    }
+
+    @Deprecated
     @Override
     public void setSpeed(float speed) {
         float pxSpeed = DimensUtils.dip2pixel(mContext, speed);
@@ -150,8 +166,14 @@ public class ZGDanmakuController implements IZGDanmakuController {
     }
 
     @Override
-    public void updateTime(long time) {
-        mDispatcher.updateTime(time);
+    public void seek(long time) {
+        ZGTimer.getInstance().syncTime(time);
+        mDispatcher.seek(time);
+    }
+
+    @Override
+    public void syncTime(long time) {
+        ZGTimer.getInstance().syncTime(time);
     }
 
     @Override
@@ -159,6 +181,14 @@ public class ZGDanmakuController implements IZGDanmakuController {
         if (isStarted()) {
             ZGLog.d("addDanmaku at time:" + danmakuItem.getOffsetTime());
             mDanmakuPool.offer(danmakuItem);
+        }
+    }
+
+    @Override
+    public void addDanmakus(List<ZGDanmakuItem> danmakuItems) {
+        if (isStarted()) {
+            ZGLog.d("addDanmakus size:" + danmakuItems.size());
+            mDanmakuPool.addAll(danmakuItems);
         }
     }
 

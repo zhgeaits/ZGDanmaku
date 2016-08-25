@@ -17,6 +17,8 @@ package org.zhgeaits.zgdanmaku.controller;
 
 import org.zhgeaits.zgdanmaku.model.ZGDanmakuItem;
 
+import java.util.List;
+
 /**
  * Created by zhgeaits on 16/2/25.
  * 弹幕控制器接口
@@ -84,6 +86,12 @@ public interface IZGDanmakuController {
     void setLeading(float leading);
 
     /**
+     * 设置行高
+     * @param lineHeight
+     */
+    void setLineHeight(float lineHeight);
+
+    /**
      * 设置弹幕速度
      * @param speed
      */
@@ -93,11 +101,23 @@ public interface IZGDanmakuController {
      * 更新时间
      * @param time
      */
-    void updateTime(long time);
+    void seek(long time);
+
+    /**
+     * 同步时间,不会去情况Dispatcher的弹幕
+     * @param time
+     */
+    void syncTime(long time);
 
     /**
      * 添加一个弹幕
      * @param danmakuItem
      */
     void addDanmaku(ZGDanmakuItem danmakuItem);
+
+    /**
+     * 添加一批弹幕
+     * @param danmakuItems
+     */
+    void addDanmakus(List<ZGDanmakuItem> danmakuItems);
 }
