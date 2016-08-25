@@ -323,6 +323,7 @@ public class ZGDanmaku {
                 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, byteBuffer);
 
         mBitmap.recycle();
+        mBitmap = null;
 //        BitmapPool.getInstance().cacheOrRecycle(mBitmap);
         return true;
     }
