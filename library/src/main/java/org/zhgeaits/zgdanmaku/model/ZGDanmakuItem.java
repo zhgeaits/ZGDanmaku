@@ -23,6 +23,7 @@ import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 
+import org.zhgeaits.zgdanmaku.utils.BitmapPool;
 import org.zhgeaits.zgdanmaku.utils.DimensUtils;
 import org.zhgeaits.zgdanmaku.utils.NativeBitmapFactory;
 import org.zhgeaits.zgdanmaku.utils.ZGLog;
@@ -324,6 +325,18 @@ public class ZGDanmakuItem implements Comparable<ZGDanmakuItem> {
     }
 
     private Bitmap createBitmap(int width, int height, Bitmap.Config config) {
+//        Bitmap bitmap = null;
+//        BitmapFactory.Options options = new BitmapFactory.Options();
+//        options.inSampleSize = 1;
+//        options.outHeight = height;
+//        options.outWidth = width;
+//        Bitmap inBitmap = BitmapPool.getInstance().getBitmapFromReusableSet(options);
+//        if (inBitmap != null) {
+//            bitmap = Bitmap.createBitmap(inBitmap, 0, 0, width, height);
+//            bitmap.eraseColor(0x00000000);
+//        } else {
+//            bitmap = NativeBitmapFactory.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+//        }
         Bitmap bitmap = NativeBitmapFactory.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         return bitmap;
     }
