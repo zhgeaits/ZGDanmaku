@@ -142,7 +142,7 @@ public class ShaderUtils {
      * @return
      */
     public static String loadFromAssetsFile(String fname, Resources resources) {
-        String result = null;
+        String result = "";
         try {
             InputStream in = resources.getAssets().open(fname);
             int ch;
