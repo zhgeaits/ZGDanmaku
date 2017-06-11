@@ -17,8 +17,10 @@ package org.zhgeaits.zgdanmaku.view;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.view.View;
 
 import org.zhgeaits.zgdanmaku.controller.IZGDanmakuController;
 import org.zhgeaits.zgdanmaku.controller.ZGDanmakuController;
@@ -67,11 +69,18 @@ public class ZGDanmakuTextureView extends GLTextureView implements IZGDanmakuVie
         mRenderer.useTextureView();
 
         //设置textureview透明
-        setOpaque(false);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            setOpaque(false);
+            setWillNotCacheDrawing(true);
+            setDrawingCacheEnabled(false);
+            setWillNotDraw(true);
+            setSurfaceTextureListener(this);
+        }
 
         // 设置渲染模式为被动渲染，在调用start()方法以后再设置为主动模式,
         // 主动模式有一条后台OPENGL线程每帧都调用onDrawFrame方法
-        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
         mDanmakuController = new ZGDanmakuController(context, mRenderer);
     }

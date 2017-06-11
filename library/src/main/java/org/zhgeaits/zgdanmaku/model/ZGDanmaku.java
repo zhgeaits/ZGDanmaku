@@ -224,6 +224,10 @@ public class ZGDanmaku {
      * 初始化顶点坐标与纹理坐标
      */
     public void initVertexData() {
+        if (mBitmap == null) {
+            return;
+        }
+
         //顶点坐标数据
         //顶点坐标系：窗口取值范围是-1至1，所以，左上角坐标是(-1,1),中点坐标是(0,0)，右下角坐标是(1, -1)
         //其实就是把坐标给归一化了，下面是计算弹幕的归一化宽和高
@@ -289,7 +293,7 @@ public class ZGDanmaku {
     private boolean initTexture() {
         mTextureId = TexturePool.pollTextureId();
 
-        if(mTextureId < 0) {
+        if(mTextureId < 0 || mBitmap == null) {
             return false;
         }
 

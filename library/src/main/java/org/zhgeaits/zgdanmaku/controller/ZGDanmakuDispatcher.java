@@ -447,8 +447,10 @@ public class ZGDanmakuDispatcher implements Runnable {
                 }
             }
 
-            //替换临界区的弹幕
-            mRenderer.setRendererDanmakuList(nextRendererList);
+            if (nextRendererList != null && !mStop && !mPaused.get()) {
+                //替换临界区的弹幕
+                mRenderer.setRendererDanmakuList(nextRendererList);
+            }
         }
     }
 }
